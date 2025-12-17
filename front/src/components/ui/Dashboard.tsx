@@ -6,14 +6,12 @@ import { type StandardBarChartPoint } from "../../types/plotTypes"
 
 
 interface CountryProbability {
-    country_id: string;
-    probability: number;
+    x: string;
+    y: number;
 }
 
 interface ApiData {
-    count: number;
-    name: string;
-    country: CountryProbability[];
+    probabilities: CountryProbability[] | undefined;
 }
 
 const Dashboard = () => {
@@ -27,7 +25,7 @@ const Dashboard = () => {
         setError(null);
         try {
             const response = await axios.get<ApiData>(
-                `https://api.nationalize.io?name=${name}`
+                `http://localhost:8000/name_probabilites/${name}`
             );
             setNameData(response.data);
         } catch (error) {
@@ -41,10 +39,7 @@ const Dashboard = () => {
         }
     };
 
-    const dataDashboard: StandardBarChartPoint[] | undefined = nameData?.country.map((c) => ({
-        x: c.country_id,
-        y: c.probability
-    }));
+    const dataDashboard: StandardBarChartPoint[] | undefined = nameData?.probabilities;
 
     return (
         <Box sx={{ p: 3 }}>
