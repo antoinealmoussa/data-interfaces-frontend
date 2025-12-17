@@ -1,23 +1,29 @@
 # Architecture du repo
 
+```bash
 front/
-├── src/
-│ ├── assets/ # Images, icônes, etc.
-│ ├── pages/ # Différentes pages de l'application
-│ ├── components/ # Composants réutilisables
-│ │ ├── layout/ # Composants de layout (header, sidebar, etc.)
-│ │ ├── ui/ # Composants UI génériques (boutons, cartes, etc.)
-│ │ ├── App.tsx # Composant racine
-│ ├── theme/ # Configuration du thème MUI
-│ ├── utils/ # Fonctions utilitaires
-│ ├── App.tsx # Point d'entrée principal
-│ ├── main.tsx # Fichier d'entrée
-│ ├── vite-env.d.ts
-├── tailwind.config.js
-├── postcss.config.js
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── assets             # Images, icônes..
+│   ├── components
+│   │   ├── layout         # Affichage générique (header, menu...)
+│   │   ├── plots          # Graphiques Recharts
+│   │   └── ui             # Composants standards
+│   ├── theme              # Thème MUI
+│   ├── types
+│   ├── utils
+│   ├── index.css
+│   ├── main.tsx
+├── index.html
+├── package-lock.json
 ├── package.json
+├── README.md
+├── tsconfig.app.json
 ├── tsconfig.json
-├── index.html # Fichier principal
+├── tsconfig.node.json
+└── vite.config.ts
+```
 
 # Lancement du front en local
 
@@ -38,3 +44,9 @@ front/
 ## MUI
 
 `npm install @mui/material @emotion/react @emotion/styled @mui/icons-material`
+[Doc](https://mui.com/material-ui/getting-started/)
+
+## Recharts
+
+`npm install recharts`
+[Doc](https://recharts.github.io/)
