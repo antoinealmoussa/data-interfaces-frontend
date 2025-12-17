@@ -11,25 +11,13 @@ mon_projet/
 ├── docker-compose.yml          # Orchestration de tous les services
 ├── README.md                   # Documentation globale
 └── .gitignore                  # Ignore les fichiers inutiles (node_modules, venv, etc.)
-
 ```
 
-# Exécution
+# Création d'un service back en Python
 
-Build du projet
-
-```bash
-docker-compose build
-```
-
-Up du projet
+## Initialisation d'un projet Poetry
 
 ```bash
-docker-compose up
-```
-
-Down du projet
-
-```bash
-docker-compose down
+poetry init
+poetry add fastapi uvicorn sqlalchemy psycopg2-binary
 ```
