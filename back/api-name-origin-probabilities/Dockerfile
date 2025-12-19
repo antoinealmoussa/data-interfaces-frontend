@@ -29,4 +29,4 @@ COPY . .
 EXPOSE 8000
 
 # Commande pour lancer l'application
-CMD ["uvicorn", "src.api_name_origin_probabilities.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.api_name_origin_probabilities.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
