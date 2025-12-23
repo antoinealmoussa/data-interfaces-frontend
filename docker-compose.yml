@@ -1,17 +1,18 @@
-version: "3.8"
-
 services:
   # Service pour le frontend Vite/React
   frontend:
     build: ./front
     ports:
-      - "3000:80"
+      - "5173:5173"
     depends_on:
       - api-name-origin-probabilities
       # - service2
     environment:
       - VITE_API_URL=http://localhost:8000
       # - REACT_APP_SERVICE2_URL=http://service2:8001
+    volumes:
+      - ./front:/app # Monte le dossier local dans le conteneur
+      - /app/node_modules # Conserve les node_modules du conteneur
     restart: unless-stopped
 
   # Service api-name-origin-probabilities (FastAPI + Poetry)

@@ -1,14 +1,15 @@
-import { DropdownMenu } from "../ui/DropdownMenu";
-import { randomWord } from "../../utils/randomData";
+import { Box, Typography } from "@mui/material";
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+    height: number;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+    height
+}) => {
     return (
-        <div className="bg-white p-4 shadow-sm">
-            <div className="flex">
-                {Array.from({ length: 4 }).map((_, i) => (
-                    <DropdownMenu key={i} title={randomWord()} />
-                ))}
-            </div>
-        </div>
+        <Box sx={{ bgcolor: "white", p: 2, boxShadow: 1, height, zIndex: 10, position: "sticky" }}>
+            <Typography variant="h6">Header vide pour le moment</Typography>
+        </Box>
     );
 };
