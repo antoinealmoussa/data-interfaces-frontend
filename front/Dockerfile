@@ -1,13 +1,18 @@
-# Étape 1 : Construction de l'application avec Node.js
-FROM node:18-alpine AS builder
+# Utilise une image Node.js légère pour le développement
+FROM node:22-alpine
+
+# Définis le répertoire de travail
 WORKDIR /app
+
+# Copie les fichiers de configuration et installe les dépendances
 COPY package.json package-lock.json ./
 RUN npm install
-COPY . .
-RUN npm run build
 
-# Étape 2 : Serveur web pour servir l'application construite
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+# Copie le reste du code
+COPY . .
+
+# Expose le port utilisé par Vite (par défaut 5173)
+EXPOSE 5173
+
+# Commande pour lancer Vite en mode développement
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

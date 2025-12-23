@@ -19,3 +19,16 @@ class CountryProbability(BaseModel):
 
 class ApiNameOriginProbabilities(BaseModel):
     probabilities: list[CountryProbability]
+
+
+class CountryBase(BaseModel):
+    alias: str
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class CreateCountry(CountryBase):
+    class Config:
+        from_attributes = True

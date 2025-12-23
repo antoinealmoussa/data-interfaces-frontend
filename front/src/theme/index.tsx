@@ -5,9 +5,7 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export const AppThemeProvider: React.FC<ThemeProviderProps> = ({
-  children,
-}) => {
+export const AppThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

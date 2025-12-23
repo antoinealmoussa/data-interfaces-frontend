@@ -14,6 +14,24 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    button: {
+      textTransform: "none",
+    },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        html: {
+          boxSizing: "border-box",
+        },
+        "*, *::before, *::after": {
+          boxSizing: "inherit", // Hérite du border-box défini dans html
+        },
+        body: {
+          margin: 0, // Optionnel : retire les marges par défaut du navigateur
+        },
+      },
+    },
   },
 });
 
