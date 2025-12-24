@@ -8,10 +8,12 @@ api-name-origin-probabilities/
 │   └── api-name-origin-probabilities/
 │       ├── __init__.py
 │       ├── main.py                  # Point d'entrée FastAPI
-│       ├── models.py                # Modèles de base de données
 │       ├── schemas.py               # Schémas Pydantic
+│       ├── utils/                   # Fonctions réutilisables
+│       |   ├── __init__.py
+│       |   └── datetimes.py         # Transformations de dates
 │       └── services/                # Logique métier
 │           ├── __init__.py
-│           └── api_nationalize.py   # Appel à l'API publique
+│           └── get_economy_rss_feed.py   # Accès au flux rss public
 └── tests/
 ```

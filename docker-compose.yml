@@ -28,16 +28,14 @@ services:
       - ./back/api-name-origin-probabilities:/app
     restart: unless-stopped
 
-  # Service backend 2 (FastAPI + Poetry)
-  # service2:
-  #   build: ./mon-app-backend/service2
-  #   ports:
-  #     - "8001:8000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://user:password@db:5432/mon_app_db
-  #   depends_on:
-  #     - db
-  #   restart: unless-stopped
+  # Service api-economy-feed (FastAPI + Poetry)
+  api-economy-feed:
+    build: ./back/api-economy-feed
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./back/api-economy-feed:/app
+    restart: unless-stopped
 
   # Service pour la base de données PostgreSQL
   db:
