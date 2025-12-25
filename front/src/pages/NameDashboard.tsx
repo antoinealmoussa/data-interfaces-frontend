@@ -10,13 +10,13 @@ interface CountryProbability {
     y: number;
 }
 
-interface ApiData {
+interface ApiNameProbabilities {
     probabilities: CountryProbability[] | undefined;
 }
 
 export const NameDashboard = () => {
     const [name, setName] = useState<string>("");
-    const [nameData, setNameData] = useState<ApiData | null>(null);
+    const [nameData, setNameData] = useState<ApiNameProbabilities | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export const NameDashboard = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get<ApiData>(
+            const response = await axios.get<ApiNameProbabilities>(
                 `http://localhost:8000/name_probabilites/${name}`
             );
             setNameData(response.data);
