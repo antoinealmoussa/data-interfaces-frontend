@@ -44,7 +44,7 @@ export const PublicLayout = () => {
                         <Box
                             key={item}
                             component="img"
-                            src={`public/${item}`}
+                            src={`/${item}`}
                             sx={{
                                 width: "100%",
                                 flex: 1,
@@ -75,7 +75,7 @@ export const PublicLayout = () => {
                 }}>
                     <Box
                         component="img"
-                        src="public/StravoskaLogoFinal.png"
+                        src="/StravoskaLogoFinal.png"
                         sx={{
                             maxHeight: "100%",
                             maxWidth: "100%",

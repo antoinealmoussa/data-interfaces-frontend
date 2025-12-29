@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type SignInFormProps } from "../../types/authTypes";
 import axios from "axios";
+import API_URLS from "../../api/config";
 
 
 export const SignInForm: React.FC = ({
@@ -19,7 +20,7 @@ export const SignInForm: React.FC = ({
     const onSubmit = async (data: SignInFormProps) => {
         try {
             const response = await axios.post(
-                `https://localhost:8002/sign-in`,
+                `${API_URLS.authentication}/sign-in`,
                 JSON.stringify(data)
             );
 

@@ -2,19 +2,24 @@
 
 ```bash
 front/
+├── public                 # Images, icônes...
 ├── src
-│   ├── App.css
 │   ├── App.tsx
-│   ├── assets             # Images, icônes..
+│   ├── api                # Configuration des routes back-end spécifiées dans le docker-compose
 │   ├── components
+│   │   ├── authentication # Composants liés à l'authentification
 │   │   ├── layout         # Affichage générique (header, menu...)
 │   │   ├── plots          # Graphiques Recharts
 │   │   └── ui             # Composants standards
+│   ├── pages              # Pages complètes
+│   │   ├── authentication # Pages liées à l'authentification
+│   │   ├── ...            # Graphiques Recharts
+│   │   └── ...            # Composants standards
 │   ├── theme              # Thème MUI
 │   ├── types
 │   ├── utils
-│   ├── index.css
-│   ├── main.tsx
+│   ├── main.tsx           # Différentiation des routes publiques et privées
+│   ├── routes.ts          # Gestion des différentes url front
 ├── index.html
 ├── package-lock.json
 ├── package.json
@@ -35,11 +40,6 @@ front/
 
 `npm create vite@latest react-ts-vite-app -- --template react-ts`
 [Tuto](https://medium.com/@robinviktorsson/complete-guide-to-setting-up-react-with-typescript-and-vite-2025-468f6556aaf2)
-
-## Tailwind
-
-`npm install tailwindcss @tailwindcss/vite`
-[Tuto](https://tailwindcss.com/docs/installation/using-vite)
 
 ## MUI
 

@@ -26,7 +26,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY . .
 
 # Expose le port utilisé par FastAPI
-EXPOSE 8002
+EXPOSE 8000
 
 # Commande pour lancer l'application
-CMD ["uvicorn", "src.api_name_origin_probabilities.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
+CMD ["uvicorn", "src.api_authentication.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

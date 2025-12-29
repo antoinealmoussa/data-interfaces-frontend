@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type LoginFormProps } from "../../types/authTypes";
 import axios from "axios";
+import API_URLS from "../../api/config";
 
 
 export const LoginForm: React.FC = ({
@@ -20,7 +21,7 @@ export const LoginForm: React.FC = ({
     const onSubmit = async (data: LoginFormProps) => {
         try {
             const response = await axios.post(
-                `https://localhost:8002/login`,
+                `${API_URLS.authentication}/login`,
                 JSON.stringify(data)
             );
 
