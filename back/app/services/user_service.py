@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import ApiCreateUser
-from app.core.security import PasswordHelper
+from app.core.security import hash_password, verify_password
 
 
 def get_all_users(db: Session):
@@ -13,10 +13,10 @@ def get_user_by_email(db: Session, email: str):
 
 
 def create_user(db: Session, user_in: ApiCreateUser):
-    hashed_pw = PasswordHelper.hash_password(user_in.password)
+    hashed_pw = hash_password(user_in.password)
     db_user = User(
         email=user_in.email,
-        hashed_password=hashed_pw,
+        password=hashed_pw,
         first_name=user_in.first_name,
         surname=user_in.surname
     )
@@ -30,6 +30,6 @@ def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
     if not user:
         return False
-    if not PasswordHelper.verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user

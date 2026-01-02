@@ -19,7 +19,7 @@ def register(user_in: ApiCreateUser, db: Session = Depends(get_db)):
     user = user_service.get_user_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail="Cet email est déjà utilisé."
         )
     return user_service.create_user(db, user_in=user_in)

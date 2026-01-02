@@ -1,16 +1,21 @@
-from passlib.context import CryptContext
-
-# On définit le contexte de chiffrement (bcrypt est lent par design, ce qui est bien !)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 
-class PasswordHelper:
-    @staticmethod
-    def hash_password(password: str) -> str:
-        """Génère un hash sécurisé à partir d'un mot de passe en clair."""
-        return pwd_context.hash(password)
+def hash_password(password: str) -> str:
+    # 1. On transforme le string en bytes (UTF-8)
+    password_bytes = password.encode('utf-8')
 
-    @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Vérifie si le mot de passe en clair correspond au hash stocké."""
-        return pwd_context.verify(plain_password, hashed_password)
+    # 2. On génère un "sel" (salt)
+    salt = bcrypt.gensalt()
+
+    # 3. On hash et on transforme le résultat en string pour la DB
+    hashed_password = bcrypt.hashpw(password_bytes, salt)
+    return hashed_password.decode('utf-8')
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # On compare le mot de passe en clair avec le hash de la DB
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'),
+        hashed_password.encode('utf-8')
+    )
