@@ -56,3 +56,9 @@ docker-compose exec backend poetry run alembic revision --autogenerate -m "creat
 ```bash
 docker-compose exec backend poetry run alembic upgrade head
 ```
+
+## Lancement des tests
+
+```bash
+poetry run pytest app/tests/
+```
