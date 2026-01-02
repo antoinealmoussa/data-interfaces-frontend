@@ -7,25 +7,26 @@ services:
     environment:
       - VITE_API_AUTHENTICATION=http://localhost:8000 # Service authentification
       - REACT_APP_SERVICE2_URL=http://service2:8001 # Service 2
-    depends_on: # Le front ne démarre pas tant que l'api-authentication n'a pas démarré
-      - api-authentication
+    depends_on: # Le front ne démarre pas tant que le backend n'a pas démarré
+      - backend
     volumes: # Conservation du code et des modules dans le conteneur
       - ./front:/app
       - /app/node_modules
     restart: unless-stopped
 
-  # Service api-authentication (FastAPI + Poetry)
-  api-authentication:
-    build: ./back/api-authentication
+  # Service backend (FastAPI + Poetry)
+  backend:
+    build: ./back
     ports:
       - "8000:8000"
     environment:
+      - DB_URL=postgresql://postgres:postgres@db:5432/localdb
       - DB_HOST=db
       - DB_PORT=5432
     depends_on: # Le service ne démarre pas tant que la db n'a pas été initialisée
       - db
     volumes: # Conservation du code dans le conteneur
-      - ./back/api-authentication:/app
+      - ./back:/app
     restart: unless-stopped
 
   # Service pour la base de données PostgreSQL

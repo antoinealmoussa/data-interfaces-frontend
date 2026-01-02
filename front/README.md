@@ -13,8 +13,8 @@ front/
 │   │   └── ui             # Composants standards
 │   ├── pages              # Pages complètes
 │   │   ├── authentication # Pages liées à l'authentification
-│   │   ├── ...            # Graphiques Recharts
-│   │   └── ...            # Composants standards
+│   │   ├── ...            # Pages liées à un autre service
+│   │   └── ...            # Pages liées à un autre service
 │   ├── theme              # Thème MUI
 │   ├── types
 │   ├── utils
