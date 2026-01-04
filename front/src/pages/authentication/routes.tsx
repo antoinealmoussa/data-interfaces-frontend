@@ -1,7 +1,7 @@
 import { LoginForm } from "../../components/authentication/LoginForm";
-import { SignInForm } from "../../components/authentication/SignInForm";
+import { RegisterForm } from "../../components/authentication/RegisterForm";
 
 export const authRoutes = [
     { path: "/login", element: <LoginForm /> },
-    { path: "/sign-in", element: <SignInForm /> }
+    { path: "/register", element: <RegisterForm /> }
 ];

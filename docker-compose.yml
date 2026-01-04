@@ -5,7 +5,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_AUTHENTICATION=http://localhost:8000 # Service authentification
+      - VITE_BACKEND_API=http://localhost:8000/api/v1 # Service authentification
       - REACT_APP_SERVICE2_URL=http://service2:8001 # Service 2
     depends_on: # Le front ne démarre pas tant que le backend n'a pas démarré
       - backend

@@ -1,27 +1,27 @@
 import { TextField, Button, Box, Typography } from "@mui/material"
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { type SignInFormProps } from "../../types/authTypes";
+import { type RegisterFormProps } from "../../types/authTypes";
 import axios from "axios";
 import API_URLS from "../../api/config";
 
 
-export const SignInForm: React.FC = ({
+export const RegisterForm: React.FC = ({
 
 }) => {
     const {
         register,
         handleSubmit,
         formState: { isSubmitting }
-    } = useForm<SignInFormProps>();
+    } = useForm<RegisterFormProps>();
 
     const navigate = useNavigate();
 
-    const onSubmit = async (data: SignInFormProps) => {
+    const onSubmit = async (data: RegisterFormProps) => {
         try {
             const response = await axios.post(
-                `${API_URLS.authentication}/sign-in`,
-                JSON.stringify(data)
+                `${API_URLS.backend}/users/register`,
+                data
             );
 
             if (!response) {
@@ -50,7 +50,7 @@ export const SignInForm: React.FC = ({
                 variant="outlined"
                 color="primary"
                 label="Prénom"
-                {...register("firstName")}
+                {...register("first_name")}
             />
 
             <TextField

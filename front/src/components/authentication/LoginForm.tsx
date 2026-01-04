@@ -21,8 +21,8 @@ export const LoginForm: React.FC = ({
     const onSubmit = async (data: LoginFormProps) => {
         try {
             const response = await axios.post(
-                `${API_URLS.authentication}/login`,
-                JSON.stringify(data)
+                `${API_URLS.backend}/users/login`,
+                data
             );
 
             if (!response) {

@@ -12,7 +12,7 @@ const mockedAxios = vi.mocked(axios, true);
 // Mock de la config API
 vi.mock("../../../api/config", () => ({
     default: {
-        authentication: "http://localhost:8000/api/v1/users",
+        backend: "http://localhost:8000/api/v1",
     },
 }));
 
@@ -77,10 +77,10 @@ describe("LoginForm", () => {
         await waitFor(() => {
             expect(mockedAxios.post).toHaveBeenCalledWith(
                 "http://localhost:8000/api/v1/users/login",
-                JSON.stringify({
+                {
                     email: "test@example.com",
                     password: "password123",
-                })
+                }
             );
         });
     });

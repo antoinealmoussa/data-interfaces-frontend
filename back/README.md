@@ -60,5 +60,5 @@ docker-compose exec backend poetry run alembic upgrade head
 ## Lancement des tests
 
 ```bash
-poetry run pytest app/tests/
+docker-compose exec backend poetry run pytest app/tests
 ```

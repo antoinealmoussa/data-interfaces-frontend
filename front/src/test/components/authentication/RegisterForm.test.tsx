@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SignInForm } from "../../../components/authentication/SignInForm";
+import { RegisterForm } from "../../../components/authentication/RegisterForm";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 
@@ -12,7 +12,7 @@ const mockedAxios = vi.mocked(axios, true);
 // Mock de la config API
 vi.mock("../../../api/config", () => ({
     default: {
-        authentication: "http://localhost:8000/api/v1/users",
+        backend: "http://localhost:8000/api/v1",
     },
 }));
 
@@ -20,13 +20,13 @@ const renderWithRouter = (component: React.ReactElement) => {
     return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
-describe("SignInForm", () => {
+describe("RegisterForm", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
     it("devrait afficher tous les champs du formulaire", () => {
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/nom de famille/i)).toBeInTheDocument();
@@ -35,14 +35,14 @@ describe("SignInForm", () => {
     });
 
     it("devrait afficher le bouton d'inscription", () => {
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         expect(screen.getByRole("button", { name: /s'inscrire/i })).toBeInTheDocument();
     });
 
     it("devrait permettre la saisie de tous les champs", async () => {
         const user = userEvent.setup();
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         const firstNameInput = screen.getByLabelText(/prénom/i);
         const surnameInput = screen.getByLabelText(/nom de famille/i);
@@ -66,7 +66,7 @@ describe("SignInForm", () => {
             data: { message: "Inscription réussie" },
         });
 
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         const firstNameInput = screen.getByLabelText(/prénom/i);
         const surnameInput = screen.getByLabelText(/nom de famille/i);
@@ -82,13 +82,13 @@ describe("SignInForm", () => {
 
         await waitFor(() => {
             expect(mockedAxios.post).toHaveBeenCalledWith(
-                "http://localhost:8000/api/v1/users/sign-in",
-                JSON.stringify({
-                    firstName: "John",
+                "http://localhost:8000/api/v1/users/register",
+                {
+                    first_name: "John",
                     surname: "Doe",
                     email: "john.doe@example.com",
                     password: "password123",
-                })
+                }
             );
         });
     });
@@ -102,7 +102,7 @@ describe("SignInForm", () => {
                 })
         );
 
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         const firstNameInput = screen.getByLabelText(/prénom/i);
         const surnameInput = screen.getByLabelText(/nom de famille/i);
@@ -120,7 +120,7 @@ describe("SignInForm", () => {
     });
 
     it("devrait afficher la citation de Wout Van Aert", () => {
-        renderWithRouter(<SignInForm />);
+        renderWithRouter(<RegisterForm />);
 
         expect(screen.getByText(/Roule aussi vite que t'es con/)).toBeInTheDocument();
         expect(screen.getByText(/Wout Van Aert/)).toBeInTheDocument();
