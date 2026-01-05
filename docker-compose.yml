@@ -4,37 +4,29 @@ services:
     build: ./front
     ports:
       - "5173:5173"
-    depends_on:
-      - api-name-origin-probabilities
-      # - service2
     environment:
-      - VITE_API_URL=http://localhost:8000
-      # - REACT_APP_SERVICE2_URL=http://service2:8001
-    volumes:
-      - ./front:/app # Monte le dossier local dans le conteneur
-      - /app/node_modules # Conserve les node_modules du conteneur
+      - VITE_BACKEND_API=http://localhost:8000/api/v1 # Service authentification
+      - REACT_APP_SERVICE2_URL=http://service2:8001 # Service 2
+    depends_on: # Le front ne démarre pas tant que le backend n'a pas démarré
+      - backend
+    volumes: # Conservation du code et des modules dans le conteneur
+      - ./front:/app
+      - /app/node_modules
     restart: unless-stopped
 
-  # Service api-name-origin-probabilities (FastAPI + Poetry)
-  api-name-origin-probabilities:
-    build: ./back/api-name-origin-probabilities
+  # Service backend (FastAPI + Poetry)
+  backend:
+    build: ./back
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5000/localdb
-    depends_on:
+      - DB_URL=postgresql://postgres:postgres@db:5432/localdb
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on: # Le service ne démarre pas tant que la db n'a pas été initialisée
       - db
-    volumes:
-      - ./back/api-name-origin-probabilities:/app
-    restart: unless-stopped
-
-  # Service api-economy-feed (FastAPI + Poetry)
-  api-economy-feed:
-    build: ./back/api-economy-feed
-    ports:
-      - "8001:8001"
-    volumes:
-      - ./back/api-economy-feed:/app
+    volumes: # Conservation du code dans le conteneur
+      - ./back:/app
     restart: unless-stopped
 
   # Service pour la base de données PostgreSQL

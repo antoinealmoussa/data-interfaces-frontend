@@ -1,4 +1,4 @@
-import { Box, Typography, List, ListItem, ListItemText, Link } from "@mui/material";
+import { Box, Typography, Link } from "@mui/material";
 import { Link as BaseLink } from 'react-router-dom';
 
 
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}>
                 <img
                     style={{ height: "100%" }}
-                    src="src/assets/AntoineGif2.gif"
+                    src="AntoineGif2.gif"
                 />
                 <Typography
                     variant="h6"

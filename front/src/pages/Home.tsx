@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ArticleCard } from "../components/ui/ArticleCard";
 
+
 interface economyItem {
     title: string;
     link: string;
