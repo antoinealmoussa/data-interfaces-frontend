@@ -156,9 +156,12 @@ def test_login_success(client):
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert "message" in data
-    assert "user" in data
-    assert data["user"] == "login@test.com"
+    assert "email" in data
+    assert "first_name" in data
+    assert "surname" in data
+    assert data["email"] == "login@test.com"
+    assert data["first_name"] == "Login"
+    assert data["surname"] == "User"
 
 
 def test_login_wrong_password(client):
