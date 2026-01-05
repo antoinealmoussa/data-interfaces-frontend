@@ -9,3 +9,16 @@ export type RegisterFormProps = {
   first_name: string;
   surname: string;
 };
+
+export type User = {
+  email: string;
+  first_name: string;
+  surname: string;
+};
+
+export type AuthContextType = {
+  isAuthenticated: boolean;
+  user: User | null;
+  login: (userData: User) => void;
+  logout: () => void;
+};

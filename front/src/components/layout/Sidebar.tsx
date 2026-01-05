@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}>
                 <img
                     style={{ height: "100%" }}
-                    src="src/assets/AntoineGif2.gif"
+                    src="AntoineGif2.gif"
                 />
                 <Typography
                     variant="h6"

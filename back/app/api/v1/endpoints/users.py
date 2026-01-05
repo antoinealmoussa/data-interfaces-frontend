@@ -35,4 +35,8 @@ def login(user_in: ApiLoginUser, db: Session = Depends(get_db)):
             detail="Email ou mot de passe incorrect",
         )
     # Note: Ici tu généreras ton Token JWT plus tard
-    return {"message": "Connexion réussie", "user": user.email}
+    return {
+        "email": user.email,
+        "first_name": user.first_name,
+        "surname": user.surname
+    }

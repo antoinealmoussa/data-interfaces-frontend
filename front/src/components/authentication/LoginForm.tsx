@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { type LoginFormProps } from "../../types/authTypes";
 import axios from "axios";
 import API_URLS from "../../api/config";
+import { useAuth } from "../../hooks/useAuth";
 
 
 export const LoginForm: React.FC = ({
@@ -17,6 +18,7 @@ export const LoginForm: React.FC = ({
     } = useForm<LoginFormProps>();
 
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const onSubmit = async (data: LoginFormProps) => {
         try {
@@ -28,6 +30,8 @@ export const LoginForm: React.FC = ({
             if (!response) {
                 throw new Error("Identifiants invalides")
             }
+            const user = response.data;
+            login(user);
             navigate("/")
 
         } catch (error) {
