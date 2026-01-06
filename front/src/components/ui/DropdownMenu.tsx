@@ -21,12 +21,12 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = (
     };
 
     const handleClose = () => {
+        console.log("fermeture");
         setAnchorEl(null);
     };
 
     return (
         <Box
-            onMouseLeave={handleClose}
             sx={{
                 display: 'inline-block',
                 height: "100%",
