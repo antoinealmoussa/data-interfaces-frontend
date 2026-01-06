@@ -83,7 +83,7 @@ export const LoginForm: React.FC = ({
                 variant="contained"
                 color="secondary"
                 component={BaseLink}
-                to="/sign-in"
+                to="/register"
             >
                 S'inscrire
             </Button>

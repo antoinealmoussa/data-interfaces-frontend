@@ -1,15 +1,12 @@
 import { Box } from "@mui/material";
 import { Header } from "./layout/Header";
-import { Sidebar } from "./layout/Sidebar";
 import { Outlet } from "react-router-dom";
 
 interface AppContainerProps {
-    sidebarWidth: number;
     headerHeight: number;
 }
 
 export const AppContainer: React.FC<AppContainerProps> = ({
-    sidebarWidth,
     headerHeight,
 }) => {
     return (
@@ -19,12 +16,10 @@ export const AppContainer: React.FC<AppContainerProps> = ({
             height: "100vh",
             overflow: "hidden"
         }}>
-            <Sidebar width={sidebarWidth} headerHeight={headerHeight} />
             <Box sx={{
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                ml: `${sidebarWidth}px`,
                 overflow: "hidden",
                 height: "100%"
             }}>
