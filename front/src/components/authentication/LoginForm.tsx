@@ -47,8 +47,7 @@ export const LoginForm: React.FC = ({
                 display: "flex",
                 flexDirection: "column",
                 gap: 2,
-                mt: 2,
-                p: 3
+                mt: 2
             }}>
             <TextField
                 variant="outlined"
@@ -83,7 +82,7 @@ export const LoginForm: React.FC = ({
                 variant="contained"
                 color="secondary"
                 component={BaseLink}
-                to="/sign-in"
+                to="/register"
             >
                 S'inscrire
             </Button>

@@ -15,7 +15,7 @@ const theme = createTheme({
     },
     background: {
       default: "#EBEEE7", // Gris très légèrement teinté de vert/beige (plus doux que le blanc)
-      paper: "#F8F9F5",
+      paper: "#CACDC3",
     },
     text: {
       primary: "#2C3333", // Anthracite doux (meilleur que le noir pur pour la lecture longue)

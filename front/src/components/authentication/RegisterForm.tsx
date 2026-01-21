@@ -42,8 +42,7 @@ export const RegisterForm: React.FC = ({
                 display: "flex",
                 flexDirection: "column",
                 gap: 2,
-                mt: 2,
-                p: 3
+                mt: 2
             }}>
 
             <TextField
