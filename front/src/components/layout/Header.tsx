@@ -6,6 +6,7 @@ import DirectionsBikeOutlinedIcon from '@mui/icons-material/DirectionsBikeOutlin
 import { type HeaderProps } from "../../types/layoutTypes";
 import type { MultiTypeMenuItemProps } from "../../types/uiTypes";
 import LogoutIcon from '@mui/icons-material/Logout';
+import { MultiTypeMenuItem } from "../ui/MultiTypeMenuItem";
 
 
 export const Header: React.FC<HeaderProps> = ({
@@ -35,6 +36,30 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick: logout,
                 icon: LogoutIcon
             }
+        }
+    ]
+
+    const applicationMenuItems: MultiTypeMenuItemProps[] = [
+        {
+            item: {
+                type: 'link',
+                label: 'Exploration vélo',
+                href: '/'
+            },
+        },
+        {
+            item: {
+                type: 'link',
+                label: 'Rugby teams',
+                href: '/'
+            },
+        },
+        {
+            item: {
+                type: 'link',
+                label: 'Préparation de course',
+                href: '/'
+            },
         }
     ]
 
@@ -82,7 +107,14 @@ export const Header: React.FC<HeaderProps> = ({
                     gap: 3
                 }}
             >
+                {applicationMenuItems.map(applicationMenuItem => (
+                    <MultiTypeMenuItem
+                        item={applicationMenuItem.item}
+                    />
+                ))
+                }
             </Box>
+
             <Box
                 sx={{
                     flex: 0.5,
