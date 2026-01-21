@@ -25,7 +25,7 @@ def register(user_in: ApiCreateUser, db: Session = Depends(get_db)):
     return user_service.create_user(db, user_in=user_in)
 
 
-@router.post("/login")
+@router.post("/login", response_model=ApiReturnUser, status_code=status.HTTP_200_OK)
 def login(user_in: ApiLoginUser, db: Session = Depends(get_db)):
     user = user_service.authenticate_user(
         db, email=user_in.email, password=user_in.password)
@@ -36,6 +36,7 @@ def login(user_in: ApiLoginUser, db: Session = Depends(get_db)):
         )
     # Note: Ici tu généreras ton Token JWT plus tard
     return {
+        "id": user.id,
         "email": user.email,
         "first_name": user.first_name,
         "surname": user.surname
