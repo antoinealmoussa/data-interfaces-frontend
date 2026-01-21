@@ -68,10 +68,14 @@ export const PublicLayout = () => {
                 flex: 3,
                 display: "flex",
                 flexDirection: "column",
-                p: 2
+                p: 2,
+                gap: 2
             }}>
                 <Box sx={{
-                    flex: 1
+                    flex: { lg: 1, xl: 1 },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}>
                     <Box
                         component="img"
@@ -84,16 +88,17 @@ export const PublicLayout = () => {
                     />
                 </Box>
                 <Box sx={{
-                    flex: 3,
+                    flex: { lg: 3, xl: 1.5 },
                     bgcolor: "background.paper",
                     borderRadius: 2,
                     border: 1,
-                    borderColor: "primary.main"
+                    borderColor: "primary.main",
+                    p: 3
                 }}>
                     <Outlet />
                 </Box>
                 <Box sx={{
-                    flex: 1
+                    flex: { lg: 1, xl: 1 }
                 }}>
 
                 </Box>
