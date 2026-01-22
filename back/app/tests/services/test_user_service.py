@@ -56,6 +56,13 @@ def test_get_user_by_email_exists(db_session):
     assert found_user.surname == "User"
 
 
+def test_get_user_by_id_not_exists(db_session):
+    """Test récupération d'un utilisateur par id qui n'existe pas."""
+    found_user = user_service.get_user_by_id(db_session, 14688455)
+
+    assert found_user is None
+
+
 def test_get_user_by_email_not_exists(db_session):
     """Test récupération d'un utilisateur par email qui n'existe pas."""
     found_user = user_service.get_user_by_email(

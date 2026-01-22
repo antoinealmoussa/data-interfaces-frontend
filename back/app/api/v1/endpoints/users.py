@@ -9,7 +9,7 @@ from app.services import user_service
 router = APIRouter()
 
 
-@router.get("/", response_model=List[ApiReturnUser])
+@router.get("/", response_model=List[ApiReturnUser], status_code=status.HTTP_200_OK)
 def read_users(db: Session = Depends(get_db)):
     return user_service.get_all_users(db)
 
