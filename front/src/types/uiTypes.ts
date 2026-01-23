@@ -28,3 +28,14 @@ export type MenuItemConfig = LabelMenuItem | LinkMenuItem | ActionMenuItem;
 export interface MultiTypeMenuItemProps {
   item: MenuItemConfig;
 }
+
+export interface ApiUserApplication {
+  name: string;
+  pretty_name: string;
+}
+
+export const mapUserApplicationToMenuItem = (apiData: ApiUserApplication): MenuItemConfig => ({
+  type: 'link',
+  label: apiData.pretty_name,
+  href: `/${apiData.name}`
+})
