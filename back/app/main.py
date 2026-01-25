@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api_router import api_router  # Import du hub central
+from app.models import *
 
 app = FastAPI(
     title="Stravoska API",

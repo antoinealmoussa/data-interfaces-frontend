@@ -6,13 +6,14 @@ import DirectionsBikeOutlinedIcon from '@mui/icons-material/DirectionsBikeOutlin
 import { type HeaderProps } from "../../types/layoutTypes";
 import type { MultiTypeMenuItemProps } from "../../types/uiTypes";
 import LogoutIcon from '@mui/icons-material/Logout';
+import { HorizontalUserAppMenu } from "../ui/HorizontalUserAppMenu";
+import { PRIVATE_STANDARD_ROUTES } from "../../routes";
 
 
 export const Header: React.FC<HeaderProps> = ({
     height
 }) => {
     const { user, logout } = useAuth();
-
     const rightMenuItems: MultiTypeMenuItemProps[] = [
         {
             item: {
@@ -25,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
             item: {
                 type: 'link',
                 label: "Voir mon profil",
-                href: '/'
+                href: PRIVATE_STANDARD_ROUTES.PROFILE.path
             }
         },
         {
@@ -82,6 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
                     gap: 3
                 }}
             >
+                <HorizontalUserAppMenu />
             </Box>
             <Box
                 sx={{

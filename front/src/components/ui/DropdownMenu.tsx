@@ -21,7 +21,6 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = (
     };
 
     const handleClose = () => {
-        console.log("fermeture");
         setAnchorEl(null);
     };
 

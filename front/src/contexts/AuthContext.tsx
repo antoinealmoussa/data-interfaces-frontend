@@ -3,6 +3,7 @@ import { type User, type AuthContextType } from "../types/authTypes";
 
 const defaultAuthContext: AuthContextType = {
     isAuthenticated: false,
+    isAuthLoading: true,
     user: null,
     login: () => { },
     logout: () => { }
@@ -12,6 +13,7 @@ export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
@@ -19,6 +21,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (currentUser) {
             setUser(JSON.parse(currentUser));
             setIsAuthenticated(true);
+            setIsAuthLoading(false);
         }
     }, []);
 
@@ -26,6 +29,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated(true);
         setUser(data);
         localStorage.setItem("user", JSON.stringify(data));
+        setIsAuthLoading(false);
     }
 
     const logout = () => {
@@ -36,6 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const ContextValue: AuthContextType = {
         isAuthenticated,
+        isAuthLoading,
         user,
         login,
         logout

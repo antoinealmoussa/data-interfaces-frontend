@@ -20,13 +20,14 @@ describe("AuthContext", () => {
                 wrapper: AuthProvider,
             });
         act(() => {
-            result.current.login({ email: "test@mail.com", first_name: "Test", surname: "test" });
+            result.current.login({ id: 1, email: "test@mail.com", first_name: "Test", surname: "test" });
         });
         expect(result.current.isAuthenticated).toBe(true);
+        expect(result.current.user?.id).toBe(1);
         expect(result.current.user?.email).toBe("test@mail.com");
         expect(result.current.user?.first_name).toBe("Test");
         expect(result.current.user?.surname).toBe("test");
-        expect(localStorage.user).toBe(JSON.stringify({ email: "test@mail.com", first_name: "Test", surname: "test" }));
+        expect(localStorage.user).toBe(JSON.stringify({ id: 1, email: "test@mail.com", first_name: "Test", surname: "test" }));
     })
 
     it("devrait réinitialiser l'état après un login puis un logout", () => {
@@ -35,7 +36,7 @@ describe("AuthContext", () => {
                 wrapper: AuthProvider,
             });
         act(() => {
-            result.current.login({ email: "test@mail.com", first_name: "Test", surname: "test" });
+            result.current.login({ id: 1, email: "test@mail.com", first_name: "Test", surname: "test" });
             result.current.logout();
         });
         expect(result.current.isAuthenticated).toBe(false);

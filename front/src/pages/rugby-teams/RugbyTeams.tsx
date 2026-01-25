@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export const Home = () => {
+export const RugbyTeams = () => {
 
     return (
         <Box
@@ -14,7 +14,7 @@ export const Home = () => {
                 width: '100%'
             }}
         >
-            Page d'accueil
+            Rugby teams
         </Box >
     );
 };

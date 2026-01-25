@@ -12,6 +12,10 @@ def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
 
+def get_user_by_id(db: Session, user_id: id):
+    return db.query(User).filter(User.id == user_id).first()
+
+
 def create_user(db: Session, user_in: ApiCreateUser):
     hashed_pw = hash_password(user_in.password)
     db_user = User(
