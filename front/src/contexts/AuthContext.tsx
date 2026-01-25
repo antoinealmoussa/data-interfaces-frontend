@@ -3,7 +3,7 @@ import { type User, type AuthContextType } from "../types/authTypes";
 
 const defaultAuthContext: AuthContextType = {
     isAuthenticated: false,
-    isAuthLoading: false,
+    isAuthLoading: true,
     user: null,
     login: () => { },
     logout: () => { }
