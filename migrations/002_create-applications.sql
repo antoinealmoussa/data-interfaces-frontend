@@ -17,22 +17,17 @@ CREATE TABLE user_application (
 );
 
 INSERT INTO
-    application (name, pretty_name)
+    application (id, name, pretty_name)
 VALUES
-    ('bike-exploration', 'Exploration vélo'),
-    ('rugby-teams', 'Rugby teams'),
-    ('race-preparation', 'Préparation de course');
+    (1, 'bike-exploration', 'Exploration vélo'),
+    (2, 'rugby-teams', 'Rugby teams'),
+    (3, 'race-preparation', 'Préparation de course');
 
 INSERT INTO
     user_application (user_id, application_id)
 VALUES
-    (3, 1),
-    (3, 2),
-    (3, 3);
-
-INSERT INTO
-    schema_migrations (version)
-VALUES
-    ('002');
+    (1, 1),
+    (1, 2),
+    (1, 3);
 
 COMMIT;
