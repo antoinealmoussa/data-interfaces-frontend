@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-
-# --- Schéma de base ---
+from pydantic import BaseModel, ConfigDict
+from app.models.user import User
+from typing import List
+from app.schemas.application import ApiReturnApplication
 
 
 class UserBase(BaseModel):
@@ -11,8 +12,6 @@ class UserBase(BaseModel):
     first_name: str
     surname: str
 
-# --- Schéma pour la Création ---
-
 
 class ApiCreateUser(UserBase):
     """
@@ -20,18 +19,13 @@ class ApiCreateUser(UserBase):
     Le mot de passe n'est présent qu'ici.
     """
     password: str
-
-# --- Schéma pour la Connexion ---
-
-
-class ApiLoginUser(BaseModel):
-    """
-    Données minimales pour s'authentifier.
-    """
-    email: str
-    password: str
-
-# --- Schéma pour la Sortie (Response) ---
+    def to_model(self, hashed_pw: str):
+        return User(
+            email=self.email,
+            first_name=self.first_name,
+            surname=self.surname,
+            password=hashed_pw
+        )
 
 
 class ApiReturnUser(UserBase):
@@ -41,9 +35,15 @@ class ApiReturnUser(UserBase):
     On ajoute l'ID mais on ne renvoie JAMAIS le mot de passe.
     """
     id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    model_config = {
-        # Permet à Pydantic de lire les attributs des objets SQLAlchemy
-        # (ex: user.email au lieu de user["email"])
-        "from_attributes": True
-    }
+
+class ApiReturnUserWithApplications(ApiReturnUser):
+    applications: List[ApiReturnApplication]
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

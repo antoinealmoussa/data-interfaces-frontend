@@ -18,12 +18,7 @@ def get_user_by_id(db: Session, user_id: id):
 
 def create_user(db: Session, user_in: ApiCreateUser):
     hashed_pw = hash_password(user_in.password)
-    db_user = User(
-        email=user_in.email,
-        password=hashed_pw,
-        first_name=user_in.first_name,
-        surname=user_in.surname
-    )
+    db_user = user_in.to_model(hashed_pw)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

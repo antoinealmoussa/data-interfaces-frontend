@@ -42,23 +42,23 @@ poetry add fastapi uvicorn sqlalchemy psycopg2-binary
 ## Connexion via Docker
 
 ```bash
-psql -h localhost -U postgres -d localdb
+docker compose exec db psql -h localhost -U postgres -d localdb
 ```
 
 ## Génération d'une migration
 
 ```bash
-docker-compose exec backend poetry run alembic revision --autogenerate -m "create_user_stravoska_table"
+docker compose exec backend poetry run alembic revision --autogenerate -m "create_user_stravoska_table"
 ```
 
 ## Exécution d'une migration
 
 ```bash
-docker-compose exec backend poetry run alembic upgrade head
+docker compose exec backend poetry run alembic upgrade head
 ```
 
 ## Lancement des tests
 
 ```bash
-docker-compose exec backend poetry run pytest app/tests
+docker compose exec backend poetry run pytest app/tests
 ```
