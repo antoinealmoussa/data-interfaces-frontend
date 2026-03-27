@@ -15,6 +15,7 @@ class User(Base):
     surname = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+    token_version = Column(Integer, default=0)
 
     applications: Mapped[List["Application"]] = relationship(
         "Application", secondary=user_application, back_populates="users")

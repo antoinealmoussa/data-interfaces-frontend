@@ -10,7 +10,10 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+        data: dict,
+        expires_delta: Optional[timedelta] = None
+    ) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -36,11 +39,19 @@ async def get_current_user(token: str = Depends(settings.oauth2_scheme), db: Ses
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
+        
+        token_version = payload.get("token_version")
+        if token_version is None:
+            raise credentials_exception
+        
     except JWTError:
         raise credentials_exception
     
     user = get_user_by_email(db, email)
     if user is None:
+        raise credentials_exception
+    
+    if user.token_version != token_version:
         raise credentials_exception
     
     return user

@@ -47,11 +47,23 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email, "version": user.token_version})
 
     return {
         "access_token": access_token,
         "token_type": "bearer"
+    }
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    current_user.token_version += 1
+    db.commit()
+
+    return {
+        "message": "Successfully logged out"
     }
 
 @router.get("/me", response_model=ApiReturnUserWithApplications)
