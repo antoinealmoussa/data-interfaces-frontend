@@ -26,7 +26,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const currentToken = localStorage.getItem("token");
         const currentUser = localStorage.getItem("user");
         const currentApplications = localStorage.getItem("applications");
-        console.log(currentApplications, currentToken, currentUser);
         if (currentToken && currentUser && currentApplications) {
             setToken(currentToken);
             setUser(JSON.parse(currentUser));
@@ -57,7 +56,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthLoading(false);
     }
 
-    const logout = () => {
+    const logout = async () => {
+        await axios.post(
+            `${API_URLS.backend}/users/logout`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
         setIsAuthenticated(false);
         setApplications(null);
         setUser(null);

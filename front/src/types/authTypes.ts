@@ -33,7 +33,7 @@ export type AuthContextType = {
   user: User | null;
   applications: Application[] | null;
   token: string | null;
-  login: (token: string ) => void;
+  login: ( token: string ) => void;
   logout: () => void;
 };
 

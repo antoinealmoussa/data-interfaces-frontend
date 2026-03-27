@@ -47,7 +47,7 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": user.email, "version": user.token_version})
+    access_token = create_access_token(data={"sub": user.email, "token_version": user.token_version})
 
     return {
         "access_token": access_token,
@@ -59,8 +59,7 @@ def logout(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    current_user.token_version += 1
-    db.commit()
+    user_service.revoke_tokens(db, current_user)
 
     return {
         "message": "Successfully logged out"

@@ -32,3 +32,9 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_password(password, user.password):
         return False
     return user
+
+def revoke_tokens(db: Session, user: User) -> User:
+    user.token_version += 1
+    db.commit()
+    db.refresh(user)
+    return user

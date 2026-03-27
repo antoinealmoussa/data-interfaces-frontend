@@ -8,7 +8,7 @@ from app.services.user_service import get_user_by_email
 from app.db.session import get_db
 from sqlalchemy.orm import Session
 from app.models.user import User
-
+from app.core.logging_config import logger
 
 def create_access_token(
         data: dict,
@@ -37,6 +37,7 @@ async def get_current_user(token: str = Depends(settings.oauth2_scheme), db: Ses
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
+        
         if email is None:
             raise credentials_exception
         
