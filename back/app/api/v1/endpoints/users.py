@@ -58,4 +58,7 @@ def login(
 async def read_users_me(
     current_user: User = Depends(get_current_active_user)
 ):
-    return current_user
+    return {
+        "user": current_user,
+        "applications": current_user.applications
+    }

@@ -38,7 +38,8 @@ class ApiReturnUser(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ApiReturnUserWithApplications(ApiReturnUser):
+class ApiReturnUserWithApplications(BaseModel):
+    user: ApiReturnUser
     applications: List[ApiReturnApplication]
     model_config = ConfigDict(from_attributes=True)
 

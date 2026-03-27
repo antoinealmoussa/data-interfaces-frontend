@@ -22,16 +22,19 @@ export const LoginForm: React.FC = ({
 
     const onSubmit = async (data: LoginFormProps) => {
         try {
-            const response = await axios.post(
+            const formData = new URLSearchParams();
+            formData.append('username', data.email);
+            formData.append('password', data.password);
+            const response = await axios.post<{ access_token: string ; token_type: string}>(
                 `${API_URLS.backend}/users/login`,
-                data
+                formData
             );
 
             if (!response) {
                 throw new Error("Identifiants invalides")
             }
-            const user = response.data;
-            login(user);
+            const token = response.data.access_token;
+            await login(token);
             navigate("/")
 
         } catch (error) {
@@ -92,3 +95,4 @@ export const LoginForm: React.FC = ({
         </Box>
     )
 }
+
