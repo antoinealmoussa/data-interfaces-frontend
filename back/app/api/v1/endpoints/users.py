@@ -54,7 +54,7 @@ def login(
         "token_type": "bearer"
     }
 
-@router.post("/logout", status_code=status.HTTP_200_OK)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

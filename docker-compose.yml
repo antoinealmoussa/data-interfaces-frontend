@@ -11,7 +11,7 @@ services:
     volumes: # Conservation du code et des modules dans le conteneur
       - ./front:/app
       - /app/node_modules
-    restart: unless-stopped
+    restart: no
 
   # Conteneur éphémère pour les migrations
   migration:
@@ -44,7 +44,7 @@ services:
         condition: service_completed_successfully
     volumes: # Conservation du code dans le conteneur
       - ./back:/app
-    restart: unless-stopped
+    restart: no
 
   # Service pour la base de données PostgreSQL
   db:
@@ -62,7 +62,7 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    restart: no
 # Volume pour persister les données de PostgreSQL
 volumes:
   postgres_data:

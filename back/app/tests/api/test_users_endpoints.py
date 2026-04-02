@@ -13,7 +13,6 @@ def test_read_users_empty(client):
 
 def test_read_users_with_data(client):
     """Test GET /api/v1/users/ avec des utilisateurs."""
-    # Créer des utilisateurs directement en base
     user1_data = {
         "email": "user1@test.com",
         "password": "password1",
@@ -35,9 +34,8 @@ def test_read_users_with_data(client):
     assert response.status_code == status.HTTP_200_OK
     users = response.json()
     assert len(users) == 2
-    assert users[0]["email"] in ["user1@test.com", "user2@test.com"]
-    assert users[1]["email"] in ["user1@test.com", "user2@test.com"]
-    # Vérifier que le mot de passe n'est pas dans la réponse
+    emails = {u["email"] for u in users}
+    assert emails == {"user1@test.com", "user2@test.com"}
     assert "password" not in users[0]
     assert "password" not in users[1]
 
@@ -94,16 +92,14 @@ def test_register_duplicate_email(client):
         "surname": "User"
     }
 
-    # Premier enregistrement
     response1 = client.post("/api/v1/users/register", json=user_data)
     assert response1.status_code == status.HTTP_201_CREATED
 
-    # Tentative de double enregistrement
     response2 = client.post("/api/v1/users/register", json=user_data)
 
     assert response2.status_code == 409
-    assert "déjà utilisé" in response2.json()["detail"].lower(
-    ) or "email" in response2.json()["detail"].lower()
+    detail = response2.json()["detail"].lower()
+    assert "déjà utilisé" in detail or "email" in detail
 
 
 def test_register_missing_fields(client):
@@ -111,7 +107,6 @@ def test_register_missing_fields(client):
     incomplete_data = {
         "email": "incomplete@test.com",
         "password": "password123"
-        # first_name et surname manquants
     }
 
     response = client.post("/api/v1/users/register", json=incomplete_data)
@@ -128,16 +123,13 @@ def test_register_invalid_email_format(client):
         "surname": "Email"
     }
 
-    # Note: Pydantic peut valider le format d'email, mais cela dépend de la config
     response = client.post("/api/v1/users/register", json=user_data)
-    # Soit 422 (validation), soit 201 si la validation n'est pas stricte
     assert response.status_code in [
         status.HTTP_422_UNPROCESSABLE_CONTENT, status.HTTP_201_CREATED]
 
 
 def test_login_success(client):
     """Test POST /api/v1/users/login avec succès."""
-    # D'abord créer un utilisateur
     user_data = {
         "email": "login@test.com",
         "password": "correct_password",
@@ -146,28 +138,19 @@ def test_login_success(client):
     }
     client.post("/api/v1/users/register", json=user_data)
 
-    # Puis se connecter
-    login_data = {
-        "email": "login@test.com",
-        "password": "correct_password"
-    }
-
-    response = client.post("/api/v1/users/login", json=login_data)
+    response = client.post(
+        "/api/v1/users/login",
+        data={"username": "login@test.com", "password": "correct_password"}
+    )
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert "id" in data
-    assert "email" in data
-    assert "first_name" in data
-    assert "surname" in data
-    assert data["email"] == "login@test.com"
-    assert data["first_name"] == "Login"
-    assert data["surname"] == "User"
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
 
 
 def test_login_wrong_password(client):
     """Test POST /api/v1/users/login avec un mauvais mot de passe."""
-    # Créer un utilisateur
     user_data = {
         "email": "login@test.com",
         "password": "correct_password",
@@ -176,40 +159,66 @@ def test_login_wrong_password(client):
     }
     client.post("/api/v1/users/register", json=user_data)
 
-    # Tentative de connexion avec mauvais mot de passe
-    login_data = {
-        "email": "login@test.com",
-        "password": "wrong_password"
-    }
-
-    response = client.post("/api/v1/users/login", json=login_data)
+    response = client.post(
+        "/api/v1/users/login",
+        data={"username": "login@test.com", "password": "wrong_password"}
+    )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert "incorrect" in response.json()["detail"].lower(
-    ) or "incorrect" in response.json()["detail"]
+    assert "incorrect" in response.json()["detail"].lower()
 
 
 def test_login_nonexistent_user(client):
     """Test POST /api/v1/users/login avec un utilisateur inexistant."""
-    login_data = {
-        "email": "nonexistent@test.com",
-        "password": "any_password"
-    }
-
-    response = client.post("/api/v1/users/login", json=login_data)
+    response = client.post(
+        "/api/v1/users/login",
+        data={"username": "nonexistent@test.com", "password": "any_password"}
+    )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert "incorrect" in response.json()["detail"].lower(
-    ) or "incorrect" in response.json()["detail"]
+    assert "incorrect" in response.json()["detail"].lower()
 
 
 def test_login_missing_fields(client):
     """Test POST /api/v1/users/login avec des champs manquants."""
-    incomplete_data = {
-        "email": "test@test.com"
-        # password manquant
-    }
-
-    response = client.post("/api/v1/users/login", json=incomplete_data)
+    response = client.post(
+        "/api/v1/users/login",
+        data={"username": "test@test.com"}
+    )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_logout_success(authenticated_client):
+    """Test POST /api/v1/users/logout avec un token valide."""
+    response = authenticated_client.post("/api/v1/users/logout")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "message" in response.json()
+
+
+def test_logout_unauthenticated(client):
+    """Test POST /api/v1/users/logout sans token."""
+    response = client.post("/api/v1/users/logout")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_read_users_me(authenticated_client):
+    """Test GET /api/v1/users/me avec un token valide."""
+    response = authenticated_client.get("/api/v1/users/me")
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert "user" in data
+    assert "email" in data["user"]
+    assert "first_name" in data["user"]
+    assert "surname" in data["user"]
+    assert "password" not in data["user"]
+
+
+def test_read_users_me_unauthenticated(client):
+    """Test GET /api/v1/users/me sans token."""
+    response = client.get("/api/v1/users/me")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
