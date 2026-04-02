@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Un service FastAPI qui gère le backend de l'application Stravoska"
 authors = ["Antoine Almoussa"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -17,11 +18,18 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 alembic = "^1.17.2"
 bcrypt = "^5.0.0"
 pytest = "^9.0.2"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+logging = "^0.4.9.6"
+python-multipart = "^0.0.22"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"
+pytest-asyncio = "^1.3.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE user_stravoska
+ADD COLUMN token_version INT NOT NULL DEFAULT 0;
+
+COMMIT;

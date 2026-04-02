@@ -86,3 +86,4 @@ coverage.xml
 .project
 .pydevproject
 .settings/
+.aider*

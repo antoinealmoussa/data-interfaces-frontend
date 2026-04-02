@@ -84,7 +84,7 @@ test/
 ### Lancer les tests
 
 ```bash
-docker-compose exec frontend npm run test
+docker compose exec frontend npm run test
 ```
 
 ### Mode watch (développement)

@@ -18,20 +18,13 @@ export const RegisterForm: React.FC = ({
     const navigate = useNavigate();
 
     const onSubmit = async (data: RegisterFormProps) => {
-        try {
-            const response = await axios.post(
-                `${API_URLS.backend}/users/register`,
-                data
-            );
+        await axios.post(
+            `${API_URLS.backend}/users/register`,
+            data
+        );
 
-            if (!response) {
-                throw new Error("Identifiants invalides")
-            }
-            navigate("/login")
+        navigate("/login")
 
-        } catch (error) {
-            alert("Erreur lors de la connexion");
-        }
     }
 
     return (
@@ -46,6 +39,7 @@ export const RegisterForm: React.FC = ({
             }}>
 
             <TextField
+                key="firstName"
                 variant="outlined"
                 color="primary"
                 label="Prénom"
@@ -53,6 +47,7 @@ export const RegisterForm: React.FC = ({
             />
 
             <TextField
+                key="surname"
                 variant="outlined"
                 color="primary"
                 label="Nom de famille"
@@ -60,6 +55,7 @@ export const RegisterForm: React.FC = ({
             />
 
             <TextField
+                key="email"
                 variant="outlined"
                 color="primary"
                 label="Email"
@@ -67,6 +63,7 @@ export const RegisterForm: React.FC = ({
             />
 
             <TextField
+                key="password"
                 variant="outlined"
                 color="primary"
                 label="Mot de passe"
@@ -75,6 +72,7 @@ export const RegisterForm: React.FC = ({
             />
 
             <Button
+                key="submitButton"
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -82,7 +80,11 @@ export const RegisterForm: React.FC = ({
                 {isSubmitting ? "Inscription..." : "S'inscrire"}
             </Button>
 
-            <Typography variant="subtitle2" color="primary">
+            <Typography 
+                key="caption"
+                variant="subtitle2" 
+                color="primary"
+            >
                 <i>"Roule aussi vite que t'es con"</i>   -   Wout Van Aert
             </Typography>
         </Box>

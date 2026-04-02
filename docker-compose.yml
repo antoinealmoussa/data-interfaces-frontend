@@ -5,14 +5,28 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_BACKEND_API=http://localhost:8000/api/v1 # Service authentification
-      - REACT_APP_SERVICE2_URL=http://service2:8001 # Service 2
+      - VITE_BACKEND_API=http://localhost:8000/api/v1 # Backend
     depends_on: # Le front ne démarre pas tant que le backend n'a pas démarré
       - backend
     volumes: # Conservation du code et des modules dans le conteneur
       - ./front:/app
       - /app/node_modules
-    restart: unless-stopped
+    restart: no
+
+  # Conteneur éphémère pour les migrations
+  migration:
+    image: postgres:15-alpine
+    volumes:
+      - ./scripts:/scripts        # Monte ton dossier scripts
+      - ./migrations:/migrations  # Monte ton dossier de fichiers .sql
+    working_dir: /                # On se met à la racine
+    entrypoint: /bin/sh           # On force le shell
+    command: /scripts/migrate.sh
+    environment:
+      - PGPASSWORD=postgres       # Évite que psql ne demande le mot de passe
+    depends_on:
+      db:
+        condition: service_healthy
 
   # Service backend (FastAPI + Poetry)
   backend:
@@ -24,10 +38,13 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
     depends_on: # Le service ne démarre pas tant que la db n'a pas été initialisée
-      - db
+      db:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     volumes: # Conservation du code dans le conteneur
       - ./back:/app
-    restart: unless-stopped
+    restart: no
 
   # Service pour la base de données PostgreSQL
   db:
@@ -37,10 +54,15 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=localdb
     ports:
-      - "5000:5000"
+      - "5000:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d localdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    restart: no
 # Volume pour persister les données de PostgreSQL
 volumes:
   postgres_data:

@@ -125,5 +125,6 @@ describe("RegisterForm", () => {
         expect(screen.getByText(/Roule aussi vite que t'es con/)).toBeInTheDocument();
         expect(screen.getByText(/Wout Van Aert/)).toBeInTheDocument();
     });
+
 });
 

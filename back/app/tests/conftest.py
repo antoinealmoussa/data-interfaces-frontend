@@ -6,9 +6,11 @@ from sqlalchemy.pool import StaticPool
 
 from app.db.session import Base, get_db
 from app.main import app
+from app.services import user_service
+from app.schemas.user import ApiCreateUser
+from app.core.token import create_access_token
 
 
-# Base de données SQLite en mémoire pour les tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(
@@ -22,27 +24,18 @@ TestingSessionLocal = sessionmaker(
 
 @pytest.fixture(scope="function")
 def db_session():
-    """
-    Crée une nouvelle base de données pour chaque test.
-    """
-    # Créer toutes les tables
     Base.metadata.create_all(bind=engine)
 
-    # Créer une session
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
-        # Supprimer toutes les tables après le test
         Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """
-    Crée un client de test FastAPI avec une base de données de test.
-    """
     def override_get_db():
         try:
             yield db_session
@@ -55,3 +48,23 @@ def client(db_session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def test_user(db_session):
+    user = ApiCreateUser(
+        email="testuser@test.com",
+        password="testpassword",
+        first_name="Test",
+        surname="User"
+    )
+    return user_service.create_user(db_session, user_in=user)
+
+
+@pytest.fixture(scope="function")
+def authenticated_client(client, test_user):
+    token = create_access_token(
+        data={"sub": test_user.email, "token_version": test_user.token_version}
+    )
+    client.headers = {"Authorization": f"Bearer {token}"}
+    return client

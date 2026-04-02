@@ -8,12 +8,13 @@ import type { MultiTypeMenuItemProps } from "../../types/uiTypes";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { HorizontalUserAppMenu } from "../ui/HorizontalUserAppMenu";
 import { PRIVATE_STANDARD_ROUTES } from "../../routes";
-
+import { useLogout } from "../../hooks/useLogout";
 
 export const Header: React.FC<HeaderProps> = ({
     height
 }) => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
+
     const rightMenuItems: MultiTypeMenuItemProps[] = [
         {
             item: {
@@ -33,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
             item: {
                 type: 'action',
                 label: "Se déconnecter",
-                onClick: logout,
+                onClick: useLogout(),
                 icon: LogoutIcon
             }
         }
@@ -53,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
         >
             <ButtonBase
+                key="logo"
                 component={Link}
                 to="/"
                 sx={{
@@ -74,6 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
                     }} />
             </ButtonBase>
             <Box
+                key="userAppMenu"
                 sx={{
                     flex: 5,
                     height,
@@ -86,6 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <HorizontalUserAppMenu />
             </Box>
             <Box
+                key="rightMenu"
                 sx={{
                     flex: 0.5,
                     height

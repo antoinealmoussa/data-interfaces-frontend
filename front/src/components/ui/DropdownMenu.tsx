@@ -33,6 +33,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = (
             }}
         >
             <Button
+                key="arrowDropdown"
                 onMouseEnter={handleOpen}
                 startIcon={Icon ? <Icon /> : undefined}
                 endIcon={<ArrowDropDown />}
@@ -47,6 +48,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = (
                 {label}
             </Button>
             <Menu
+                key="menu"
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
@@ -78,6 +80,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = (
             >
                 {menuItems.map(menuItem => (
                     <MultiTypeMenuItem
+                        key={`${menuItem.item.label}`}
                         item={menuItem.item}
                     />
                 ))}

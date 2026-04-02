@@ -1,4 +1,5 @@
 import type { RouteProps } from "./routesTypes";
+import type { Application } from "./authTypes"
 
 export interface DropdownMenuProps {
   label?: string;
@@ -31,12 +32,7 @@ export interface MultiTypeMenuItemProps {
   item: MenuItemConfig;
 }
 
-export interface ApiUserApplication {
-  name: string;
-  pretty_name: string;
-}
-
-export const mapUserApplicationToMenuItem = (apiData: ApiUserApplication, config: RouteProps): MenuItemConfig => ({
+export const mapUserApplicationToMenuItem = (apiData: Application, config: RouteProps): MenuItemConfig => ({
   type: 'link',
   label: apiData.pretty_name,
   href: config.path

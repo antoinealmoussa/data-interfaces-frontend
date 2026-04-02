@@ -5,14 +5,12 @@ import { PRIVATE_STANDARD_ROUTES, DYNAMIC_APP_ROUTES } from "../../routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicLayout } from "../../pages/authentication/PublicLayout";
 import { authRoutes } from "../../pages/authentication/routes";
-import { useUserApplications } from "../../hooks/useUserApplications";
 import { useAuth } from "../../hooks/useAuth";
 import type { AppName } from "../../types/routesTypes";
 
 
 export const AppRoutes: React.FC = () => {
-    const { user } = useAuth();
-    const { data: userApplicationData } = useUserApplications(user)
+    const { applications } = useAuth();
 
     return (
         <Routes>
@@ -29,8 +27,8 @@ export const AppRoutes: React.FC = () => {
                 ))}
 
                 {/* Routes privées dynamiques */}
-                {userApplicationData?.map((userApp) => {
-                    const userAppConfig = DYNAMIC_APP_ROUTES[userApp.name as AppName];
+                {applications && applications.map((app) => {
+                    const userAppConfig = DYNAMIC_APP_ROUTES[app.name as AppName];
                     return userAppConfig ? <Route
                         key={userAppConfig.path}
                         path={userAppConfig.path}

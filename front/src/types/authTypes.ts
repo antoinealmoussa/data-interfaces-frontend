@@ -17,10 +17,23 @@ export type User = {
   surname: string;
 };
 
+export type Application = {
+  name: string;
+  pretty_name: string;
+}
+
+export type MeResponse = {
+  user: User;
+  applications: Application[];
+}
+
 export type AuthContextType = {
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   user: User | null;
-  login: (userData: User) => void;
+  applications: Application[] | null;
+  token: string | null;
+  login: ( token: string ) => void;
   logout: () => void;
 };
+

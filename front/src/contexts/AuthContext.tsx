@@ -1,10 +1,14 @@
 import { useState, createContext, type ReactNode, useEffect } from 'react';
-import { type User, type AuthContextType } from "../types/authTypes";
+import type { User, Application, AuthContextType, MeResponse } from "../types/authTypes";
+import axios from 'axios';
+import API_URLS from '../api/config';
 
 const defaultAuthContext: AuthContextType = {
     isAuthenticated: false,
     isAuthLoading: true,
+    token: null,
     user: null,
+    applications: null,
     login: () => { },
     logout: () => { }
 }
@@ -15,33 +19,68 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
     const [user, setUser] = useState<User | null>(null);
+    const [applications, setApplications] = useState<Application[] | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
+        const currentToken = localStorage.getItem("token");
         const currentUser = localStorage.getItem("user");
-        if (currentUser) {
+        const currentApplications = localStorage.getItem("applications");
+        if (currentToken && currentUser && currentApplications) {
+            setToken(currentToken);
             setUser(JSON.parse(currentUser));
+            setApplications(JSON.parse(currentApplications));
             setIsAuthenticated(true);
             setIsAuthLoading(false);
         }
     }, []);
 
-    const login = (data: User) => {
+    const login = async (token: string) => {
+        setToken(token);
+        localStorage.setItem("token", token);
+
+        const response = await axios.get<MeResponse>(
+            `${API_URLS.backend}/users/me`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        setUser(response.data.user);
+        setApplications(response.data.applications);
+        localStorage.setItem("user", JSON.stringify(response.data.user))
+        localStorage.setItem("applications", JSON.stringify(response.data.applications));
+
         setIsAuthenticated(true);
-        setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
         setIsAuthLoading(false);
     }
 
-    const logout = () => {
+    const logout = async () => {
+        await axios.post(
+            `${API_URLS.backend}/users/logout`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
         setIsAuthenticated(false);
+        setApplications(null);
         setUser(null);
+        setApplications(null);
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
+        localStorage.removeItem("applications");
     }
 
     const ContextValue: AuthContextType = {
         isAuthenticated,
         isAuthLoading,
         user,
+        applications,
+        token,
         login,
         logout
     }
