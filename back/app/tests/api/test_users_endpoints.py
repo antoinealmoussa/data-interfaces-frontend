@@ -193,8 +193,7 @@ def test_logout_success(authenticated_client):
     """Test POST /api/v1/users/logout avec un token valide."""
     response = authenticated_client.post("/api/v1/users/logout")
 
-    assert response.status_code == status.HTTP_200_OK
-    assert "message" in response.json()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
 def test_logout_unauthenticated(client):

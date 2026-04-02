@@ -54,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
         >
             <ButtonBase
+                key="logo"
                 component={Link}
                 to="/"
                 sx={{
@@ -75,6 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
                     }} />
             </ButtonBase>
             <Box
+                key="userAppMenu"
                 sx={{
                     flex: 5,
                     height,
@@ -87,6 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <HorizontalUserAppMenu />
             </Box>
             <Box
+                key="rightMenu"
                 sx={{
                     flex: 0.5,
                     height

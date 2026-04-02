@@ -61,7 +61,7 @@ describe("LoginForm", () => {
     it("devrait soumettre le formulaire avec les données correctes", async () => {
         const user = userEvent.setup();
         mockedAxios.post.mockResolvedValueOnce({
-            data: { message: "Connexion réussie" },
+            data: { access_token: "test-token", token_type: "bearer" },
         });
 
         renderWithRouter(<LoginForm />);
@@ -75,14 +75,12 @@ describe("LoginForm", () => {
         await user.click(submitButton);
 
         await waitFor(() => {
-            expect(mockedAxios.post).toHaveBeenCalledWith(
-                "http://localhost:8000/api/v1/users/login",
-                {
-                    email: "test@example.com",
-                    password: "password123",
-                }
-            );
+            expect(mockedAxios.post).toHaveBeenCalled();
         });
+        const call = mockedAxios.post.mock.calls[0];
+        expect(call[0]).toBe("http://localhost:8000/api/v1/users/login");
+        expect(call[1].get('username')).toBe("test@example.com");
+        expect(call[1].get('password')).toBe("password123");
     });
 
     it("devrait afficher 'Connexion...' pendant la soumission", async () => {
@@ -112,6 +110,41 @@ describe("LoginForm", () => {
 
         expect(screen.getByText(/Roule aussi vite que t'es con/)).toBeInTheDocument();
         expect(screen.getByText(/Wout Van Aert/)).toBeInTheDocument();
+    });
+
+    it("devrait gérer l'erreur de connexion", async () => {
+        const user = userEvent.setup();
+        const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+        mockedAxios.post.mockRejectedValueOnce(new Error("Network Error"));
+
+        renderWithRouter(<LoginForm />);
+
+        const emailInput = screen.getByLabelText(/email/i);
+        const passwordInput = screen.getByLabelText(/mot de passe/i);
+        const submitButton = screen.getByRole("button", { name: /se connecter/i });
+
+        await user.type(emailInput, "test@example.com");
+        await user.type(passwordInput, "wrongpassword");
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(alertMock).toHaveBeenCalledWith("Erreur lors de la connexion");
+        });
+
+        alertMock.mockRestore();
+    });
+
+    it("devrait avoir un lien vers la page d'inscription", () => {
+        renderWithRouter(<LoginForm />);
+
+        const link = screen.getByRole("link", { name: /s'inscrire/i });
+        expect(link).toHaveAttribute("href", "/register");
+    });
+
+    it("devrait avoir un Divider avec le texte OU", () => {
+        renderWithRouter(<LoginForm />);
+
+        expect(screen.getByText("OU")).toBeInTheDocument();
     });
 });
 
