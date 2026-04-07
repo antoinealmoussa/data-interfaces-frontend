@@ -37,3 +37,17 @@ export const mapUserApplicationToMenuItem = (apiData: Application, config: Route
   label: apiData.pretty_name,
   href: config.path
 })
+
+export interface LoadingSpinnerProps {
+  size?: number;
+}
+
+export interface SearchInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSearch: () => void;
+  isLoading?: boolean;
+  placeholder?: string;
+}
+
+export type HomeState = "idle" | "loading" | "success" | "error";

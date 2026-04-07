@@ -6,7 +6,7 @@ import type {
   MeResponse,
 } from "../types/authTypes";
 import axios from "axios";
-import API_URLS from "../api/config";
+import API_URLS, { getAuthHeaders } from "../api/config";
 
 const defaultAuthContext: AuthContextType = {
   isAuthenticated: false,
@@ -46,9 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const response = await axios.get<MeResponse>(
       `${API_URLS.backend}/users/me`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
       },
     );
     setUser(response.data.user);
