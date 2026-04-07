@@ -9,35 +9,35 @@ vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
-    default: {
-        backend: "http://localhost:8000/api/v1",
-    },
+  default: {
+    backend: "http://localhost:8000/api/v1",
+  },
 }));
 
 describe("LogoutPage", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        localStorage.clear();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("devrait rediriger vers la page de login", async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { message: "Logged out" },
     });
 
-    it("devrait rediriger vers la page de login", async () => {
-        mockedAxios.post.mockResolvedValueOnce({
-            data: { message: "Logged out" },
-        });
+    render(
+      <MemoryRouter initialEntries={["/logout"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/logout" element={<LogoutPage />} />
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
 
-        render(
-            <MemoryRouter initialEntries={["/logout"]}>
-                <AuthProvider>
-                    <Routes>
-                        <Route path="/logout" element={<LogoutPage />} />
-                        <Route path="/login" element={<div>Login Page</div>} />
-                    </Routes>
-                </AuthProvider>
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
-            expect(screen.getByText("Login Page")).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(screen.getByText("Login Page")).toBeInTheDocument();
     });
+  });
 });

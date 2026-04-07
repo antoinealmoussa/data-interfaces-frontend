@@ -15,7 +15,6 @@ describe("useAuth", () => {
         });
 
         expect(result.current).toHaveProperty('isAuthenticated');
-        expect(result.current).toHaveProperty('isAuthLoading');
         expect(result.current).toHaveProperty('user');
         expect(result.current).toHaveProperty('applications');
         expect(result.current).toHaveProperty('token');
@@ -38,7 +37,6 @@ describe("useAuth", () => {
         });
 
         expect(typeof result.current.isAuthenticated).toBe("boolean");
-        expect(typeof result.current.isAuthLoading).toBe("boolean");
         expect(result.current.user).toBeNull();
         expect(result.current.applications).toBeNull();
         expect(result.current.token).toBeNull();

@@ -11,6 +11,7 @@ vi.mock("../../api/config", () => ({
     default: {
         backend: "http://localhost:8000/api/v1",
     },
+    getAuthHeaders: () => ({ Authorization: "Bearer test-token" }),
 }));
 
 describe("AuthContext", () => {

@@ -1,6 +1,4 @@
-import pytest
 from fastapi import status
-from app.services import user_service
 
 
 def test_read_users_empty(client):
@@ -17,13 +15,13 @@ def test_read_users_with_data(client):
         "email": "user1@test.com",
         "password": "password1",
         "first_name": "John",
-        "surname": "Doe"
+        "surname": "Doe",
     }
     user2_data = {
         "email": "user2@test.com",
         "password": "password2",
         "first_name": "Jane",
-        "surname": "Smith"
+        "surname": "Smith",
     }
 
     client.post("/api/v1/users/register", json=user1_data)
@@ -46,7 +44,7 @@ def test_read_users_response_structure(client):
         "email": "struct@test.com",
         "password": "password123",
         "first_name": "Struct",
-        "surname": "Test"
+        "surname": "Test",
     }
 
     client.post("/api/v1/users/register", json=user_data)
@@ -69,7 +67,7 @@ def test_register_success(client):
         "email": "register@test.com",
         "password": "password123",
         "first_name": "Register",
-        "surname": "User"
+        "surname": "User",
     }
 
     response = client.post("/api/v1/users/register", json=user_data)
@@ -89,7 +87,7 @@ def test_register_duplicate_email(client):
         "email": "duplicate@test.com",
         "password": "password123",
         "first_name": "First",
-        "surname": "User"
+        "surname": "User",
     }
 
     response1 = client.post("/api/v1/users/register", json=user_data)
@@ -104,10 +102,7 @@ def test_register_duplicate_email(client):
 
 def test_register_missing_fields(client):
     """Test POST /api/v1/users/register avec des champs manquants."""
-    incomplete_data = {
-        "email": "incomplete@test.com",
-        "password": "password123"
-    }
+    incomplete_data = {"email": "incomplete@test.com", "password": "password123"}
 
     response = client.post("/api/v1/users/register", json=incomplete_data)
 
@@ -120,12 +115,14 @@ def test_register_invalid_email_format(client):
         "email": "not-an-email",
         "password": "password123",
         "first_name": "Invalid",
-        "surname": "Email"
+        "surname": "Email",
     }
 
     response = client.post("/api/v1/users/register", json=user_data)
     assert response.status_code in [
-        status.HTTP_422_UNPROCESSABLE_CONTENT, status.HTTP_201_CREATED]
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        status.HTTP_201_CREATED,
+    ]
 
 
 def test_login_success(client):
@@ -134,13 +131,13 @@ def test_login_success(client):
         "email": "login@test.com",
         "password": "correct_password",
         "first_name": "Login",
-        "surname": "User"
+        "surname": "User",
     }
     client.post("/api/v1/users/register", json=user_data)
 
     response = client.post(
         "/api/v1/users/login",
-        data={"username": "login@test.com", "password": "correct_password"}
+        data={"username": "login@test.com", "password": "correct_password"},
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -155,13 +152,13 @@ def test_login_wrong_password(client):
         "email": "login@test.com",
         "password": "correct_password",
         "first_name": "Login",
-        "surname": "User"
+        "surname": "User",
     }
     client.post("/api/v1/users/register", json=user_data)
 
     response = client.post(
         "/api/v1/users/login",
-        data={"username": "login@test.com", "password": "wrong_password"}
+        data={"username": "login@test.com", "password": "wrong_password"},
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -172,7 +169,7 @@ def test_login_nonexistent_user(client):
     """Test POST /api/v1/users/login avec un utilisateur inexistant."""
     response = client.post(
         "/api/v1/users/login",
-        data={"username": "nonexistent@test.com", "password": "any_password"}
+        data={"username": "nonexistent@test.com", "password": "any_password"},
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -181,10 +178,7 @@ def test_login_nonexistent_user(client):
 
 def test_login_missing_fields(client):
     """Test POST /api/v1/users/login avec des champs manquants."""
-    response = client.post(
-        "/api/v1/users/login",
-        data={"username": "test@test.com"}
-    )
+    response = client.post("/api/v1/users/login", data={"username": "test@test.com"})
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
