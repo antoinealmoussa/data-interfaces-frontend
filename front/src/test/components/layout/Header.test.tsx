@@ -17,9 +17,6 @@ vi.mock("../../../api/config", () => ({
 
 const renderWithProviders = (ui: React.ReactElement, userData: any = null) => {
     const user = userData || { id: 1, email: "test@test.com", first_name: "Test", surname: "User" };
-    localStorage.setItem("token", "test-token");
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("applications", JSON.stringify([]));
 
     mockedAxios.get.mockResolvedValueOnce({
         data: {
@@ -40,7 +37,6 @@ const renderWithProviders = (ui: React.ReactElement, userData: any = null) => {
 describe("Header", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
     });
 
     it("devrait rendre le Header avec la bonne hauteur", async () => {

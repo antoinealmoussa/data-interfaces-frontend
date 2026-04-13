@@ -12,7 +12,6 @@ vi.mock("../../api/config", () => ({
     default: {
         backend: "http://localhost:8000/api/v1",
     },
-    getAuthHeaders: () => ({ Authorization: "Bearer test-token" }),
 }));
 
 const mockAuthContext = {
@@ -20,7 +19,6 @@ const mockAuthContext = {
     isLoading: false,
     user: { id: 1, email: "test@test.com", first_name: "Jean", surname: "Dupont" },
     applications: [],
-    token: "test-token",
     login: vi.fn(),
     logout: vi.fn(),
 };
@@ -38,7 +36,6 @@ const renderHome = () => {
 describe("Home", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
     });
 
     it("devrait afficher le message de bienvenue avec le prénom de l'utilisateur", async () => {

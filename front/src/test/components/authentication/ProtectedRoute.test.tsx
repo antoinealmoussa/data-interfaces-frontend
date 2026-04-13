@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { Routes, Route, MemoryRouter } from "react-router-dom";
 import { ProtectedRoute } from "../../../components/authentication/ProtectedRoute";
 import { AuthProvider } from "../../../contexts/AuthContext";
+import axios from "axios";
+
+vi.mock("axios");
+const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
   default: {
@@ -10,39 +14,36 @@ vi.mock("../../../api/config", () => ({
   },
 }));
 
-const renderWithProviders = (
-  ui: React.ReactElement,
-  initialEntry: string = "/",
-) => {
-  return render(
-    <MemoryRouter initialEntries={[initialEntry]}>
-      <AuthProvider>{ui}</AuthProvider>
-    </MemoryRouter>,
-  );
-};
-
 describe("ProtectedRoute", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    mockedAxios.get.mockRejectedValueOnce(new Error("Not authenticated"));
   });
 
   it("devrait rediriger vers /login si non authentifié", async () => {
-    renderWithProviders(
-      <Routes>
-        <Route path="/login" element={<div>Login Page</div>} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <div>Protected Content</div>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>,
-    );
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={["/"]}>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<div>Login Page</div>} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <div>Protected Content</div>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </AuthProvider>
+        </MemoryRouter>,
+      );
+    });
 
-    expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
+    });
     expect(screen.getByText("Login Page")).toBeInTheDocument();
   });
 });

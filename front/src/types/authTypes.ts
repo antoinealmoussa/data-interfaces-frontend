@@ -32,8 +32,7 @@ export type AuthContextType = {
   isLoading: boolean;
   user: User | null;
   applications: Application[] | null;
-  token: string | null;
-  login: ( token: string ) => void;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
 };
 

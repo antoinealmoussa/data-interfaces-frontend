@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, render } from "@testing-library/react";
+import { renderHook, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useLogout } from "../../hooks/useLogout";
 import { AuthProvider } from "../../contexts/AuthContext";
@@ -29,20 +29,30 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 describe("useLogout", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
+        mockedAxios.get.mockResolvedValueOnce({
+            data: { user: null, applications: [] },
+        });
     });
 
-    it("devrait retourner une fonction de logout", () => {
+    it("devrait retourner une fonction de logout", async () => {
         const { result } = renderHook(() => useLogout(), {
             wrapper: AllTheProviders,
         });
 
-        expect(typeof result.current).toBe("function");
+        await waitFor(() => {
+            expect(typeof result.current).toBe("function");
+        });
     });
 
     it("devrait être une fonction qui peut être appelée", async () => {
+        mockedAxios.get.mockResolvedValueOnce({
+            data: { user: null, applications: [] },
+        });
         mockedAxios.post.mockResolvedValueOnce({
             data: { message: "Logged out" },
+        });
+        mockedAxios.get.mockResolvedValueOnce({
+            data: { user: null, applications: [] },
         });
 
         const TestComponent: React.FC = () => {
@@ -72,7 +82,7 @@ describe("useLogout", () => {
         const user = userEvent.setup();
         await user.click(container.querySelector("button")!);
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(mockedAxios.post).toHaveBeenCalled();
         });
     });
