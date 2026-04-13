@@ -1,4 +1,5 @@
 from fastapi import status
+from app.core.token import create_access_token
 
 
 def test_read_users_empty(client):
@@ -215,3 +216,50 @@ def test_read_users_me_unauthenticated(client):
     response = client.get("/api/v1/users/me")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_update_user_success(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me avec un utilisateur valide."""
+    update_data = {
+        "first_name": "NewFirst",
+        "surname": "NewSurname",
+        "email": "newemail@test.com",
+    }
+
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["first_name"] == "NewFirst"
+    assert data["surname"] == "NewSurname"
+    assert data["email"] == "newemail@test.com"
+    assert data["id"] == test_user.id
+
+
+def test_update_user_partial(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me avec mise à jour partielle."""
+    update_data = {"first_name": "OnlyFirst"}
+
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["first_name"] == "OnlyFirst"
+    assert data["surname"] == test_user.surname
+    assert data["email"] == test_user.email
+
+
+def test_update_user_unauthenticated(client):
+    """Test PUT /api/v1/users/me sans token."""
+    update_data = {"first_name": "NewFirst"}
+
+    response = client.put("/api/v1/users/me", json=update_data)
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_update_user_empty_body(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me avec un body vide."""
+    response = authenticated_client.put("/api/v1/users/me", json={})
+
+    assert response.status_code == status.HTTP_200_OK

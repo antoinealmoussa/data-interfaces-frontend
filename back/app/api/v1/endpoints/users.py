@@ -4,7 +4,7 @@ from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.session import get_db
-from app.schemas.user import ApiReturnUser, ApiCreateUser, Token, ApiReturnUserWithApplications
+from app.schemas.user import ApiReturnUser, ApiCreateUser, Token, ApiReturnUserWithApplications, ApiUpdateUser
 from app.services import user_service
 from app.core.token import create_access_token, get_current_active_user
 from app.models.user import User
@@ -73,3 +73,13 @@ async def read_users_me(
         "user": current_user,
         "applications": current_user.applications
     }
+
+@router.put("/me", response_model=ApiReturnUser, status_code=status.HTTP_200_OK)
+def update_user(
+    user_in: ApiUpdateUser,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    updated_user = user_service.update_user(db, user_id=current_user.id, user_in=user_in)
+    
+    return updated_user
