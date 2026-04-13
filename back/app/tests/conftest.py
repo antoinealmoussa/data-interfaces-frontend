@@ -66,5 +66,5 @@ def authenticated_client(client, test_user):
     token = create_access_token(
         data={"sub": test_user.email, "token_version": test_user.token_version}
     )
-    client.headers = {"Authorization": f"Bearer {token}"}
+    client.cookies.set("access_token", token)
     return client
