@@ -29,6 +29,7 @@ export type MeResponse = {
 
 export type AuthContextType = {
   isAuthenticated: boolean;
+  isLoading: boolean;
   user: User | null;
   applications: Application[] | null;
   token: string | null;
