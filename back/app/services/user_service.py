@@ -17,6 +17,10 @@ def get_user_by_id(db: Session, user_id: id):
 
 
 def create_user(db: Session, user_in: ApiCreateUser):
+    existing_user = get_user_by_email(db, user_in.email)
+    if existing_user:
+        raise ValueError("Cet email est déjà utilisé.")
+    
     hashed_pw = hash_password(user_in.password)
     db_user = user_in.to_model(hashed_pw)
     db.add(db_user)
@@ -46,6 +50,12 @@ def update_user(db: Session, user_id: int, user_in: ApiUpdateUser) -> User | Non
         return None
     
     update_data = user_in.model_dump(exclude_unset=True)
+    
+    if "email" in update_data:
+        existing_user = get_user_by_email(db, update_data["email"])
+        if existing_user and existing_user.id != user_id:
+            raise ValueError("Cet email est déjà utilisé par un autre utilisateur.")
+    
     for field, value in update_data.items():
         setattr(user, field, value)
     

@@ -28,10 +28,10 @@ def read_users(db: Session = Depends(get_db)):
     "/register", response_model=ApiReturnUser, status_code=status.HTTP_201_CREATED
 )
 def register(user_in: ApiCreateUser, db: Session = Depends(get_db)):
-    user = user_service.get_user_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(status_code=409, detail="Cet email est déjà utilisé.")
-    new_user = user_service.create_user(db, user_in=user_in)
+    try:
+        new_user = user_service.create_user(db, user_in=user_in)
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
     return new_user
 
@@ -96,8 +96,11 @@ def update_user(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    updated_user = user_service.update_user(
-        db, user_id=current_user.id, user_in=user_in
-    )
+    try:
+        updated_user = user_service.update_user(
+            db, user_id=current_user.id, user_in=user_in
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
     return updated_user

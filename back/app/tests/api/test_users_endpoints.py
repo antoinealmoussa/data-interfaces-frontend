@@ -1,5 +1,6 @@
 from fastapi import status
 from app.core.token import create_access_token
+from app.services import user_service
 
 
 def test_read_users_empty(client):
@@ -370,3 +371,63 @@ def test_update_user_empty_body(authenticated_client, test_user):
     response = authenticated_client.put("/api/v1/users/me", json={})
 
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_update_user_duplicate_email(authenticated_client, test_user, db_session):
+    """Test PUT /api/v1/users/me avec un email déjà utilisé par un autre utilisateur."""
+    from app.schemas.user import ApiCreateUser
+    
+    other_user = ApiCreateUser(
+        email="other@test.com",
+        password="password123",
+        first_name="Other",
+        surname="User"
+    )
+    user_service.create_user(db_session, user_in=other_user)
+    
+    update_data = {"email": "other@test.com"}
+    
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+    
+    assert response.status_code == 409
+    detail = response.json()["detail"].lower()
+    assert "déjà utilisé" in detail or "email" in detail
+
+
+def test_update_user_same_email(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me avec le même email (doit réussir)."""
+    update_data = {"email": test_user.email}
+    
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+    
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["email"] == test_user.email
+
+
+def test_update_user_only_email_change(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me avec seulement un changement d'email."""
+    update_data = {"email": "newemail@test.com"}
+    
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+    
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["email"] == "newemail@test.com"
+    assert data["first_name"] == test_user.first_name
+    assert data["surname"] == test_user.surname
+
+
+def test_update_user_email_to_own_existing_email(authenticated_client, test_user):
+    """Test PUT /api/v1/users/me en gardant son propre email (pas d'erreur)."""
+    update_data = {
+        "first_name": "UpdatedName",
+        "email": test_user.email
+    }
+    
+    response = authenticated_client.put("/api/v1/users/me", json=update_data)
+    
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["email"] == test_user.email
+    assert data["first_name"] == "UpdatedName"
