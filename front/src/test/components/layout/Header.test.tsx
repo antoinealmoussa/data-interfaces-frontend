@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Header } from "../../../components/layout/Header";
 import { AuthProvider } from "../../../contexts/AuthContext";
+import axios from "axios";
+
+vi.mock("axios");
+const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
     default: {
@@ -11,7 +15,16 @@ vi.mock("../../../api/config", () => ({
     },
 }));
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (ui: React.ReactElement, userData: any = null) => {
+    const user = userData || { id: 1, email: "test@test.com", first_name: "Test", surname: "User" };
+
+    mockedAxios.get.mockResolvedValueOnce({
+        data: {
+            user: user,
+            applications: []
+        },
+    });
+
     return render(
         <BrowserRouter>
             <AuthProvider>
@@ -24,19 +37,16 @@ const renderWithProviders = (ui: React.ReactElement) => {
 describe("Header", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
     });
 
     it("devrait rendre le Header avec la bonne hauteur", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([]));
-
-        renderWithProviders(
-            <Routes>
-                <Route path="/" element={<Header height={60} />} />
-            </Routes>
-        );
+        await act(async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route path="/" element={<Header height={60} />} />
+                </Routes>
+            );
+        });
 
         await vi.waitFor(() => {
             const headerBox = document.querySelector('[class*="MuiBox-root"]');
@@ -46,15 +56,14 @@ describe("Header", () => {
 
     it("devrait afficher le nom de l'utilisateur connecté dans le menu", async () => {
         const user = userEvent.setup();
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "John", surname: "Doe" }));
-        localStorage.setItem("applications", JSON.stringify([]));
-
-        renderWithProviders(
-            <Routes>
-                <Route path="/" element={<Header height={60} />} />
-            </Routes>
-        );
+        await act(async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route path="/" element={<Header height={60} />} />
+                </Routes>,
+                { id: 1, email: "test@test.com", first_name: "John", surname: "Doe" }
+            );
+        });
 
         const button = screen.getByRole("button");
         await user.hover(button);
@@ -65,15 +74,13 @@ describe("Header", () => {
     });
 
     it("devrait avoir un lien vers le logo", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([]));
-
-        renderWithProviders(
-            <Routes>
-                <Route path="/" element={<Header height={60} />} />
-            </Routes>
-        );
+        await act(async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route path="/" element={<Header height={60} />} />
+                </Routes>
+            );
+        });
 
         await vi.waitFor(() => {
             const logoLink = document.querySelector('a[href="/"]');

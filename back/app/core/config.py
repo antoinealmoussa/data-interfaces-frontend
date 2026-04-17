@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Cookie Configuration
+    ACCESS_TOKEN_COOKIE_NAME: str = "access_token"
+    ACCESS_TOKEN_COOKIE_HTTPONLY: bool = True
+    ACCESS_TOKEN_COOKIE_SECURE: bool = False
+    ACCESS_TOKEN_COOKIE_SAMESITE: str = "lax"
+    ACCESS_TOKEN_COOKIE_PATH: str = "/"
+    ACCESS_TOKEN_COOKIE_MAX_AGE: int = 60 * 30
+
     # Chargement automatique du fichier .env
     model_config = SettingsConfigDict(env_file=".env")
 

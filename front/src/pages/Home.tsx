@@ -4,7 +4,7 @@ import axios from "axios";
 import { SearchInput } from "../components/ui/SearchInput";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
-import API_URLS, { getAuthHeaders } from "../api/config";
+import API_URLS from "../api/config";
 import type { HomeState } from "../types/uiTypes";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 
@@ -24,7 +24,6 @@ export const Home = () => {
         `${API_URLS.backend}/search/topic`,
         {
           params: { query: searchValue },
-          headers: getAuthHeaders(),
         },
       );
       setResponseText(response.data.text);

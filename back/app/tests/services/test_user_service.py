@@ -225,3 +225,60 @@ def test_revoke_tokens(db_session):
 
     db_session.refresh(created_user)
     assert created_user.token_version == initial_version + 1
+
+
+def test_update_user_success(db_session):
+    """Test update_user avec des données valides."""
+    from app.schemas.user import ApiUpdateUser
+    user = ApiCreateUser(
+        email="update@test.com",
+        password="password",
+        first_name="Update",
+        surname="Test"
+    )
+    created_user = user_service.create_user(db_session, user_in=user)
+
+    update_data = ApiUpdateUser(
+        first_name="UpdatedFirst",
+        surname="UpdatedSurname",
+        email="updated@test.com"
+    )
+
+    updated_user = user_service.update_user(db_session, user_id=created_user.id, user_in=update_data)
+
+    assert updated_user is not None
+    assert updated_user.id == created_user.id
+    assert updated_user.first_name == "UpdatedFirst"
+    assert updated_user.surname == "UpdatedSurname"
+    assert updated_user.email == "updated@test.com"
+
+
+def test_update_user_partial(db_session):
+    """Test update_user avec mise à jour partielle."""
+    from app.schemas.user import ApiUpdateUser
+    user = ApiCreateUser(
+        email="partial@test.com",
+        password="password",
+        first_name="Partial",
+        surname="Test"
+    )
+    created_user = user_service.create_user(db_session, user_in=user)
+
+    update_data = ApiUpdateUser(first_name="NewFirst")
+
+    updated_user = user_service.update_user(db_session, user_id=created_user.id, user_in=update_data)
+
+    assert updated_user is not None
+    assert updated_user.first_name == "NewFirst"
+    assert updated_user.surname == "Test"
+    assert updated_user.email == "partial@test.com"
+
+
+def test_update_user_not_found(db_session):
+    """Test update_user avec un ID inexistant."""
+    from app.schemas.user import ApiUpdateUser
+    update_data = ApiUpdateUser(first_name="NewFirst")
+
+    updated_user = user_service.update_user(db_session, user_id=99999, user_in=update_data)
+
+    assert updated_user is None

@@ -1,5 +1,6 @@
 import pytest
 from datetime import timedelta
+from unittest.mock import MagicMock
 from jose import jwt
 from app.core.token import create_access_token, get_current_user, get_current_active_user
 from app.core.config import settings
@@ -32,6 +33,18 @@ def test_create_access_token_custom_expiry():
     assert decoded["token_version"] == 1
 
 
+def create_mock_request_with_cookie(cookie_name: str, cookie_value: str) -> MagicMock:
+    mock_request = MagicMock()
+    mock_request.cookies = {cookie_name: cookie_value}
+    return mock_request
+
+
+def create_mock_request_without_cookie() -> MagicMock:
+    mock_request = MagicMock()
+    mock_request.cookies = {}
+    return mock_request
+
+
 @pytest.mark.asyncio
 async def test_get_current_user_valid_token(db_session):
     """Test get_current_user avec un token valide."""
@@ -44,8 +57,9 @@ async def test_get_current_user_valid_token(db_session):
     created_user = user_service.create_user(db_session, user_in=user)
 
     token = create_access_token(data={"sub": created_user.email, "token_version": created_user.token_version})
+    mock_request = create_mock_request_with_cookie("access_token", token)
 
-    current_user = await get_current_user(token, db_session)
+    current_user = await get_current_user(mock_request, db_session)
 
     assert current_user is not None
     assert current_user.email == created_user.email
@@ -54,10 +68,21 @@ async def test_get_current_user_valid_token(db_session):
 @pytest.mark.asyncio
 async def test_get_current_user_invalid_token():
     """Test get_current_user avec un token invalide."""
-    invalid_token = "invalid.token.here"
+    mock_request = create_mock_request_with_cookie("access_token", "invalid.token.here")
 
     with pytest.raises(HTTPException) as exc_info:
-        await get_current_user(invalid_token, None)
+        await get_current_user(mock_request, None)
+
+    assert exc_info.value.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_missing_cookie(db_session):
+    """Test get_current_user sans cookie."""
+    mock_request = create_mock_request_without_cookie()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(mock_request, db_session)
 
     assert exc_info.value.status_code == 401
 
@@ -77,9 +102,10 @@ async def test_get_current_user_expired_token(db_session):
         data={"sub": created_user.email, "token_version": created_user.token_version},
         expires_delta=timedelta(seconds=-1)
     )
+    mock_request = create_mock_request_with_cookie("access_token", token)
 
     with pytest.raises(HTTPException) as exc_info:
-        await get_current_user(token, db_session)
+        await get_current_user(mock_request, db_session)
 
     assert exc_info.value.status_code == 401
 
@@ -97,11 +123,12 @@ async def test_get_current_user_revoked_token(db_session):
     original_version = created_user.token_version
 
     token = create_access_token(data={"sub": created_user.email, "token_version": original_version})
+    mock_request = create_mock_request_with_cookie("access_token", token)
 
     user_service.revoke_tokens(db_session, created_user)
 
     with pytest.raises(HTTPException) as exc_info:
-        await get_current_user(token, db_session)
+        await get_current_user(mock_request, db_session)
 
     assert exc_info.value.status_code == 401
 

@@ -1,24 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { HorizontalUserAppMenu } from "../../../components/ui/HorizontalUserAppMenu";
-import { AuthProvider } from "../../../contexts/AuthContext";
-
-vi.mock("../../../api/config", () => ({
-    default: {
-        backend: "http://localhost:8000/api/v1",
-    },
-}));
-
-const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-        <BrowserRouter>
-            <AuthProvider>
-                {ui}
-            </AuthProvider>
-        </BrowserRouter>
-    );
-};
+import { AuthContext } from "../../../contexts/AuthContext";
 
 describe("HorizontalUserAppMenu", () => {
     beforeEach(() => {
@@ -26,36 +10,79 @@ describe("HorizontalUserAppMenu", () => {
         localStorage.clear();
     });
 
-    it("devrait retourner null si aucune application n'est disponible", () => {
-        const { container } = renderWithProviders(<HorizontalUserAppMenu />);
+    it("devrait retourner null si aucune application n'est disponible", async () => {
+        const mockAuthContext = {
+            isAuthenticated: true,
+            isLoading: false,
+            user: { id: 1, email: "test@test.com", first_name: "Test", surname: "User" },
+            applications: null,
+            token: "test-token",
+            login: vi.fn(),
+            logout: vi.fn(),
+        };
+
+        const { container } = render(
+            <BrowserRouter>
+                <AuthContext.Provider value={mockAuthContext}>
+                    <HorizontalUserAppMenu />
+                </AuthContext.Provider>
+            </BrowserRouter>
+        );
+
         expect(container.firstChild).toBeNull();
     });
 
     it("devrait afficher les menus des applications si disponibles", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([
-            { name: "bike-exploration", pretty_name: "Bike Exploration" }
-        ]));
+        const mockAuthContext = {
+            isAuthenticated: true,
+            isLoading: false,
+            user: { id: 1, email: "test@test.com", first_name: "Test", surname: "User" },
+            applications: [{ name: "bike-exploration", pretty_name: "Bike Exploration" }],
+            token: "test-token",
+            login: vi.fn(),
+            logout: vi.fn(),
+        };
 
-        renderWithProviders(<HorizontalUserAppMenu />);
+        await act(async () => {
+            render(
+                <BrowserRouter>
+                    <AuthContext.Provider value={mockAuthContext}>
+                        <HorizontalUserAppMenu />
+                    </AuthContext.Provider>
+                </BrowserRouter>
+            );
+        });
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(screen.getByText("Bike Exploration")).toBeInTheDocument();
         });
     });
 
     it("devrait afficher plusieurs applications", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([
-            { name: "bike-exploration", pretty_name: "Bike Exploration" },
-            { name: "rugby-teams", pretty_name: "Rugby Teams" }
-        ]));
+        const mockAuthContext = {
+            isAuthenticated: true,
+            isLoading: false,
+            user: { id: 1, email: "test@test.com", first_name: "Test", surname: "User" },
+            applications: [
+                { name: "bike-exploration", pretty_name: "Bike Exploration" },
+                { name: "rugby-teams", pretty_name: "Rugby Teams" }
+            ],
+            token: "test-token",
+            login: vi.fn(),
+            logout: vi.fn(),
+        };
 
-        renderWithProviders(<HorizontalUserAppMenu />);
+        await act(async () => {
+            render(
+                <BrowserRouter>
+                    <AuthContext.Provider value={mockAuthContext}>
+                        <HorizontalUserAppMenu />
+                    </AuthContext.Provider>
+                </BrowserRouter>
+            );
+        });
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(screen.getByText("Bike Exploration")).toBeInTheDocument();
             expect(screen.getByText("Rugby Teams")).toBeInTheDocument();
         });

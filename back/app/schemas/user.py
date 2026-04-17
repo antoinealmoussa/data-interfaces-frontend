@@ -48,3 +48,9 @@ class ApiReturnUserWithApplications(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class ApiUpdateUser(BaseModel):
+    first_name: str | None = None
+    surname: str | None = None
+    email: str | None = None

@@ -61,7 +61,10 @@ describe("LoginForm", () => {
     it("devrait soumettre le formulaire avec les données correctes", async () => {
         const user = userEvent.setup();
         mockedAxios.post.mockResolvedValueOnce({
-            data: { access_token: "test-token", token_type: "bearer" },
+            data: { message: "Login successful" },
+        });
+        mockedAxios.get.mockResolvedValueOnce({
+            data: { user: { id: 1, email: "test@example.com", first_name: "Test", surname: "User" }, applications: [] },
         });
 
         renderWithRouter(<LoginForm />);

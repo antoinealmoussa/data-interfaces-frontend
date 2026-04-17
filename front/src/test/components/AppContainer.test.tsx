@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppContainer } from "../../components/AppContainer";
 import { AuthProvider } from "../../contexts/AuthContext";
+import axios from "axios";
+
+vi.mock("axios");
+const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
     default: {
@@ -13,56 +17,45 @@ vi.mock("../../api/config", () => ({
 describe("AppContainer", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
+        mockedAxios.get.mockResolvedValue({
+            data: {
+                user: { id: 1, email: "test@test.com", first_name: "Test", surname: "User" },
+                applications: []
+            },
+        });
     });
 
     it("devrait rendre le Header et l'Outlet", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([]));
-
         render(
             <BrowserRouter>
                 <AuthProvider>
                     <Routes>
-                        <Route path="/" element={
-                            <AppContainer headerHeight={60}>
-                                <div>Main Content</div>
-                            </AppContainer>
-                        } />
+                        <Route path="/" element={<AppContainer headerHeight={60} />}>
+                            <Route index element={<div>Main Content</div>} />
+                        </Route>
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>
         );
 
-        await vi.waitFor(() => {
-            const header = document.querySelector('[class*="MuiBox-root"]');
-            expect(header).toBeInTheDocument();
-        });
+        const content = await screen.findByText(/Main Content/i);
+        expect(content).toBeInTheDocument();
     });
 
     it("devrait accepter une hauteur personnalisée", async () => {
-        localStorage.setItem("token", "test-token");
-        localStorage.setItem("user", JSON.stringify({ id: 1, email: "test@test.com", first_name: "Test", surname: "User" }));
-        localStorage.setItem("applications", JSON.stringify([]));
-
-        const { container } = render(
+        render(
             <BrowserRouter>
                 <AuthProvider>
                     <Routes>
-                        <Route path="/" element={
-                            <AppContainer headerHeight={80}>
-                                <div>Content</div>
-                            </AppContainer>
-                        } />
+                        <Route path="/" element={<AppContainer headerHeight={80} />}>
+                            <Route index element={<div>Content</div>} />
+                        </Route>
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>
         );
 
-        await vi.waitFor(() => {
-            const box = container.querySelector('[class*="css"]');
-            expect(box).toBeInTheDocument();
-        });
+        const content = await screen.findByText(/Content/i);
+        expect(content).toBeInTheDocument();
     });
 });

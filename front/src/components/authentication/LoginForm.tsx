@@ -25,16 +25,12 @@ export const LoginForm: React.FC = ({
             const formData = new URLSearchParams();
             formData.append('username', data.email);
             formData.append('password', data.password);
-            const response = await axios.post<{ access_token: string ; token_type: string}>(
+            await axios.post(
                 `${API_URLS.backend}/users/login`,
                 formData
             );
 
-            if (!response) {
-                throw new Error("Identifiants invalides")
-            }
-            const token = response.data.access_token;
-            await login(token);
+            await login();
             navigate("/")
 
         } catch (error) {
