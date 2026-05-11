@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from app.models.team import Team
 from app.models.season import Season
 from app.schemas.team import ApiCreateTeam, ApiReturnTeam
-from fastapi import HTTPException, status
 from app.services import season_service
 
 
