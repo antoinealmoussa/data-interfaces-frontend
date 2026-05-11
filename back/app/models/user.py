@@ -18,4 +18,6 @@ class User(Base):
     token_version = Column(Integer, default=0)
 
     applications: Mapped[List["Application"]] = relationship(
-        "Application", secondary=user_application, back_populates="users")
+        "Application", secondary=user_application, back_populates="users"
+    )
+    teams = relationship("Team", back_populates="user")

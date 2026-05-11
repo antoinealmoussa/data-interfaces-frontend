@@ -11,4 +11,5 @@ export type AppName = typeof AppNameMapper[keyof typeof AppNameMapper];
 export interface RouteProps {
     path: string;
     element: JSX.Element;
+    children?: RouteProps[];
 }

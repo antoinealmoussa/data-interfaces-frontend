@@ -5,7 +5,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_BACKEND_API=http://localhost:8000/api/v1 # Backend
+      - VITE_BACKEND_API=/api/v1
+      - VITE_PROXY_TARGET=http://backend:8000
     depends_on: # Le front ne démarre pas tant que le backend n'a pas démarré
       - backend
     volumes: # Conservation du code et des modules dans le conteneur
