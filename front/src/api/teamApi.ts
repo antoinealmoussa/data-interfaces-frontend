@@ -10,8 +10,8 @@ export const teamApi = {
     axios.get<Team[]>(`${TEAM_URL}/by-season/${seasonId}`),
   hasTeams: async (): Promise<boolean> => {
     try {
-      const response = await axios.get<{ has_teams: boolean }>(`${TEAM_URL}/has-teams`);
-      return response.data.has_teams;
+      const response = await axios.get<boolean>(`${TEAM_URL}/has-teams`);
+      return response.data;
     } catch {
       return false;
     }

@@ -11,19 +11,22 @@ export const RugbyTeams = () => {
   const location = useLocation();
 
   useEffect(() => {
+    if (location.state?.teamCreated) {
+      window.history.replaceState({}, "");
+      setHasTeams(true);
+      return;
+    }
+
     const checkUserTeams = async () => {
       try {
         const result = await teamApi.hasTeams();
         setHasTeams(result);
 
-        // Si pas d'équipes, rediriger vers la création
-        if (!result && !location.pathname.includes("first-team-creation")) {
-          navigate("/rugby-teams/first-team-creation");
+        if (!result && !location.pathname.includes("team-creation")) {
+          navigate("/rugby-teams/team-creation");
         } else if (result) {
-          // Charger les équipes
           const teamsRes = await teamApi.getAll();
 
-          // Si on est sur la page principale, rediriger vers la première équipe et la saison la plus récente
           if (
             location.pathname === "/rugby-teams" ||
             location.pathname === "/rugby-teams/"
@@ -47,7 +50,7 @@ export const RugbyTeams = () => {
       }
     };
     checkUserTeams();
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.state]);
 
   if (hasTeams === null) {
     return (

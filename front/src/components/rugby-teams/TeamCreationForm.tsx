@@ -9,7 +9,6 @@ import {
   Checkbox,
   Alert,
   Typography,
-  Snackbar,
 } from "@mui/material";
 import { useState, useMemo } from "react";
 import { teamApi } from "../../api/teamApi";
@@ -41,7 +40,6 @@ export const TeamCreationForm = ({
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const validation = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -84,13 +82,10 @@ export const TeamCreationForm = ({
 
     try {
       const response = await teamApi.create(formData);
-      setShowSuccess(true);
-      if (onSuccess) {
-        onSuccess(response.data);
-      }
-      setTimeout(() => {
-        navigate("/rugby-teams");
-      }, 1500);
+      const team = response.data;
+      navigate(`/rugby-teams/${team.id}/${team.seasons[0].id}/team-management`, {
+        state: { teamCreated: true },
+      });
     } catch (error: any) {
       setSubmitError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
@@ -175,13 +170,6 @@ export const TeamCreationForm = ({
         </Button>
       </Box>
 
-      <Snackbar
-        open={showSuccess}
-        autoHideDuration={3000}
-        onClose={() => setShowSuccess(false)}
-      >
-        <Alert severity="success">Équipe créée avec succès !</Alert>
-      </Snackbar>
     </Box>
   );
 };

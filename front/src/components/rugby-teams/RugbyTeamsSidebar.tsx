@@ -1,8 +1,7 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { teamApi } from "../../api/teamApi";
-import { seasonApi } from "../../api/seasonApi";
 import { useNavigate } from "react-router-dom";
 import type { Team } from "../../types/teamTypes";
 import type { Season } from "../../types/seasonTypes";
@@ -16,26 +15,24 @@ const menuItems: SidebarItem[] = [
 
 export const RugbyTeamsSidebar = () => {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [seasons, setSeasons] = useState<Season[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const navigate = useNavigate();
 
+  const seasons = useMemo(() => {
+    const seasonMap = new Map<number, Season>();
+    teams.forEach(team => team.seasons.forEach(s => seasonMap.set(s.id, s)));
+    return Array.from(seasonMap.values());
+  }, [teams]);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [teamsRes, seasonsRes] = await Promise.all([
-          teamApi.getAll(),
-          seasonApi.getAll(),
-        ]);
+        const teamsRes = await teamApi.getAll();
         setTeams(teamsRes.data);
-        setSeasons(seasonsRes.data);
 
         if (teamsRes.data.length > 0 && !selectedTeamId) {
           setSelectedTeamId(teamsRes.data[0].id);
-        }
-        if (seasonsRes.data.length > 0 && !selectedSeasonId) {
-          setSelectedSeasonId(seasonsRes.data[0].id);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
@@ -44,9 +41,18 @@ export const RugbyTeamsSidebar = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (seasons.length > 0 && !selectedSeasonId) {
+      setSelectedSeasonId(seasons[0].id);
+    }
+  }, [seasons, selectedSeasonId]);
+
+  const visibleItems =
+    selectedTeamId && selectedSeasonId ? menuItems : [];
+
   return (
     <GenericSidebar
-      items={menuItems}
+      items={visibleItems}
       teams={teams.map((t) => ({ id: t.id, name: t.name }))}
       seasons={seasons}
       selectedTeamId={selectedTeamId}

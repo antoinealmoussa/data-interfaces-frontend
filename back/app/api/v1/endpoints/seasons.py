@@ -6,7 +6,7 @@ from app.schemas.season import ApiReturnSeason
 
 router = APIRouter()
 
-@router.get("/", response_model=List[ApiReturnSeason])
+@router.get("", response_model=List[ApiReturnSeason])
 def read_seasons(
     skip: int = 0,
     limit: int = 100,

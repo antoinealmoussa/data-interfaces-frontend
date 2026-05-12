@@ -6,7 +6,8 @@ from app.models import *
 app = FastAPI(
     title="Stravoska API",
     description="Backend modulaire avec routage centralisé",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False
 )
 
 # --- CONFIGURATION DES CORS ---
