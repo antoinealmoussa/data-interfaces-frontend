@@ -38,3 +38,12 @@ def create_team(
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTeam:
     return team_service.create_team(db, team_in=team_in)
+
+
+@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_team(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> None:
+    team_service.delete_team(db, team_id=team_id, user_id=current_user.id)

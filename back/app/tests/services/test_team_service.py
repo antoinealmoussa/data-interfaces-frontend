@@ -1,5 +1,7 @@
+import pytest
+from fastapi import HTTPException
 from app.schemas.team import ApiCreateTeam
-from app.services import team_service
+from app.services import team_service, season_service
 from app.models.season import Season
 
 
@@ -128,3 +130,84 @@ def test_create_team_reuses_existing_season(db_session, test_user):
     )
     result = team_service.create_team(db_session, team_in)
     assert result.seasons[0].id == season.id
+
+
+def test_get_team_by_id_found(db_session, test_user):
+    season = Season(name="2025-2026")
+    db_session.add(season)
+    db_session.commit()
+
+    team_in = ApiCreateTeam(
+        name="Mon équipe", categories=["Mixte"],
+        user_id=test_user.id, season_name="2025-2026",
+    )
+    created = team_service.create_team(db_session, team_in)
+
+    result = team_service.get_team_by_id(db_session, created.id)
+    assert result is not None
+    assert result.id == created.id
+
+
+def test_get_team_by_id_not_found(db_session):
+    result = team_service.get_team_by_id(db_session, 999)
+    assert result is None
+
+
+def test_delete_team_success(db_session, test_user):
+    season = Season(name="2025-2026")
+    db_session.add(season)
+    db_session.commit()
+
+    team_in = ApiCreateTeam(
+        name="Mon équipe", categories=["Mixte"],
+        user_id=test_user.id, season_name="2025-2026",
+    )
+    created = team_service.create_team(db_session, team_in)
+
+    team_service.delete_team(db_session, created.id, test_user.id)
+
+    assert team_service.get_team_by_id(db_session, created.id) is None
+    assert season_service.get_season_by_id(db_session, season.id) is None
+
+
+def test_delete_team_not_found(db_session, test_user):
+    with pytest.raises(HTTPException) as exc:
+        team_service.delete_team(db_session, 999, test_user.id)
+    assert exc.value.status_code == 404
+
+
+def test_delete_team_forbidden(db_session, test_user):
+    season = Season(name="2025-2026")
+    db_session.add(season)
+    db_session.commit()
+
+    team_in = ApiCreateTeam(
+        name="Mon équipe", categories=["Mixte"],
+        user_id=test_user.id, season_name="2025-2026",
+    )
+    created = team_service.create_team(db_session, team_in)
+
+    with pytest.raises(HTTPException) as exc:
+        team_service.delete_team(db_session, created.id, 999)
+    assert exc.value.status_code == 403
+
+
+def test_delete_team_keeps_shared_season(db_session, test_user):
+    season = Season(name="2025-2026")
+    db_session.add(season)
+    db_session.commit()
+
+    team1_in = ApiCreateTeam(
+        name="Équipe A", categories=["Mixte"],
+        user_id=test_user.id, season_name="2025-2026",
+    )
+    team2_in = ApiCreateTeam(
+        name="Équipe B", categories=["+35"],
+        user_id=test_user.id, season_name="2025-2026",
+    )
+    team1 = team_service.create_team(db_session, team1_in)
+    team_service.create_team(db_session, team2_in)
+
+    team_service.delete_team(db_session, team1.id, test_user.id)
+
+    assert season_service.get_season_by_id(db_session, season.id) is not None
