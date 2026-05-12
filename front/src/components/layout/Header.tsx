@@ -14,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
     height
 }) => {
     const { user } = useAuth();
+    const logout = useLogout();
 
     const rightMenuItems: MultiTypeMenuItemProps[] = [
         {
@@ -34,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
             item: {
                 type: 'action',
                 label: "Se déconnecter",
-                onClick: useLogout(),
+                onClick: logout,
                 icon: LogoutIcon
             }
         }
@@ -61,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                     flex: 1,
                     overflow: "hidden",
                     '&:hover': {
-                        '&:img': {
+                        '& img': {
                             transform: 'scale(1.05)'
                         }
                     }

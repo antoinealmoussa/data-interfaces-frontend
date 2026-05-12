@@ -1,110 +1,63 @@
-# Architecture du repo
+# Frontend — Stravoska
 
-```bash
+## Structure du projet
+
+```
 front/
-├── public                 # Images, icônes...
-├── src
-│   ├── App.tsx
-│   ├── api                # Configuration des routes back-end spécifiées dans le docker-compose
-│   ├── components
-│   │   ├── authentication # Composants liés à l'authentification
-│   │   ├── layout         # Affichage générique (header, menu...)
-│   │   ├── plots          # Graphiques Recharts
-│   │   └── ui             # Composants standards
-│   ├── pages              # Pages complètes
-│   │   ├── authentication # Pages liées à l'authentification
-│   │   ├── ...            # Pages liées à un autre service
-│   │   └── ...            # Pages liées à un autre service
-│   ├── theme              # Thème MUI
-│   ├── types
-│   ├── utils
-│   ├── main.tsx           # Différentiation des routes publiques et privées
-│   ├── routes.ts          # Gestion des différentes url front
+├── public/                   # Images statiques (logo, WVA photos...)
+├── src/
+│   ├── api/                  # Services API (axios, endpoints)
+│   ├── components/
+│   │   ├── authentication/   # Connexion, inscription, routes protégées
+│   │   ├── layout/           # Header, sidebar, markdown renderer
+│   │   ├── rugby-teams/      # Sidebar équipes, formulaire création
+│   │   └── ui/               # Composants réutilisables (DropdownMenu, SearchInput...)
+│   ├── contexts/             # Contexte d'authentification
+│   ├── hooks/                # Hooks personnalisés (useAuth, useLogout)
+│   ├── pages/                # Pages complètes
+│   │   ├── authentication/   # Login, register, logout
+│   │   ├── bike-exploration/ # Placeholder
+│   │   ├── management/       # Profil utilisateur
+│   │   ├── race-preparation/ # Placeholder
+│   │   └── rugby-teams/      # Gestion d'équipes
+│   ├── test/                 # Tests unitaires (miroir de src/)
+│   ├── theme/                # Thème MUI personnalisé
+│   └── types/                # Types TypeScript partagés
 ├── index.html
-├── package-lock.json
-├── package.json
-├── README.md
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-└── vite.config.ts
+├── vite.config.ts
+├── vitest.config.ts
+└── package.json
 ```
 
-# Lancement du front en local
-
-`npm run dev`
-
-# Ce projet a été créé grâce à ...
-
-## Vite
-
-`npm create vite@latest react-ts-vite-app -- --template react-ts`
-[Tuto](https://medium.com/@robinviktorsson/complete-guide-to-setting-up-react-with-typescript-and-vite-2025-468f6556aaf2)
-
-## MUI
-
-`npm install @mui/material @emotion/react @emotion/styled @mui/icons-material`
-[Doc](https://mui.com/material-ui/getting-started/)
-
-## Recharts
-
-`npm install recharts`
-[Doc](https://recharts.github.io/)
-
-# Tests Frontend
-
-Ce dossier contient tous les tests unitaires pour l'application frontend.
-
-## Configuration
-
-Les tests utilisent :
-
-- **Vitest** : Framework de test rapide et moderne
-- **React Testing Library** : Bibliothèque pour tester les composants React
-- **@testing-library/user-event** : Pour simuler les interactions utilisateur
-- **jsdom** : Environnement DOM simulé pour les tests
-
-## Structure
-
-```
-test/
-├── setupTests.ts                    # Configuration globale des tests
-├── components/
-│   ├── authentication/
-│   │   ├── LoginForm.test.tsx      # Tests du formulaire de connexion
-│   │   └── SignInForm.test.tsx     # Tests du formulaire d'inscription
-│   └── ui/
-│       └── ArticleCard.test.tsx    # Tests de la carte d'article
-└── utils/
-    └── randomData.test.tsx         # Tests des utilitaires de données aléatoires
-```
-
-## Exécution des tests
-
-### Lancer les tests
+## Lancement
 
 ```bash
-docker compose exec frontend npm run test
+npm run dev        # Développement (port 5173)
+npm run build      # Production (tsc + vite build)
+npm run preview    # Prévisualisation du build
 ```
 
-### Mode watch (développement)
-
-Les tests s'exécutent en mode watch par défaut pour re-tester automatiquement lors des modifications.
-
-### Interface utilisateur des tests
+## Tests
 
 ```bash
-npm run test:ui
+npm test               # Mode CI
+npm run test:ui        # Interface Vitest
+npm run test:coverage  # Couverture
 ```
 
-### Couverture de code
+Stack : **Vitest** + **React Testing Library** + **jsdom**.
+Les requêtes HTTP sont mockées avec `vi.mock("axios")`.
 
-```bash
-npm run test:coverage
-```
+## Stack technique
 
-## Notes
-
-- Les tests mockent `axios` pour éviter de faire de vraies requêtes HTTP
-- Les tests utilisent `BrowserRouter` pour simuler le routage React
-- Les composants Material-UI sont testés avec React Testing Library
+| Technologie | Usage |
+|-------------|-------|
+| React 19 | UI |
+| TypeScript 5.9 | Typage strict |
+| Vite 7 | Build / dev server |
+| MUI 7 | Design system |
+| Axios | Requêtes HTTP |
+| react-router-dom 7 | Routage |
+| react-hook-form | Formulaires |
+| react-markdown + rehype-raw | Rendus Markdown |
+| @tanstack/react-query | Cache API (en place) |

@@ -27,9 +27,9 @@ const theme = createTheme({
     h1: { fontWeight: 700, color: "#1B3618" },
     h2: { fontWeight: 600, color: "#1B3618" },
     body1: { lineHeight: 1.7 },
-    fontWeightBold: 600,
-    fontWeightLight: 600,
-    fontWeightMedium: 600,
+    fontWeightBold: 700,
+    fontWeightLight: 300,
+    fontWeightMedium: 500,
     fontWeightRegular: 600,
     button: {
       textTransform: "none",

@@ -1,10 +1,28 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../contexts/AuthContext";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../hooks/useAuth";
-import axios from "axios";
 
-vi.mock("axios");
+const { mockGet, mockPost } = vi.hoisted(() => ({
+  mockGet: vi.fn().mockRejectedValue(new Error("Default no cookie")),
+  mockPost: vi.fn().mockResolvedValue({ data: {} }),
+}));
+
+vi.mock("axios", () => ({
+  default: {
+    get: mockGet,
+    post: mockPost,
+    create: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn(), eject: vi.fn() },
+      response: { use: vi.fn(), eject: vi.fn() },
+    },
+    defaults: { withCredentials: false },
+  },
+}));
+
+import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
@@ -13,20 +31,28 @@ vi.mock("../../api/config", () => ({
   },
 }));
 
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <MemoryRouter>
+      <AuthProvider>{children}</AuthProvider>
+    </MemoryRouter>
+  );
+}
+
 describe("AuthContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it("devrait s'initialiser avec isLoading à false et isAuthenticated à false quand pas de cookie", async () => {
     mockedAxios.get.mockRejectedValueOnce(new Error("No cookie"));
 
     const { result } = renderHook(() => useAuth(), {
-      wrapper: AuthProvider,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -62,7 +88,7 @@ describe("AuthContext", () => {
       });
 
     const { result } = renderHook(() => useAuth(), {
-      wrapper: AuthProvider,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -112,7 +138,7 @@ describe("AuthContext", () => {
     });
 
     const { result } = renderHook(() => useAuth(), {
-      wrapper: AuthProvider,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -149,7 +175,7 @@ describe("AuthContext", () => {
     });
 
     const { result } = renderHook(() => useAuth(), {
-      wrapper: AuthProvider,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from app.models.user import User
 from app.core.token import get_current_active_user
 from app.schemas.search_topic import SearchTopicResponse
@@ -11,9 +11,6 @@ router = APIRouter()
 async def search_topic(
     query: str = Query(..., min_length=1),
     current_user: User = Depends(get_current_active_user),
-):
+) -> dict:
     result = await get_search_result(query)
-    if isinstance(result, dict) and "error" in result:
-        raise HTTPException(status_code=result["status"], detail=result["error"])
-
     return {"text": result}

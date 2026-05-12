@@ -18,9 +18,6 @@ export const TeamCreation = () => {
       {user && (
         <TeamCreationForm
           userId={user.id}
-          onSuccess={(team) => {
-            console.log("Équipe créée:", team);
-          }}
         />
       )}
     </Box>

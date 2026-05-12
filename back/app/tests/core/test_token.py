@@ -148,3 +148,80 @@ async def test_get_current_active_user(db_session):
 
     assert active_user is not None
     assert active_user.email == created_user.email
+
+
+@ pytest.mark.asyncio
+async def test_get_current_user_token_without_sub(db_session):
+    """Test get_current_user avec un token sans 'sub'."""
+    token = create_access_token(data={"token_version": 1})
+    mock_request = create_mock_request_with_cookie("access_token", token)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(mock_request, db_session)
+
+    assert exc_info.value.status_code == 401
+
+
+@ pytest.mark.asyncio
+async def test_get_current_user_token_without_token_version(db_session):
+    """Test get_current_user avec un token sans 'token_version'."""
+    token = create_access_token(data={"sub": "no-version@test.com"})
+    mock_request = create_mock_request_with_cookie("access_token", token)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(mock_request, db_session)
+
+    assert exc_info.value.status_code == 401
+
+
+@ pytest.mark.asyncio
+async def test_get_current_user_user_not_found(db_session):
+    """Test get_current_user quand l'utilisateur n'existe pas en base."""
+    token = create_access_token(
+        data={"sub": "nonexistent@test.com", "token_version": 1}
+    )
+    mock_request = create_mock_request_with_cookie("access_token", token)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(mock_request, db_session)
+
+    assert exc_info.value.status_code == 401
+
+
+@ pytest.mark.asyncio
+async def test_get_current_user_with_bearer_token(db_session):
+    """Test get_current_user avec Authorization: Bearer header."""
+    from unittest.mock import MagicMock
+
+    user = ApiCreateUser(
+        email="bearer@test.com",
+        password="password",
+        first_name="Bearer",
+        surname="User"
+    )
+    created_user = user_service.create_user(db_session, user_in=user)
+
+    token = create_access_token(data={"sub": created_user.email, "token_version": created_user.token_version})
+
+    mock_request = MagicMock()
+    mock_request.cookies = {}
+    mock_request.headers = {"Authorization": f"Bearer {token}"}
+
+    current_user = await get_current_user(mock_request, db_session)
+    assert current_user is not None
+    assert current_user.email == created_user.email
+
+
+@ pytest.mark.asyncio
+async def test_get_current_user_bearer_missing_token(db_session):
+    """Test get_current_user avec Authorization: Bearer sans token."""
+    from unittest.mock import MagicMock
+
+    mock_request = MagicMock()
+    mock_request.cookies = {}
+    mock_request.headers = {"Authorization": "Bearer "}
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(mock_request, db_session)
+
+    assert exc_info.value.status_code == 401

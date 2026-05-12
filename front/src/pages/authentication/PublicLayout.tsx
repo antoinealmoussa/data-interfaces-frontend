@@ -49,7 +49,7 @@ export const PublicLayout = () => {
                                 width: "100%",
                                 flex: 1,
                                 objectFit: "cover",
-                                opcaity: 0.9,
+                                opacity: 0.9,
                                 transition: "all 0.3s ease-in-out",
                                 cursor: "pointer",
                                 "&:hover": {

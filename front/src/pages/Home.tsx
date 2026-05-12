@@ -38,6 +38,20 @@ export const Home = () => {
     }
   };
 
+  const searchInput = (
+    <SearchInput
+      value={searchValue}
+      onChange={setSearchValue}
+      onSearch={handleSearch}
+      isLoading={state === "loading"}
+      placeholder={
+        state === "idle" || state === "loading"
+          ? "Quel sujet souhaitez-vous explorer ?"
+          : "Explorer un autre sujet..."
+      }
+    />
+  );
+
   return (
     <Box
       sx={{
@@ -70,13 +84,7 @@ export const Home = () => {
       </Typography>
 
       {state === "idle" || state === "loading" ? (
-        <SearchInput
-          value={searchValue}
-          onChange={setSearchValue}
-          onSearch={handleSearch}
-          isLoading={state === "loading"}
-          placeholder="Quel sujet souhaitez-vous explorer ?"
-        />
+        searchInput
       ) : (
         <Box
           sx={{
@@ -86,12 +94,7 @@ export const Home = () => {
             gap: 3,
           }}
         >
-          <SearchInput
-            value={searchValue}
-            onChange={setSearchValue}
-            onSearch={handleSearch}
-            placeholder="Explorer un autre sujet..."
-          />
+          {searchInput}
           <MarkdownRenderer>{responseText}</MarkdownRenderer>
         </Box>
       )}

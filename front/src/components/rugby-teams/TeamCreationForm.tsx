@@ -16,18 +16,15 @@ import {
   type CreateTeamDto,
   TEAM_CATEGORIES,
   type TeamCategory,
-  type Team,
 } from "../../types/teamTypes";
 import { useNavigate } from "react-router-dom";
 
 interface TeamCreationFormProps {
   userId: number;
-  onSuccess?: (team: Team) => void;
 }
 
 export const TeamCreationForm = ({
   userId,
-  onSuccess,
 }: TeamCreationFormProps) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CreateTeamDto>({
@@ -86,7 +83,7 @@ export const TeamCreationForm = ({
       navigate(`/rugby-teams/${team.id}/${team.seasons[0].id}/team-management`, {
         state: { teamCreated: true },
       });
-    } catch (error: any) {
+    } catch {
       setSubmitError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);

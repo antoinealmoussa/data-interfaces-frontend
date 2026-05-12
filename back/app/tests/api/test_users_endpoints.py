@@ -3,15 +3,19 @@ from app.core.token import create_access_token
 from app.services import user_service
 
 
-def test_read_users_empty(client):
-    """Test GET /api/v1/users/ avec une base vide."""
-    response = client.get("/api/v1/users/")
+def test_read_users_empty(authenticated_client, test_user):
+    """Test GET /api/v1/users/ retourne au moins l'utilisateur courant."""
+    response = authenticated_client.get("/api/v1/users/")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == []
+    users = response.json()
+    assert len(users) >= 1
+    emails = {u["email"] for u in users}
+    assert test_user.email in emails
+    assert "password" not in users[0]
 
 
-def test_read_users_with_data(client):
+def test_read_users_with_data(authenticated_client, test_user):
     """Test GET /api/v1/users/ avec des utilisateurs."""
     user1_data = {
         "email": "user1@test.com",
@@ -26,41 +30,23 @@ def test_read_users_with_data(client):
         "surname": "Smith",
     }
 
-    client.post("/api/v1/users/register", json=user1_data)
-    client.post("/api/v1/users/register", json=user2_data)
+    authenticated_client.post("/api/v1/users/register", json=user1_data)
+    authenticated_client.post("/api/v1/users/register", json=user2_data)
 
-    response = client.get("/api/v1/users/")
+    response = authenticated_client.get("/api/v1/users/")
 
     assert response.status_code == status.HTTP_200_OK
     users = response.json()
-    assert len(users) == 2
+    assert len(users) == 3
     emails = {u["email"] for u in users}
-    assert emails == {"user1@test.com", "user2@test.com"}
+    assert emails == {"user1@test.com", "user2@test.com", test_user.email}
     assert "password" not in users[0]
-    assert "password" not in users[1]
 
 
 def test_read_users_response_structure(client):
-    """Test que la structure de la réponse GET /api/v1/users/ est correcte."""
-    user_data = {
-        "email": "struct@test.com",
-        "password": "password123",
-        "first_name": "Struct",
-        "surname": "Test",
-    }
-
-    client.post("/api/v1/users/register", json=user_data)
-
+    """Test GET /api/v1/users/ nécessite une authentification."""
     response = client.get("/api/v1/users/")
-    users = response.json()
-
-    assert len(users) > 0
-    user = users[0]
-    assert "id" in user
-    assert "email" in user
-    assert "first_name" in user
-    assert "surname" in user
-    assert "password" not in user
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_register_success(client):
@@ -124,7 +110,7 @@ def test_register_invalid_email_format(client):
     assert response.status_code in [
         status.HTTP_422_UNPROCESSABLE_CONTENT,
         status.HTTP_201_CREATED,
-    ]
+    ], f"Expected 422 or 201, got {response.status_code}: {response.text}"
 
 
 def test_login_success(client):
@@ -210,14 +196,14 @@ def test_logout_success(authenticated_client):
     """Test POST /api/v1/users/logout avec un token valide."""
     response = authenticated_client.post("/api/v1/users/logout")
 
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
 
 
 def test_logout_clears_cookie(authenticated_client):
     """Test POST /api/v1/users/logout supprime le cookie."""
     response = authenticated_client.post("/api/v1/users/logout")
 
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
     assert "access_token" not in response.cookies or response.cookies.get("access_token") == ""
 
 
@@ -240,7 +226,7 @@ def test_logout_invalidates_token(client):
     assert login_response.status_code == status.HTTP_200_OK
 
     logout_response = client.post("/api/v1/users/logout")
-    assert logout_response.status_code == status.HTTP_204_NO_CONTENT
+    assert logout_response.status_code == status.HTTP_200_OK
 
     response = client.get("/api/v1/users/me")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

@@ -6,9 +6,7 @@ import axios from "axios";
 import API_URLS from "../../api/config";
 
 
-export const RegisterForm: React.FC = ({
-
-}) => {
+export const RegisterForm: React.FC = () => {
     const {
         register,
         handleSubmit,

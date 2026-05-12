@@ -147,7 +147,7 @@ describe("MultiTypeMenuItem", () => {
             };
 
             const { container } = renderWithRouter(
-                <MultiTypeMenuItem item={invalidItem as MenuItemConfig} />
+                <MultiTypeMenuItem item={invalidItem as unknown as MenuItemConfig} />
             );
 
             expect(container.firstChild).toBeNull();

@@ -1,4 +1,5 @@
-import { TextField, Button, Box, Typography, Divider } from "@mui/material"
+import { useState } from "react";
+import { TextField, Button, Box, Typography, Divider, Snackbar, Alert } from "@mui/material"
 import { Link as BaseLink } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +9,7 @@ import API_URLS from "../../api/config";
 import { useAuth } from "../../hooks/useAuth";
 
 
-export const LoginForm: React.FC = ({
-
-}) => {
+export const LoginForm: React.FC = () => {
     const {
         register,
         handleSubmit,
@@ -19,6 +18,7 @@ export const LoginForm: React.FC = ({
 
     const navigate = useNavigate();
     const { login } = useAuth();
+    const [errorSnackbar, setErrorSnackbar] = useState(false);
 
     const onSubmit = async (data: LoginFormProps) => {
         try {
@@ -33,21 +33,32 @@ export const LoginForm: React.FC = ({
             await login();
             navigate("/")
 
-        } catch (error) {
-            alert("Erreur lors de la connexion");
+        } catch {
+            setErrorSnackbar(true);
         }
     }
 
     return (
-        <Box
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-                mt: 2
-            }}>
+        <>
+            <Snackbar
+                open={errorSnackbar}
+                autoHideDuration={5000}
+                onClose={() => setErrorSnackbar(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert severity="error" onClose={() => setErrorSnackbar(false)}>
+                    Erreur lors de la connexion
+                </Alert>
+            </Snackbar>
+            <Box
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    mt: 2
+                }}>
             <TextField
                 variant="outlined"
                 color="primary"
@@ -89,6 +100,7 @@ export const LoginForm: React.FC = ({
                 <i>"Roule aussi vite que t'es con"</i>   -   Wout Van Aert
             </Typography>
         </Box>
-    )
+        </>
+    );
 }
 

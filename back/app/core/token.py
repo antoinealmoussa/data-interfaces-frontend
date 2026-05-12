@@ -3,16 +3,11 @@ from typing import Optional
 from jose import JWTError, jwt
 from app.core.config import settings
 from fastapi import Depends, status, HTTPException, Request
-from jose import JWTError, jwt
 from app.services.user_service import get_user_by_email
 from app.db.session import get_db
 from sqlalchemy.orm import Session
 from app.models.user import User
-from app.core.logging_config import logger
 
-
-async def get_token_from_request(request: Request) -> Optional[str]:
-    return request.cookies.get(settings.ACCESS_TOKEN_COOKIE_NAME)
 
 def create_access_token(
         data: dict,
