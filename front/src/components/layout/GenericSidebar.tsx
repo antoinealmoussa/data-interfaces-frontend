@@ -18,8 +18,8 @@ export const GenericSidebar = ({
   items,
   teams,
   seasons,
-  selectedTeamId,
-  selectedSeasonId,
+  selectedTeamName,
+  selectedSeasonName,
   onTeamChange,
   onSeasonChange,
 }: GenericSidebarProps) => {
@@ -30,8 +30,10 @@ export const GenericSidebar = ({
   const isActive = (path: string) => currentPath.includes(path);
 
   const handleNavigation = (path: string) => {
-    if (selectedTeamId && selectedSeasonId) {
-      navigate(`/rugby-teams/${selectedTeamId}/${selectedSeasonId}/${path}`);
+    if (selectedTeamName && selectedSeasonName) {
+      navigate(
+        `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(selectedSeasonName)}/${path}`,
+      );
     }
   };
 
@@ -49,12 +51,12 @@ export const GenericSidebar = ({
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Équipe</InputLabel>
           <Select
-            value={selectedTeamId || ""}
+            value={selectedTeamName || ""}
             label="Équipe"
-            onChange={(e) => onTeamChange(e.target.value as number)}
+            onChange={(e) => onTeamChange(e.target.value as string)}
           >
             {teams.map((team) => (
-              <MenuItem key={team.id} value={team.id}>
+              <MenuItem key={team.id} value={team.name}>
                 {team.name}
               </MenuItem>
             ))}
@@ -64,12 +66,12 @@ export const GenericSidebar = ({
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Saison</InputLabel>
           <Select
-            value={selectedSeasonId || ""}
+            value={selectedSeasonName || ""}
             label="Saison"
-            onChange={(e) => onSeasonChange(e.target.value as number)}
+            onChange={(e) => onSeasonChange(e.target.value as string)}
           >
             {seasons.map((season) => (
-              <MenuItem key={season.id} value={season.id}>
+              <MenuItem key={season.id} value={season.name}>
                 {season.name}
               </MenuItem>
             ))}

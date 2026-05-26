@@ -63,8 +63,8 @@ export interface GenericSidebarProps {
   items: SidebarItem[];
   teams: Array<{ id: number; name: string }>;
   seasons: Array<{ id: number; name: string }>;
-  selectedTeamId: number | null;
-  selectedSeasonId: number | null;
-  onTeamChange: (teamId: number) => void;
-  onSeasonChange: (seasonId: number) => void;
+  selectedTeamName: string | null;
+  selectedSeasonName: string | null;
+  onTeamChange: (teamName: string) => void;
+  onSeasonChange: (seasonName: string) => void;
 }

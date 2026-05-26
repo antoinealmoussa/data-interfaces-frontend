@@ -1,8 +1,8 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { teamApi } from "../../api/teamApi";
-import { useNavigate } from "react-router-dom";
 import type { Team } from "../../types/teamTypes";
 import type { Season } from "../../types/seasonTypes";
 import type { SidebarItem } from "../../types/uiTypes";
@@ -14,9 +14,10 @@ const menuItems: SidebarItem[] = [
 ];
 
 export const RugbyTeamsSidebar = () => {
+  const { teamName, seasonName } = useParams<{ teamName: string; seasonName: string }>();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
-  const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
+  const [selectedTeamName, setSelectedTeamName] = useState<string | null>(null);
+  const [selectedSeasonName, setSelectedSeasonName] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const seasons = useMemo(() => {
@@ -30,10 +31,6 @@ export const RugbyTeamsSidebar = () => {
       try {
         const teamsRes = await teamApi.getAll();
         setTeams(teamsRes.data);
-
-        if (teamsRes.data.length > 0 && !selectedTeamId) {
-          setSelectedTeamId(teamsRes.data[0].id);
-        }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
       }
@@ -42,34 +39,51 @@ export const RugbyTeamsSidebar = () => {
   }, []);
 
   useEffect(() => {
-    if (seasons.length > 0 && !selectedSeasonId) {
-      setSelectedSeasonId(seasons[0].id);
+    if (teams.length > 0 && !selectedTeamName) {
+      const decodedTeamName = teamName ? decodeURIComponent(teamName) : null;
+      const match = decodedTeamName
+        ? teams.find((t) => t.name === decodedTeamName)
+        : null;
+      setSelectedTeamName(match ? match.name : teams[0].name);
     }
-  }, [seasons, selectedSeasonId]);
+  }, [teams, teamName, selectedTeamName]);
+
+  useEffect(() => {
+    const currentTeam = teams.find((t) => t.name === selectedTeamName);
+    const teamSeasons = currentTeam?.seasons ?? [];
+
+    if (teamSeasons.length > 0 && !selectedSeasonName) {
+      const decodedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
+      const match = decodedSeasonName
+        ? teamSeasons.find((s) => s.name === decodedSeasonName)
+        : null;
+      setSelectedSeasonName(match ? match.name : teamSeasons[0].name);
+    }
+  }, [selectedTeamName, teams, seasonName, selectedSeasonName]);
 
   const visibleItems =
-    selectedTeamId && selectedSeasonId ? menuItems : [];
+    selectedTeamName && selectedSeasonName ? menuItems : [];
 
   return (
     <GenericSidebar
       items={visibleItems}
       teams={teams.map((t) => ({ id: t.id, name: t.name }))}
       seasons={seasons}
-      selectedTeamId={selectedTeamId}
-      selectedSeasonId={selectedSeasonId}
-      onTeamChange={(teamId) => {
-        setSelectedTeamId(teamId);
-        if (selectedSeasonId) {
+      selectedTeamName={selectedTeamName}
+      selectedSeasonName={selectedSeasonName}
+      onTeamChange={(teamName) => {
+        setSelectedTeamName(teamName);
+        if (selectedSeasonName) {
           navigate(
-            `/rugby-teams/${teamId}/${selectedSeasonId}/team-management`,
+            `/rugby-teams/${encodeURIComponent(teamName)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
           );
         }
       }}
-      onSeasonChange={(seasonId) => {
-        setSelectedSeasonId(seasonId);
-        if (selectedTeamId) {
+      onSeasonChange={(seasonName) => {
+        setSelectedSeasonName(seasonName);
+        if (selectedTeamName) {
           navigate(
-            `/rugby-teams/${selectedTeamId}/${seasonId}/team-management`,
+            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(seasonName)}/team-management`,
           );
         }
       }}

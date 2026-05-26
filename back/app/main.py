@@ -8,6 +8,7 @@ from app.models.season import Season
 from app.models.team_season import TeamSeason
 from app.models.application import Application
 from app.models.user_application import user_application
+from app.models.player import Player
 
 app = FastAPI(
     title="Stravoska API",

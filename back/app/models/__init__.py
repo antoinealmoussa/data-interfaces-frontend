@@ -6,3 +6,4 @@ from app.models.season import Season
 from app.models.team_season import TeamSeason
 from app.models.category import Category
 from app.models.team_category import TeamCategory
+from app.models.player_category import PlayerCategory

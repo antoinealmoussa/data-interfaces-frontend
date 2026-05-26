@@ -4,6 +4,7 @@ import { UserProfile } from "./pages/management/UserProfile";
 import { RacePreparation } from "./pages/race-preparation/RacePreparation";
 import { RugbyTeams } from "./pages/rugby-teams/RugbyTeams";
 import { TeamCreation } from "./pages/rugby-teams/TeamCreation";
+import { TeamManagement } from "./pages/rugby-teams/TeamManagement";
 import { type AppName, type RouteProps } from "./types/routesTypes";
 import { AppNameMapper } from "./types/routesTypes";
 
@@ -19,9 +20,9 @@ export const DYNAMIC_APP_ROUTES: Record<AppName, RouteProps> = {
       element: <RugbyTeams />,
       children: [
         { path: "team-creation", element: <TeamCreation /> },
-        { path: ":teamId/:seasonId/team-management", element: <div>Team Management (to implement)</div> },
-        { path: ":teamId/:seasonId/tournament", element: <div>Tournament (to implement)</div> },
-        { path: ":teamId/:seasonId/training", element: <div>Training (to implement)</div> },
+        { path: ":teamName/:seasonName/team-management", element: <TeamManagement /> },
+        { path: ":teamName/:seasonName/tournament", element: <div>Tournament (to implement)</div> },
+        { path: ":teamName/:seasonName/training", element: <div>Training (to implement)</div> },
       ]
     },
     [AppNameMapper.RACE_PREPARATION]: { path: "/race-preparation", element: <RacePreparation /> },

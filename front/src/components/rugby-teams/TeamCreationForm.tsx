@@ -80,9 +80,10 @@ export const TeamCreationForm = ({
     try {
       const response = await teamApi.create(formData);
       const team = response.data;
-      navigate(`/rugby-teams/${team.id}/${team.seasons[0].id}/team-management`, {
-        state: { teamCreated: true },
-      });
+      navigate(
+        `/rugby-teams/${encodeURIComponent(team.name)}/${encodeURIComponent(team.seasons[0].name)}/team-management`,
+        { state: { teamCreated: true } },
+      );
     } catch {
       setSubmitError("Une erreur est survenue. Veuillez réessayer.");
     } finally {

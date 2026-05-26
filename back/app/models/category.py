@@ -10,3 +10,4 @@ class Category(Base):
     name = Column(String(50), nullable=False, unique=True)
 
     teams = relationship("Team", secondary="team_category", back_populates="categories")
+    players = relationship("Player", secondary="player_category", back_populates="categories")

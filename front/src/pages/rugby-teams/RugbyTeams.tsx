@@ -38,7 +38,7 @@ export const RugbyTeams = () => {
               )[0];
               if (mostRecentSeason) {
                 navigate(
-                  `/rugby-teams/${firstTeam.id}/${mostRecentSeason.id}/team-management`,
+                  `/rugby-teams/${encodeURIComponent(firstTeam.name)}/${encodeURIComponent(mostRecentSeason.name)}/team-management`,
                 );
               }
             }
