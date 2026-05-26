@@ -6,7 +6,7 @@ from app.schemas.season import ApiReturnSeason
 
 class TeamBase(BaseModel):
     name: str
-    categories: List[str]  # ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
+    categories: List[str]
     user_id: int
 
     @field_validator("name")
@@ -31,7 +31,7 @@ class TeamBase(BaseModel):
 
 
 class ApiCreateTeam(TeamBase):
-    season_name: str  # Nom de la saison (ex: "2025-2026")
+    season_name: str
 
     @field_validator("season_name")
     @classmethod
@@ -44,5 +44,16 @@ class ApiCreateTeam(TeamBase):
 
 class ApiReturnTeam(TeamBase):
     id: int
-    seasons: List[ApiReturnSeason]  # Saisons associées (une seule lors de la création)
+    seasons: List[ApiReturnSeason]
     model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        data = {
+            "id": obj.id,
+            "name": obj.name,
+            "categories": [c.name for c in obj.categories],
+            "user_id": obj.user_id,
+            "seasons": [ApiReturnSeason.model_validate(s) for s in obj.seasons],
+        }
+        return cls(**data)

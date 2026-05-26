@@ -14,7 +14,8 @@ def read_teams(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ) -> List[ApiReturnTeam]:
-    return team_service.get_teams_by_user(db, user_id=current_user.id)
+    teams = team_service.get_teams_by_user(db, user_id=current_user.id)
+    return [ApiReturnTeam.model_validate(t) for t in teams]
 
 @router.get("/has-teams", response_model=bool)
 def check_user_has_teams(
@@ -29,7 +30,8 @@ def read_teams_by_season(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ) -> List[ApiReturnTeam]:
-    return team_service.get_teams_by_season(db, season_id=season_id)
+    teams = team_service.get_teams_by_season(db, season_id=season_id)
+    return [ApiReturnTeam.model_validate(t) for t in teams]
 
 @router.post("", response_model=ApiReturnTeam, status_code=status.HTTP_201_CREATED)
 def create_team(

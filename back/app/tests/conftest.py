@@ -6,9 +6,12 @@ from sqlalchemy.pool import StaticPool
 
 from app.db.session import Base, get_db
 from app.main import app
+from app.models.category import Category
 from app.services import user_service
 from app.schemas.user import ApiCreateUser
 from app.core.token import create_access_token
+
+TEAM_CATEGORIES = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -22,12 +25,19 @@ TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
 
 
+def seed_categories(db):
+    for name in TEAM_CATEGORIES:
+        db.add(Category(name=name))
+    db.commit()
+
+
 @pytest.fixture(scope="function")
 def db_session():
     Base.metadata.create_all(bind=engine)
 
     db = TestingSessionLocal()
     try:
+        seed_categories(db)
         yield db
     finally:
         db.close()
