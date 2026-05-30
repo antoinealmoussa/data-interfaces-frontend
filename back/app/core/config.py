@@ -16,13 +16,27 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # Cookie Configuration
+    # Access Token (JWT) Configuration
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Cookie Configuration — Access Token
     ACCESS_TOKEN_COOKIE_NAME: str = "access_token"
     ACCESS_TOKEN_COOKIE_HTTPONLY: bool = True
     ACCESS_TOKEN_COOKIE_SECURE: bool = True
     ACCESS_TOKEN_COOKIE_SAMESITE: str = "lax"
     ACCESS_TOKEN_COOKIE_PATH: str = "/"
     ACCESS_TOKEN_COOKIE_MAX_AGE: int = 60 * 30
+
+    # Refresh Token (JWT) Configuration
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
+    # Cookie Configuration — Refresh Token
+    REFRESH_TOKEN_COOKIE_NAME: str = "refresh_token"
+    REFRESH_TOKEN_COOKIE_HTTPONLY: bool = True
+    REFRESH_TOKEN_COOKIE_SECURE: bool = True
+    REFRESH_TOKEN_COOKIE_SAMESITE: str = "lax"
+    REFRESH_TOKEN_COOKIE_PATH: str = "/"
+    REFRESH_TOKEN_COOKIE_MAX_AGE: int = 60 * 60 * 24 * 30
 
     # Mistral AI
     MISTRAL_API_KEY: str = ""

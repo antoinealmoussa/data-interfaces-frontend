@@ -12,8 +12,8 @@ from app.schemas.user import (
     ApiUpdateUser,
 )
 from app.services import user_service
-from app.core.token import create_access_token, get_current_active_user
-from app.api.v1.helpers import set_auth_cookie, delete_auth_cookie
+from app.core.token import create_access_token, create_refresh_token, get_current_active_user
+from app.api.v1.helpers import set_auth_cookie, delete_auth_cookie, set_refresh_cookie, delete_refresh_cookie
 from app.models.user import User
 
 router = APIRouter()
@@ -58,8 +58,12 @@ def login(
     access_token = create_access_token(
         data={"sub": user.email, "token_version": user.token_version}
     )
+    refresh_token = create_refresh_token(
+        data={"sub": user.email, "token_version": user.token_version}
+    )
 
     set_auth_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
 
     return {"message": "Login successful"}
 
@@ -73,6 +77,7 @@ def logout(
     user_service.revoke_tokens(db, current_user)
 
     delete_auth_cookie(response)
+    delete_refresh_cookie(response)
 
     return {"message": "Successfully logged out"}
 
