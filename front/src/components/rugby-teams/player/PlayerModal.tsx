@@ -8,6 +8,7 @@ interface PlayerModalProps {
   player?: Player | null;
   onSave: (data: CreatePlayerDto) => Promise<void>;
   onClose: () => void;
+  teamCategories: string[];
 }
 
 export const PlayerModal = ({
@@ -16,6 +17,7 @@ export const PlayerModal = ({
   player,
   onSave,
   onClose,
+  teamCategories,
 }: PlayerModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -27,6 +29,7 @@ export const PlayerModal = ({
           defaultValues={player ?? undefined}
           onSubmit={onSave}
           onCancel={onClose}
+          teamCategories={teamCategories}
         />
       </DialogContent>
     </Dialog>

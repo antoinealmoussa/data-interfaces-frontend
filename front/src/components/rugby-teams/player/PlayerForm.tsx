@@ -10,16 +10,16 @@ import {
   CircularProgress,
   Chip,
 } from "@mui/material";
-import { TEAM_CATEGORIES } from "../../../types/teamTypes";
 import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
 
 interface PlayerFormProps {
   defaultValues?: Player;
   onSubmit: (data: CreatePlayerDto) => Promise<void>;
   onCancel: () => void;
+  teamCategories: string[];
 }
 
-export const PlayerForm = ({ defaultValues, onSubmit, onCancel }: PlayerFormProps) => {
+export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }: PlayerFormProps) => {
   const {
     register,
     handleSubmit,
@@ -128,7 +128,7 @@ export const PlayerForm = ({ defaultValues, onSubmit, onCancel }: PlayerFormProp
                 </Box>
               )}
             >
-              {TEAM_CATEGORIES.map((cat) => (
+              {teamCategories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
                 </MenuItem>

@@ -182,6 +182,7 @@ export const TeamManagement = () => {
           setModalMode(null);
           setEditingPlayer(null);
         }}
+        teamCategories={team.categories}
       />
 
       <ConfirmDialog
