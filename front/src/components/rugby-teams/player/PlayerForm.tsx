@@ -3,12 +3,15 @@ import {
   Box,
   TextField,
   FormControl,
+  FormLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
   InputLabel,
   Select,
   MenuItem,
   Button,
-  CircularProgress,
-  Chip,
+  Typography,
 } from "@mui/material";
 import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
 
@@ -108,34 +111,40 @@ export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }
         />
       </FormControl>
 
-      <FormControl fullWidth error={!!errors.category_names}>
-        <InputLabel>Catégories</InputLabel>
+      <FormControl error={!!errors.category_names} required>
+        <FormLabel>Catégories</FormLabel>
         <Controller
           name="category_names"
           control={control}
           rules={{ required: "Au moins une catégorie est requise" }}
           render={({ field }) => (
-            <Select
-              label="Catégories"
-              multiple
-              value={field.value}
-              onChange={field.onChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((val) => (
-                    <Chip key={val} label={val} size="small" />
-                  ))}
-                </Box>
-              )}
-            >
+            <FormGroup>
               {teamCategories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
+                <FormControlLabel
+                  key={cat}
+                  control={
+                    <Checkbox
+                      checked={field.value.includes(cat)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          field.onChange([...field.value, cat]);
+                        } else {
+                          field.onChange(field.value.filter((v) => v !== cat));
+                        }
+                      }}
+                    />
+                  }
+                  label={cat}
+                />
               ))}
-            </Select>
+            </FormGroup>
           )}
         />
+        {errors.category_names && (
+          <Typography variant="caption" color="error">
+            {errors.category_names.message}
+          </Typography>
+        )}
       </FormControl>
 
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>

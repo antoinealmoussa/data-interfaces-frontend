@@ -11,3 +11,4 @@ class Category(Base):
 
     teams = relationship("Team", secondary="team_category", back_populates="categories")
     players = relationship("Player", secondary="player_category", back_populates="categories")
+    tournaments = relationship("Tournament", back_populates="category")

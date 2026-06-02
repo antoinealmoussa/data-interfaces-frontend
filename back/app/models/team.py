@@ -13,3 +13,4 @@ class Team(Base):
     seasons = relationship("Season", secondary="team_season", back_populates="teams")
     categories = relationship("Category", secondary="team_category", back_populates="teams")
     players = relationship("Player", back_populates="team", lazy="dynamic")
+    tournaments = relationship("Tournament", back_populates="team")

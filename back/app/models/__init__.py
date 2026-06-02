@@ -7,3 +7,5 @@ from app.models.team_season import TeamSeason
 from app.models.category import Category
 from app.models.team_category import TeamCategory
 from app.models.player_category import PlayerCategory
+from app.models.tournament import Tournament
+from app.models.tournament_player import TournamentPlayer

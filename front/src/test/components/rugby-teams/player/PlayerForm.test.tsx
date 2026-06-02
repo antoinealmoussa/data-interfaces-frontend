@@ -3,6 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlayerForm } from "../../../../components/rugby-teams/player/PlayerForm";
 
+const DEFAULT_TEAM_CATEGORIES = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"];
+
 describe("PlayerForm", () => {
     const mockSubmit = vi.fn();
     const mockCancel = vi.fn();
@@ -12,13 +14,13 @@ describe("PlayerForm", () => {
     });
 
     it("devrait rendre tous les champs en mode création", () => {
-        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} />);
+        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} teamCategories={DEFAULT_TEAM_CATEGORIES} />);
 
         expect(screen.getByLabelText("Nom")).toBeInTheDocument();
         expect(screen.getAllByText("Niveau").length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText("Sexe").length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText("Poste").length).toBeGreaterThanOrEqual(1);
-        expect(screen.getAllByText("Catégories").length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText("Catégories")).toBeInTheDocument();
         expect(screen.getByText("Enregistrer")).toBeInTheDocument();
         expect(screen.getByText("Annuler")).toBeInTheDocument();
     });
@@ -37,6 +39,7 @@ describe("PlayerForm", () => {
                 }}
                 onSubmit={mockSubmit}
                 onCancel={mockCancel}
+                teamCategories={DEFAULT_TEAM_CATEGORIES}
             />,
         );
 
@@ -61,6 +64,7 @@ describe("PlayerForm", () => {
                 }}
                 onSubmit={mockSubmit}
                 onCancel={mockCancel}
+                teamCategories={DEFAULT_TEAM_CATEGORIES}
             />,
         );
 
@@ -79,7 +83,7 @@ describe("PlayerForm", () => {
     it("devrait afficher les erreurs de validation", async () => {
         const user = userEvent.setup();
 
-        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} />);
+        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} teamCategories={DEFAULT_TEAM_CATEGORIES} />);
 
         await user.click(screen.getByText("Enregistrer"));
 
@@ -91,7 +95,7 @@ describe("PlayerForm", () => {
     it("devrait appeler onCancel au clic sur Annuler", async () => {
         const user = userEvent.setup();
 
-        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} />);
+        render(<PlayerForm onSubmit={mockSubmit} onCancel={mockCancel} teamCategories={DEFAULT_TEAM_CATEGORIES} />);
 
         await user.click(screen.getByText("Annuler"));
 
@@ -119,6 +123,7 @@ describe("PlayerForm", () => {
                 }}
                 onSubmit={mockSubmit}
                 onCancel={mockCancel}
+                teamCategories={DEFAULT_TEAM_CATEGORIES}
             />,
         );
 
@@ -131,7 +136,7 @@ describe("PlayerForm", () => {
         resolvePromise!();
     });
 
-    it("devrait afficher les catégories sous forme de chips en mode édition", () => {
+    it("devrait pré-cocher les catégories existantes en mode édition", () => {
         render(
             <PlayerForm
                 defaultValues={{
@@ -145,10 +150,47 @@ describe("PlayerForm", () => {
                 }}
                 onSubmit={mockSubmit}
                 onCancel={mockCancel}
+                teamCategories={DEFAULT_TEAM_CATEGORIES}
             />,
         );
 
-        expect(screen.getByText("Mixte")).toBeInTheDocument();
-        expect(screen.getByText("+35")).toBeInTheDocument();
+        const mixteCheckbox = screen.getByRole("checkbox", { name: "Mixte" });
+        const plus35Checkbox = screen.getByRole("checkbox", { name: "+35" });
+        const plus50Checkbox = screen.getByRole("checkbox", { name: "+50" });
+
+        expect(mixteCheckbox).toBeChecked();
+        expect(plus35Checkbox).toBeChecked();
+        expect(plus50Checkbox).not.toBeChecked();
+    });
+
+    it("devrait cocher/décocher une catégorie au clic", async () => {
+        const user = userEvent.setup();
+        mockSubmit.mockResolvedValue(undefined);
+
+        render(
+            <PlayerForm
+                defaultValues={{
+                    id: 1,
+                    name: "Jean",
+                    level: 2,
+                    sex: "H",
+                    position: "Ailier",
+                    team_name: "Mon equipe",
+                    category_names: [],
+                }}
+                onSubmit={mockSubmit}
+                onCancel={mockCancel}
+                teamCategories={DEFAULT_TEAM_CATEGORIES}
+            />,
+        );
+
+        const mixteCheckbox = screen.getByRole("checkbox", { name: "Mixte" });
+        expect(mixteCheckbox).not.toBeChecked();
+
+        await user.click(mixteCheckbox);
+        expect(mixteCheckbox).toBeChecked();
+
+        await user.click(mixteCheckbox);
+        expect(mixteCheckbox).not.toBeChecked();
     });
 });

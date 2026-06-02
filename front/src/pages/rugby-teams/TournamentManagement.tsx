@@ -1,29 +1,18 @@
 import { Box, Typography, Button, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState, useCallback } from "react";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
+import { tournamentApi } from "../../api/tournamentApi";
 import { playerApi } from "../../api/playerApi";
 import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
-import { PlayerModal } from "../../components/rugby-teams/player/PlayerModal";
-import type { Player, CreatePlayerDto } from "../../types/playerTypes";
+import { TournamentModal } from "../../components/rugby-teams/tournament/TournamentModal";
+import type { Tournament, CreateTournamentDto } from "../../types/tournamentTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
-
-const playerColumns: Column<Player>[] = [
-  { key: "name", label: "Nom" },
-  { key: "level", label: "Niveau", render: (v) => `Niveau ${v}` },
-  { key: "sex", label: "Sexe", render: (v) => (v === "H" ? "Homme" : "Femme") },
-  { key: "position", label: "Poste" },
-  {
-    key: "category_names",
-    label: "Catégories",
-    render: (v) => (v as string[]).join(", "),
-  },
-];
 
 interface SnackbarState {
   open: boolean;
@@ -31,72 +20,108 @@ interface SnackbarState {
   message: string;
 }
 
-export const TeamManagement = () => {
+interface PlayerOption {
+  id: number;
+  name: string;
+  category_names: string[];
+}
+
+export const TournamentManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [playersLoading, setPlayersLoading] = useState(false);
-  const [playersError, setPlayersError] = useState<string | null>(null);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournamentsLoading, setTournamentsLoading] = useState(false);
+  const [tournamentsError, setTournamentsError] = useState<string | null>(null);
+  const [players, setPlayers] = useState<PlayerOption[]>([]);
+
+  const tournamentColumns: Column<Tournament>[] = [
+    { key: "name", label: "Nom" },
+    { key: "category_name", label: "Catégorie" },
+    {
+      key: "player_names",
+      label: "Joueurs",
+      sortable: false,
+      render: (value) =>
+        (value as string[]).length > 0 ? (value as string[]).join(", ") : "—",
+    },
+  ];
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     severity: "success",
     message: "",
   });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [search, setSearch] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<Player | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const loadTournaments = useCallback(async () => {
+    if (!team) return;
+    setTournamentsLoading(true);
+    setTournamentsError(null);
+    try {
+      const res = await tournamentApi.getByTeam(team.name);
+      const sorted = res.data
+        .map((t) => ({
+          ...t,
+          player_names: [...t.player_names].sort((a, b) => a.localeCompare(b)),
+        }))
+        .sort((a, b) => b.id - a.id);
+      setTournaments(sorted);
+    } catch {
+      setTournamentsError("Erreur lors du chargement des tournois");
+    } finally {
+      setTournamentsLoading(false);
+    }
+  }, [team]);
 
   const loadPlayers = useCallback(async () => {
     if (!team) return;
-    setPlayersLoading(true);
-    setPlayersError(null);
     try {
       const res = await playerApi.getByTeam(team.name);
-      setPlayers(res.data);
+      setPlayers(res.data.map((p) => ({ id: p.id, name: p.name, category_names: p.category_names })));
     } catch {
-      setPlayersError("Erreur lors du chargement des joueurs");
-    } finally {
-      setPlayersLoading(false);
+      // Silently fail — players are optional for the form
     }
   }, [team]);
 
   useEffect(() => {
+    loadTournaments();
     loadPlayers();
-  }, [loadPlayers]);
+  }, [loadTournaments, loadPlayers]);
 
-  const handleCreate = async (data: CreatePlayerDto) => {
-    await playerApi.create(team!.name, data);
-    await loadPlayers();
+  const handleCreate = async (data: CreateTournamentDto) => {
+    await tournamentApi.create(team!.name, data);
+    await loadTournaments();
     setSnackbar({
       open: true,
       severity: "success",
-      message: "Joueur ajouté avec succès",
+      message: "Tournoi ajouté avec succès",
     });
     setModalMode(null);
   };
 
-  const handleUpdate = async (data: CreatePlayerDto) => {
-    await playerApi.update(team!.name, editingPlayer!.id, data);
-    await loadPlayers();
+  const handleUpdate = async (data: CreateTournamentDto) => {
+    await tournamentApi.update(team!.name, editingTournament!.id, data);
+    await loadTournaments();
     setSnackbar({
       open: true,
       severity: "success",
-      message: "Joueur modifié avec succès",
+      message: "Tournoi modifié avec succès",
     });
     setModalMode(null);
-    setEditingPlayer(null);
+    setEditingTournament(null);
   };
 
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await playerApi.delete(team!.name, deleteTarget!.id);
-      await loadPlayers();
+      await tournamentApi.delete(team!.name, deleteTarget!.id);
+      await loadTournaments();
       setSnackbar({
         open: true,
         severity: "success",
-        message: "Joueur supprimé avec succès",
+        message: "Tournoi supprimé avec succès",
       });
       setDeleteTarget(null);
     } catch {
@@ -111,12 +136,12 @@ export const TeamManagement = () => {
     }
   };
 
-  const playerActions: Action<Player>[] = [
+  const tournamentActions: Action<Tournament>[] = [
     {
       label: "Modifier",
       icon: <EditIcon />,
-      onClick: (p) => {
-        setEditingPlayer(p);
+      onClick: (t) => {
+        setEditingTournament(t);
         setModalMode("edit");
       },
     },
@@ -124,7 +149,7 @@ export const TeamManagement = () => {
       label: "Supprimer",
       icon: <DeleteIcon />,
       color: "error",
-      onClick: (p) => setDeleteTarget(p),
+      onClick: (t) => setDeleteTarget(t),
     },
   ];
 
@@ -158,10 +183,10 @@ export const TeamManagement = () => {
       >
         <Button
           variant="contained"
-          startIcon={<PersonAddIcon />}
+          startIcon={<EmojiEventsIcon />}
           onClick={() => setModalMode("create")}
         >
-          Ajouter un joueur
+          Ajouter un tournoi
         </Button>
         <TextField
           size="small"
@@ -178,32 +203,33 @@ export const TeamManagement = () => {
       </Box>
 
       <GenericDataTable
-        columns={playerColumns}
-        rows={players}
-        actions={playerActions}
-        loading={playersLoading}
-        error={playersError}
-        emptyMessage="Aucun joueur dans cette équipe"
-        getRowId={(p) => p.id}
+        columns={tournamentColumns}
+        rows={tournaments}
+        actions={tournamentActions}
+        loading={tournamentsLoading}
+        error={tournamentsError}
+        emptyMessage="Aucun tournoi dans cette équipe"
+        getRowId={(t) => t.id}
         search={search}
         onSearchChange={setSearch}
       />
 
-      <PlayerModal
+      <TournamentModal
         open={modalMode !== null}
         mode={modalMode ?? "create"}
-        player={editingPlayer}
+        tournament={editingTournament}
         onSave={modalMode === "create" ? handleCreate : handleUpdate}
         onClose={() => {
           setModalMode(null);
-          setEditingPlayer(null);
+          setEditingTournament(null);
         }}
         teamCategories={team.categories}
+        teamPlayers={players}
       />
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title="Supprimer le joueur"
+        title="Supprimer le tournoi"
         message={`Êtes-vous sûr de vouloir supprimer ${deleteTarget?.name} ? Cette action est irréversible.`}
         confirmLabel="Supprimer"
         confirmColor="error"
