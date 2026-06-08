@@ -37,6 +37,9 @@ describe("API Config", () => {
     });
 
     it("devrait dispatcher auth:unauthorized pour une 401 sur endpoint non-auth", async () => {
+        const refreshError = new Error("Token refresh failed");
+        vi.mocked(axios.post).mockRejectedValueOnce(refreshError);
+
         const error = {
             response: { status: 401 },
             config: { url: "/api/v1/users/me" },

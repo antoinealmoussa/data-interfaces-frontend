@@ -42,6 +42,8 @@ interface GenericDataTableProps<T> {
   /** When provided, the default search field is hidden and the parent controls rendering */
   search?: string;
   onSearchChange?: (value: string) => void;
+  defaultOrderBy?: keyof T;
+  defaultOrder?: "asc" | "desc";
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -82,6 +84,8 @@ export const GenericDataTable = <T,>({
   getRowId,
   search: controlledSearch,
   onSearchChange,
+  defaultOrderBy,
+  defaultOrder,
 }: GenericDataTableProps<T>) => {
   const isControlled = controlledSearch !== undefined;
   const [internalSearch, setInternalSearch] = useState("");
@@ -91,8 +95,8 @@ export const GenericDataTable = <T,>({
     if (!isControlled) setInternalSearch(value);
   };
 
-  const [orderBy, setOrderBy] = useState<keyof T | null>(null);
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<keyof T | null>(defaultOrderBy ?? null);
+  const [order, setOrder] = useState<"asc" | "desc">(defaultOrder ?? "asc");
   const [page, setPage] = useState(0);
 
   useEffect(() => {

@@ -53,7 +53,7 @@ axios.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-        return Promise.reject(refreshError);
+        return Promise.reject(error);
       } finally {
         isRefreshing = false;
       }

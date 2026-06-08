@@ -1,7 +1,15 @@
-import { Box, Typography, Button, TextField } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
@@ -11,8 +19,12 @@ import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { TournamentModal } from "../../components/rugby-teams/tournament/TournamentModal";
-import type { Tournament, CreateTournamentDto } from "../../types/tournamentTypes";
+import type {
+  Tournament,
+  CreateTournamentDto,
+} from "../../types/tournamentTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
+
 
 interface SnackbarState {
   open: boolean;
@@ -28,6 +40,7 @@ interface PlayerOption {
 
 export const TournamentManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();
+  const [viewMode, setViewMode] = useState<"player" | "tournament">("player");
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [tournamentsLoading, setTournamentsLoading] = useState(false);
   const [tournamentsError, setTournamentsError] = useState<string | null>(null);
@@ -44,13 +57,51 @@ export const TournamentManagement = () => {
         (value as string[]).length > 0 ? (value as string[]).join(", ") : "—",
     },
   ];
+
+  interface PlayerStatsRow {
+    id: number;
+    name: string;
+    total: number;
+    [category: string]: number | string;
+  }
+
+  const playerStats = useMemo((): PlayerStatsRow[] => {
+    return players.map((player) => {
+      const counts: Record<string, number> = {};
+      let total = 0;
+      for (const tournament of tournaments) {
+        if (tournament.player_names.includes(player.name)) {
+          total++;
+          const cat = tournament.category_name;
+          counts[cat] = (counts[cat] ?? 0) + 1;
+        }
+      }
+      return { id: player.id, name: player.name, total, ...counts };
+    });
+  }, [players, tournaments]);
+
+  const categories = team?.categories ?? [];
+  const playerColumns = useMemo((): Column<PlayerStatsRow>[] => {
+    const categoryCols: Column<PlayerStatsRow>[] = categories.map((cat) => ({
+      key: cat,
+      label: cat,
+    }));
+    return [
+      { key: "name", label: "Nom" },
+      ...categoryCols,
+      { key: "total", label: "Total" },
+    ];
+  }, [categories]);
+
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     severity: "success",
     message: "",
   });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
+  const [editingTournament, setEditingTournament] = useState<Tournament | null>(
+    null,
+  );
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -79,7 +130,13 @@ export const TournamentManagement = () => {
     if (!team) return;
     try {
       const res = await playerApi.getByTeam(team.name);
-      setPlayers(res.data.map((p) => ({ id: p.id, name: p.name, category_names: p.category_names })));
+      setPlayers(
+        res.data.map((p) => ({
+          id: p.id,
+          name: p.name,
+          category_names: p.category_names,
+        })),
+      );
     } catch {
       // Silently fail — players are optional for the form
     }
@@ -173,46 +230,81 @@ export const TournamentManagement = () => {
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 1,
-        }}
-      >
-        <Button
-          variant="contained"
-          startIcon={<EmojiEventsIcon />}
-          onClick={() => setModalMode("create")}
-        >
-          Ajouter un tournoi
-        </Button>
-        <TextField
-          size="small"
-          placeholder="Rechercher..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
-            },
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, newValue) => {
+            if (newValue) setViewMode(newValue);
           }}
-          sx={{ maxWidth: 280 }}
-        />
+          size="small"
+        >
+          <ToggleButton value="player">
+            <PeopleIcon sx={{ mr: 0.5 }} /> Joueurs
+          </ToggleButton>
+          <ToggleButton value="tournament">
+            <EmojiEventsIcon sx={{ mr: 0.5 }} /> Tournois
+          </ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
-      <GenericDataTable
-        columns={tournamentColumns}
-        rows={tournaments}
-        actions={tournamentActions}
-        loading={tournamentsLoading}
-        error={tournamentsError}
-        emptyMessage="Aucun tournoi dans cette équipe"
-        getRowId={(t) => t.id}
-        search={search}
-        onSearchChange={setSearch}
-      />
+      {viewMode === "tournament" && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Button
+              variant="contained"
+              startIcon={<EmojiEventsIcon />}
+              onClick={() => setModalMode("create")}
+            >
+              Ajouter un tournoi
+            </Button>
+            <TextField
+              size="small"
+              placeholder="Rechercher..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "action.active" }} />
+                  ),
+                },
+              }}
+              sx={{ maxWidth: 280 }}
+            />
+          </Box>
+
+          <GenericDataTable
+            columns={tournamentColumns}
+            rows={tournaments}
+            actions={tournamentActions}
+            loading={tournamentsLoading}
+            error={tournamentsError}
+            emptyMessage="Aucun tournoi dans cette équipe"
+            getRowId={(t) => t.id}
+            search={search}
+            onSearchChange={setSearch}
+          />
+        </>
+      )}
+
+      {viewMode === "player" && (
+        <GenericDataTable<PlayerStatsRow>
+          columns={playerColumns}
+          rows={playerStats}
+          emptyMessage="Aucun joueur dans cette équipe"
+          getRowId={(row) => row.id}
+          defaultOrderBy="total"
+          defaultOrder="desc"
+        />
+      )}
 
       <TournamentModal
         open={modalMode !== null}
