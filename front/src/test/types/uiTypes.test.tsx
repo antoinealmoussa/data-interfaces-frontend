@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import React from "react";
 import { mapUserApplicationToMenuItem } from "../../types/uiTypes";
 import type { RouteProps } from "../../types/routesTypes";
 
@@ -39,6 +38,8 @@ describe("mapUserApplicationToMenuItem", () => {
 
         expect(result.type).toBe('link');
         expect(result.label).toBe('Rugby Teams');
-        expect(result.href).toBe('/rugby-teams');
+        if (result.type === 'link') {
+            expect(result.href).toBe('/rugby-teams');
+        }
     });
 });

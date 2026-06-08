@@ -1,64 +1,79 @@
-# Architecture du repo
+# Backend Stravoska
+
+API FastAPI modulaire pour l'application Stravoska.
+
+## Structure
 
 ```bash
 app/
-├── main.py              # Initialisation et inclusion des routeurs
+├── main.py                    # Initialisation FastAPI, CORS, inclusion routeur
 ├── api/
 │   ├── v1/
-│   │   ├── api_router.py # Point de ralliement de tous les sous-routeurs
-│   │   └── endpoints/    # Les fichiers de routes par métier
+│   │   ├── api_router.py      # Hub central de tous les routeurs
+│   │   ├── helpers.py         # Helpers HTTP (set/delete cookies)
+│   │   └── endpoints/         # Routes par domaine métier
 │   │       ├── users.py
-│   │       ├── races.py
-│   │       └── stats.py
-├── core/                # "Le cerveau" technique
-│   ├── config.py        # Lecture des variables d'env (.env)
-│   └── security.py      <-- ICI : Hashage, JWT, vérification de password
-├── db/                  # L'infrastructure de données
-│   ├── session.py       <-- ICI : Ton database.py (SessionLocal, engine)
-│   └── base.py          # Import de tous les modèles pour Alembic
-├── models/              # Définitions SQL (Shared ou par domaine)
+│   │       ├── teams.py
+│   │       ├── seasons.py
+│   │       └── search_topic.py
+├── core/
+│   ├── config.py              # Settings pydantic (.env)
+│   ├── logging_config.py      # Configuration logging
+│   ├── security.py            # Hashage, vérification mot de passe (bcrypt)
+│   └── token.py               # JWT : création, validation, dépendance current_user
+├── db/
+│   └── session.py             # Engine SQLAlchemy + get_db
+├── models/
 │   ├── user.py
-│   └── race.py
-├── schemas/             # Pydantic (Validation) par domaine
+│   ├── team.py
+│   ├── season.py
+│   ├── team_season.py
+│   ├── application.py
+│   └── user_application.py
+├── schemas/
 │   ├── user.py
-│   └── race.py
-└── services/            # La "Logique Métier" (Le coeur du code)
-    ├── user_service.py
-    ├── race_service.py
-    └── stats_service.py
+│   ├── team.py
+│   ├── season.py
+│   └── search_topic.py
+├── services/
+│   ├── user_service.py
+│   ├── team_service.py
+│   ├── season_service.py
+│   └── search_topic_service.py
+├── prompts/
+│   └── search_topic_prompt.py
+└── tests/
+    ├── api/
+    ├── core/
+    └── services/
 ```
 
-# Création d'un service back en Python
+## Configuration
 
-## Initialisation d'un projet Poetry
+Copier `.env.example` vers `.env` et remplir les valeurs :
 
 ```bash
-poetry init
-poetry add fastapi uvicorn sqlalchemy psycopg2-binary
+cp .env.example .env
 ```
 
-# Interaction base de données
+Variables requises : `SECRET_KEY`, `MISTRAL_API_KEY`.
 
-## Connexion via Docker
+## Lancement
 
 ```bash
-docker compose exec db psql -h localhost -U postgres -d localdb
+poetry install
+poetry run uvicorn app.main:app --reload
 ```
 
-## Génération d'une migration
+## Tests
 
 ```bash
-docker compose exec backend poetry run alembic revision --autogenerate -m "create_user_stravoska_table"
+poetry run pytest app/tests
 ```
 
-## Exécution d'une migration
+## Migrations
 
 ```bash
-docker compose exec backend poetry run alembic upgrade head
-```
-
-## Lancement des tests
-
-```bash
-docker compose exec backend poetry run pytest app/tests
+poetry run alembic revision --autogenerate -m "description"
+poetry run alembic upgrade head
 ```

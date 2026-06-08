@@ -1,4 +1,5 @@
 import { useState, createContext, type ReactNode, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
@@ -26,6 +27,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[] | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const unauthorize = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+    setApplications(null);
+  };
 
   useEffect(() => {
     axios
@@ -36,13 +45,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         setIsAuthenticated(true);
       })
       .catch(() => {
-        setIsAuthenticated(false);
-        setUser(null);
-        setApplications(null);
+        unauthorize();
       })
       .finally(() => {
         setIsLoading(false);
       });
+  }, [location]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/login", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    window.addEventListener("auth:unauthorized", unauthorize);
+    return () => window.removeEventListener("auth:unauthorized", unauthorize);
   }, []);
 
   const login = async () => {

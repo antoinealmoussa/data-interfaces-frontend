@@ -1,9 +1,7 @@
 import httpx
+from fastapi import HTTPException, status
 from app.prompts.search_topic_prompt import SEARCH_TOPIC_PROMPT
-
-MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions"
-MISTRAL_API_KEY = "K6lug86H5Apg6E5SlBQnHAcEOZaZrnOE"
-MISTRAL_MODEL = "mistral-small"
+from app.core.config import settings
 
 
 def format_prompt(query: str) -> str:
@@ -22,19 +20,19 @@ async def get_search_result(query: str) -> str:
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             response = await client.post(
-                MISTRAL_API_URL,
+                settings.MISTRAL_API_URL,
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {MISTRAL_API_KEY}",
+                    "Authorization": f"Bearer {settings.MISTRAL_API_KEY}",
                 },
                 json={
-                    "model": MISTRAL_MODEL,
+                    "model": settings.MISTRAL_MODEL,
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.3,
                     "max_tokens": 500,
                 },
             )
-            response.raise_for_status()  # Lève une exception si le statut HTTP est une erreur
+            response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
 
         except httpx.HTTPStatusError as e:
@@ -42,4 +40,9 @@ async def get_search_result(query: str) -> str:
             error_message = error_messages.get(
                 status_code, f"Erreur HTTP inattendue : {status_code}"
             )
-            return {"status": status_code, "error": error_message}
+            raise HTTPException(status_code=status_code, detail=error_message)
+        except httpx.RequestError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Service Mistral injoignable. Veuillez réessayer plus tard.",
+            )

@@ -1,5 +1,6 @@
 import type { RouteProps } from "./routesTypes";
-import type { Application } from "./authTypes"
+import type { Application } from "./authTypes";
+import type { JSX } from "react";
 
 export interface DropdownMenuProps {
   label?: string;
@@ -51,3 +52,19 @@ export interface SearchInputProps {
 }
 
 export type HomeState = "idle" | "loading" | "success" | "error";
+
+export interface SidebarItem {
+  label: string;
+  path: string;
+  icon: JSX.Element;
+}
+
+export interface GenericSidebarProps {
+  items: SidebarItem[];
+  teams: Array<{ id: number; name: string }>;
+  seasons: Array<{ id: number; name: string }>;
+  selectedTeamName: string | null;
+  selectedSeasonName: string | null;
+  onTeamChange: (teamName: string) => void;
+  onSeasonChange: (seasonName: string) => void;
+}

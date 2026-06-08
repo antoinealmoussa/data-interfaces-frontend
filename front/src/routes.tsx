@@ -3,9 +3,12 @@ import { Home } from "./pages/Home";
 import { UserProfile } from "./pages/management/UserProfile";
 import { RacePreparation } from "./pages/race-preparation/RacePreparation";
 import { RugbyTeams } from "./pages/rugby-teams/RugbyTeams";
+import { TeamCreation } from "./pages/rugby-teams/TeamCreation";
+import { TeamManagement } from "./pages/rugby-teams/TeamManagement";
+import { TournamentManagement } from "./pages/rugby-teams/TournamentManagement";
+import { Training } from "./pages/rugby-teams/Training";
 import { type AppName, type RouteProps } from "./types/routesTypes";
 import { AppNameMapper } from "./types/routesTypes";
-
 
 export const PRIVATE_STANDARD_ROUTES: Record<string, RouteProps> = {
     HOME: { path: "/", element: <Home /> },
@@ -14,6 +17,15 @@ export const PRIVATE_STANDARD_ROUTES: Record<string, RouteProps> = {
 
 export const DYNAMIC_APP_ROUTES: Record<AppName, RouteProps> = {
     [AppNameMapper.BIKE_EXPLORATION]: { path: "/bike-exploration", element: <BikeExploration /> },
-    [AppNameMapper.RUGBY_TEAMS]: { path: "/rugby-teams", element: <RugbyTeams /> },
+    [AppNameMapper.RUGBY_TEAMS]: { 
+      path: "/rugby-teams",
+      element: <RugbyTeams />,
+      children: [
+        { path: "team-creation", element: <TeamCreation /> },
+        { path: ":teamName/:seasonName/team-management", element: <TeamManagement /> },
+        { path: ":teamName/:seasonName/tournament", element: <TournamentManagement /> },
+        { path: ":teamName/:seasonName/training", element: <Training /> },
+      ]
+    },
     [AppNameMapper.RACE_PREPARATION]: { path: "/race-preparation", element: <RacePreparation /> },
 }

@@ -80,10 +80,10 @@ describe("LoginForm", () => {
         await waitFor(() => {
             expect(mockedAxios.post).toHaveBeenCalled();
         });
-        const call = mockedAxios.post.mock.calls[0];
-        expect(call[0]).toBe("http://localhost:8000/api/v1/users/login");
-        expect(call[1].get('username')).toBe("test@example.com");
-        expect(call[1].get('password')).toBe("password123");
+        const [url, body] = mockedAxios.post.mock.calls[0] as [string, URLSearchParams];
+        expect(url).toBe("http://localhost:8000/api/v1/users/login");
+        expect(body.get('username')).toBe("test@example.com");
+        expect(body.get('password')).toBe("password123");
     });
 
     it("devrait afficher 'Connexion...' pendant la soumission", async () => {
@@ -117,7 +117,6 @@ describe("LoginForm", () => {
 
     it("devrait gérer l'erreur de connexion", async () => {
         const user = userEvent.setup();
-        const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
         mockedAxios.post.mockRejectedValueOnce(new Error("Network Error"));
 
         renderWithRouter(<LoginForm />);
@@ -131,10 +130,8 @@ describe("LoginForm", () => {
         await user.click(submitButton);
 
         await waitFor(() => {
-            expect(alertMock).toHaveBeenCalledWith("Erreur lors de la connexion");
+            expect(screen.getByText("Erreur lors de la connexion")).toBeInTheDocument();
         });
-
-        alertMock.mockRestore();
     });
 
     it("devrait avoir un lien vers la page d'inscription", () => {

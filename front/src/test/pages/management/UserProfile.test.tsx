@@ -172,6 +172,33 @@ describe("UserProfile", () => {
         expect(screen.getByRole("button", { name: /enregistrement\.\.\./i })).toBeDisabled();
     });
 
+    it("devrait fermer le snackbar quand on clique sur le bouton de fermeture", async () => {
+        const user = userEvent.setup();
+        mockedAxios.get.mockResolvedValue({
+            data: mockUserResponse,
+        });
+
+        render(<UserProfile />);
+
+        await waitFor(() => {
+            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
+        });
+
+        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+        await user.click(submitButton);
+
+        await waitFor(() => {
+            expect(screen.getByText(/aucune modification détectée/i)).toBeInTheDocument();
+        });
+
+        const closeButton = screen.getByRole("button", { name: /close/i });
+        await user.click(closeButton);
+
+        await waitFor(() => {
+            expect(screen.queryByText(/aucune modification détectée/i)).not.toBeInTheDocument();
+        });
+    });
+
     it("devrait n'envoyer que les champs modifiés", async () => {
         const user = userEvent.setup();
         mockedAxios.get.mockResolvedValue({

@@ -3,6 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AppRoutes } from "../../../components/authentication/AppRoutes";
 import { AuthProvider } from "../../../contexts/AuthContext";
+import axios from "axios";
+
+vi.mock("axios");
+const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
     default: {
@@ -23,7 +27,7 @@ const renderWithProviders = (initialEntries: string[]) => {
 describe("AppRoutes", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        localStorage.clear();
+        mockedAxios.get.mockRejectedValue(new Error("No auth"));
     });
 
     it("devrait afficher la page de login pour /login", async () => {
@@ -39,6 +43,51 @@ describe("AppRoutes", () => {
 
         await vi.waitFor(() => {
             expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
+        });
+    });
+
+    it("devrait afficher la page d'accueil pour / quand authentifié", async () => {
+        mockedAxios.get.mockResolvedValue({
+            data: {
+                user: { id: 1, email: "test@test.com", first_name: "Jean", surname: "Dupont" },
+                applications: [],
+            },
+        });
+
+        renderWithProviders(["/"]);
+
+        await vi.waitFor(() => {
+            expect(screen.getByText(/Bonjour Jean/)).toBeInTheDocument();
+        });
+    });
+
+    it("devrait afficher les routes dynamiques pour les applications de l'utilisateur", async () => {
+        mockedAxios.get.mockResolvedValue({
+            data: {
+                user: { id: 1, email: "test@test.com", first_name: "Jean", surname: "Dupont" },
+                applications: [{ name: "rugby-teams", pretty_name: "Rugby Teams" }],
+            },
+        });
+
+        renderWithProviders(["/rugby-teams"]);
+
+        await vi.waitFor(() => {
+            expect(screen.getByText(/Chargement\.\.\./i)).toBeInTheDocument();
+        });
+    });
+
+    it("ne devrait pas afficher les routes dynamiques sans applications", async () => {
+        mockedAxios.get.mockResolvedValue({
+            data: {
+                user: { id: 1, email: "test@test.com", first_name: "Jean", surname: "Dupont" },
+                applications: [],
+            },
+        });
+
+        renderWithProviders(["/rugby-teams"]);
+
+        await vi.waitFor(() => {
+            expect(screen.queryByText(/Chargement\.\.\./i)).not.toBeInTheDocument();
         });
     });
 });

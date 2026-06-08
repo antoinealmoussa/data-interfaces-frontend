@@ -144,4 +144,50 @@ describe("Home", () => {
         );
         expect(searchCalls).toHaveLength(0);
     });
+
+    it("devrait afficher le détail de l'erreur quand response.data.detail est présent", async () => {
+        const axiosError = new Error("Axios error");
+        (axiosError as any).isAxiosError = true;
+        (axiosError as any).response = { data: { detail: "Message personnalisé" } };
+        mockedAxios.get.mockRejectedValue(axiosError);
+        mockedAxios.isAxiosError = vi.fn().mockReturnValue(true);
+
+        await act(async () => {
+            renderHome();
+        });
+
+        const input = await waitFor(() =>
+            screen.getByPlaceholderText("Quel sujet souhaitez-vous explorer ?"),
+        );
+
+        fireEvent.change(input, { target: { value: "sujet" } });
+        fireEvent.keyDown(input, { key: "Enter" });
+
+        await waitFor(() => {
+            expect(screen.getByText("Message personnalisé")).toBeInTheDocument();
+        });
+    });
+
+    it("devrait afficher le message générique quand response.data n'a pas de detail", async () => {
+        const axiosError = new Error("Axios error");
+        (axiosError as any).isAxiosError = true;
+        (axiosError as any).response = { data: {} };
+        mockedAxios.get.mockRejectedValue(axiosError);
+        mockedAxios.isAxiosError = vi.fn().mockReturnValue(true);
+
+        await act(async () => {
+            renderHome();
+        });
+
+        const input = await waitFor(() =>
+            screen.getByPlaceholderText("Quel sujet souhaitez-vous explorer ?"),
+        );
+
+        fireEvent.change(input, { target: { value: "sujet" } });
+        fireEvent.keyDown(input, { key: "Enter" });
+
+        await waitFor(() => {
+            expect(screen.getByText("Une erreur est survenue")).toBeInTheDocument();
+        });
+    });
 });

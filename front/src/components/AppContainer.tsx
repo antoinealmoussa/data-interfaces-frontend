@@ -24,7 +24,9 @@ export const AppContainer: React.FC<AppContainerProps> = ({
                 height: "100%"
             }}>
                 <Header height={headerHeight} />
-                <Outlet />
+                <Box sx={{ flex: 1, minHeight: 0 }}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     );
