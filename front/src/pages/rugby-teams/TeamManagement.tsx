@@ -12,6 +12,7 @@ import { NotificationSnackbar } from "../../components/common/NotificationSnackb
 import { PlayerModal } from "../../components/rugby-teams/player/PlayerModal";
 import type { Player, CreatePlayerDto } from "../../types/playerTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
+import type { SnackbarState } from "../../types/uiTypes";
 
 const playerColumns: Column<Player>[] = [
   { key: "name", label: "Nom" },
@@ -25,11 +26,7 @@ const playerColumns: Column<Player>[] = [
   },
 ];
 
-interface SnackbarState {
-  open: boolean;
-  severity: "success" | "error";
-  message: string;
-}
+
 
 export const TeamManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();

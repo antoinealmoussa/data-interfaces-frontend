@@ -16,4 +16,4 @@ export interface CreatePlayerDto {
   category_names: string[];
 }
 
-export type UpdatePlayerDto = CreatePlayerDto;
+

@@ -32,12 +32,7 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
-
-interface TrainingTeam {
-  id: number;
-  name: string;
-  players: Player[];
-}
+import type { TrainingTeam } from "../../api/trainingApi";
 
 const DraggablePlayer = ({ player }: { player: Player }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -174,26 +169,20 @@ export const Training = () => {
 
     const playerId = Number(String(active.id).replace("player-", ""));
     const targetTeamId = Number(String(over.id).replace("team-", ""));
+    const movedPlayer = findPlayer(String(active.id));
+    if (!movedPlayer) return;
 
     setTeams((prev) => {
       if (!prev) return prev;
-      let movedPlayer: Player | null = null;
-      const updated = prev.map((t) => {
-        const found = t.players.find((p) => p.id === playerId);
-        if (found) {
-          movedPlayer = found;
-          return { ...t, players: t.players.filter((p) => p.id !== playerId) };
-        }
-        return t;
-      });
-      if (movedPlayer) {
-        return updated.map((t) =>
-          t.id === targetTeamId
-            ? { ...t, players: [...t.players, movedPlayer!] }
+      const sourceTeam = prev.find((t) => t.players.some((p) => p.id === playerId));
+      if (!sourceTeam) return prev;
+      return prev.map((t) =>
+        t.id === sourceTeam.id
+          ? { ...t, players: t.players.filter((p) => p.id !== playerId) }
+          : t.id === targetTeamId
+            ? { ...t, players: [...t.players, movedPlayer] }
             : t,
-        );
-      }
-      return prev;
+      );
     });
   };
 

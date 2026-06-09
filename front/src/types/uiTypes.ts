@@ -68,3 +68,9 @@ export interface GenericSidebarProps {
   onTeamChange: (teamName: string) => void;
   onSeasonChange: (seasonName: string) => void;
 }
+
+export interface SnackbarState {
+  open: boolean;
+  severity: "success" | "error";
+  message: string;
+}

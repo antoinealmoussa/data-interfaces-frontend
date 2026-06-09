@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
   Box,
   TextField,
@@ -51,7 +51,7 @@ export const TournamentForm = ({
         },
   });
 
-  const selectedCategory = useWatch({ control, name: "category_name" });
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const filteredPlayers = useMemo(
     () =>
@@ -61,15 +61,6 @@ export const TournamentForm = ({
       ).sort((a, b) => a.name.localeCompare(b.name)),
     [selectedCategory, teamPlayers],
   );
-
-  const prevCategory = useRef(selectedCategory);
-
-  useEffect(() => {
-    if (prevCategory.current !== undefined && prevCategory.current !== selectedCategory) {
-      setValue("player_names", []);
-    }
-    prevCategory.current = selectedCategory;
-  }, [selectedCategory, setValue]);
 
   return (
     <Box
@@ -95,7 +86,15 @@ export const TournamentForm = ({
           control={control}
           rules={{ required: "La catégorie est obligatoire" }}
           render={({ field }) => (
-            <Select label="Catégorie" {...field}>
+            <Select
+              label="Catégorie"
+              {...field}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setValue("player_names", []);
+                field.onChange(e);
+              }}
+            >
               {teamCategories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}

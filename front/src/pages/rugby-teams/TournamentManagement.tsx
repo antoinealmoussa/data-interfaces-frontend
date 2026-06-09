@@ -24,13 +24,10 @@ import type {
   CreateTournamentDto,
 } from "../../types/tournamentTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
+import type { SnackbarState } from "../../types/uiTypes";
 
 
-interface SnackbarState {
-  open: boolean;
-  severity: "success" | "error";
-  message: string;
-}
+
 
 interface PlayerOption {
   id: number;

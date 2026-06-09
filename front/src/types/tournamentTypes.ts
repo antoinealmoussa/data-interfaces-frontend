@@ -11,4 +11,4 @@ export interface CreateTournamentDto {
   player_names: string[];
 }
 
-export type UpdateTournamentDto = CreateTournamentDto;
+

@@ -1,5 +1,5 @@
 import axios from "axios";
-import API_URLS from "../api/config";
+import API_URLS from "./config";
 import type { Player } from "../types/playerTypes";
 
 export interface AlgorithmInfo {
