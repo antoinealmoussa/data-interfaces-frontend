@@ -6,8 +6,6 @@ import { AuthProvider } from "../../contexts/AuthContext";
 import { BrowserRouter } from "react-router-dom";
 import React, { useState } from "react";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({

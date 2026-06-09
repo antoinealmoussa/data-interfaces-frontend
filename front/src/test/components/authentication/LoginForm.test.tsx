@@ -4,9 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { LoginForm } from "../../../components/authentication/LoginForm";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
-
-// Mock axios
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 // Mock de la config API
@@ -81,7 +78,7 @@ describe("LoginForm", () => {
             expect(mockedAxios.post).toHaveBeenCalled();
         });
         const [url, body] = mockedAxios.post.mock.calls[0] as [string, URLSearchParams];
-        expect(url).toBe("http://localhost:8000/api/v1/users/login");
+        expect(url).toBe("/users/login");
         expect(body.get('username')).toBe("test@example.com");
         expect(body.get('password')).toBe("password123");
     });

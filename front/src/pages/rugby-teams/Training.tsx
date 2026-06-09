@@ -106,8 +106,8 @@ export const Training = () => {
     if (!team) return;
     setPlayersLoading(true);
     try {
-      const res = await playerApi.getByTeam(team.name);
-      setPlayers(res.data.sort((a, b) => a.name.localeCompare(b.name)));
+      const data = await playerApi.getByTeam(team.name);
+      setPlayers(data.sort((a, b) => a.name.localeCompare(b.name)));
     } catch {
       // Silently fail
     } finally {
@@ -121,9 +121,9 @@ export const Training = () => {
 
   useEffect(() => {
     if (!team) return;
-    trainingApi.getAlgorithms(team.name).then((res) => {
-      setAlgorithms(res.data);
-      if (res.data.length > 0) setSelectedAlgorithm(res.data[0].id);
+    trainingApi.getAlgorithms(team.name).then((data) => {
+      setAlgorithms(data);
+      if (data.length > 0) setSelectedAlgorithm(data[0].id);
     });
   }, [team]);
 
@@ -139,12 +139,12 @@ export const Training = () => {
     if (!team || selectedPlayerIds.length < 2 || !selectedAlgorithm) return;
     setGenerating(true);
     try {
-      const res = await trainingApi.distribute(team.name, {
+      const data = await trainingApi.distribute(team.name, {
         player_ids: selectedPlayerIds,
         team_count: teamCount,
         algorithm: selectedAlgorithm,
       });
-      setTeams(res.data.teams);
+      setTeams(data.teams);
     } catch {
       // Silently fail
     } finally {

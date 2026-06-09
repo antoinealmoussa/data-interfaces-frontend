@@ -5,8 +5,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Header } from "../../../components/layout/Header";
 import { AuthProvider } from "../../../contexts/AuthContext";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({

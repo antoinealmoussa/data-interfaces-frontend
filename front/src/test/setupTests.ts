@@ -1,6 +1,24 @@
 import "@testing-library/jest-dom";
-import { afterEach, beforeEach } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+
+vi.mock("axios", () => {
+  const mockAxios: Record<string, unknown> = {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    patch: vi.fn(),
+    request: vi.fn(),
+    create: vi.fn(() => mockAxios),
+    defaults: { withCredentials: false },
+    interceptors: {
+      request: { use: vi.fn(), eject: vi.fn() },
+      response: { use: vi.fn(), eject: vi.fn() },
+    },
+  };
+  return { default: mockAxios };
+});
 
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;

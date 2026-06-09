@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
@@ -22,7 +21,7 @@ describe("teamApi", () => {
         const result = await teamApi.getAll();
 
         expect(mockedAxios.get).toHaveBeenCalledWith("http://localhost:8000/api/v1/teams");
-        expect(result.data).toEqual([{ id: 1, name: "Team A" }]);
+        expect(result).toEqual([{ id: 1, name: "Team A" }]);
     });
 
     it("getBySeason devrait appeler GET /teams/by-season/:id", async () => {
@@ -32,7 +31,7 @@ describe("teamApi", () => {
         const result = await teamApi.getBySeason(42);
 
         expect(mockedAxios.get).toHaveBeenCalledWith("http://localhost:8000/api/v1/teams/by-season/42");
-        expect(result.data).toEqual([{ id: 1, name: "Team B" }]);
+        expect(result).toEqual([{ id: 1, name: "Team B" }]);
     });
 
     it("hasTeams devrait retourner true si des équipes existent", async () => {
@@ -65,6 +64,6 @@ describe("teamApi", () => {
             "http://localhost:8000/api/v1/teams",
             newTeam
         );
-        expect(result.data).toMatchObject({ name: "New Team" });
+        expect(result).toMatchObject({ name: "New Team" });
     });
 });

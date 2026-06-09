@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
@@ -24,7 +23,7 @@ describe("playerApi", () => {
         expect(mockedAxios.get).toHaveBeenCalledWith(
             "http://localhost:8000/api/v1/teams/Mon%20equipe/players?skip=0&limit=100",
         );
-        expect(result.data).toEqual([{ id: 1, name: "Jean" }]);
+        expect(result).toEqual([{ id: 1, name: "Jean" }]);
     });
 
     it("getByTeam devrait encoder le nom de l'équipe", async () => {
@@ -66,7 +65,7 @@ describe("playerApi", () => {
             "http://localhost:8000/api/v1/teams/Mon%20equipe/players",
             newPlayer,
         );
-        expect(result.data).toMatchObject({ name: "Jean" });
+        expect(result).toMatchObject({ name: "Jean" });
     });
 
     it("update devrait appeler PUT /teams/:teamName/players/:playerId", async () => {
@@ -86,7 +85,7 @@ describe("playerApi", () => {
             "http://localhost:8000/api/v1/teams/Mon%20equipe/players/5",
             updateData,
         );
-        expect(result.data).toMatchObject({ name: "Jean Modifié" });
+        expect(result).toMatchObject({ name: "Jean Modifié" });
     });
 
     it("delete devrait appeler DELETE /teams/:teamName/players/:playerId", async () => {

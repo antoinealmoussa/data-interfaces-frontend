@@ -4,8 +4,7 @@ import { Link as BaseLink } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type LoginFormProps } from "../../types/authTypes";
-import axios from "axios";
-import API_URLS from "../../api/config";
+import apiClient from "../../api/client";
 import { useAuth } from "../../hooks/useAuth";
 
 
@@ -25,8 +24,8 @@ export const LoginForm: React.FC = () => {
             const formData = new URLSearchParams();
             formData.append('username', data.email);
             formData.append('password', data.password);
-            await axios.post(
-                `${API_URLS.backend}/users/login`,
+            await apiClient.post(
+                "/users/login",
                 formData
             );
 

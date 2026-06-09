@@ -4,8 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { AppRoutes } from "../../../components/authentication/AppRoutes";
 import { AuthProvider } from "../../../contexts/AuthContext";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({

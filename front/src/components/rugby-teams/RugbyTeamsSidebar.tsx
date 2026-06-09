@@ -1,11 +1,10 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
-import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { teamApi } from "../../api/teamApi";
-import type { Team } from "../../types/teamTypes";
+import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import type { Season } from "../../types/seasonTypes";
 import type { SidebarItem } from "../../types/uiTypes";
+import { useMemo } from "react";
 
 const menuItems: SidebarItem[] = [
   { label: "Gestion d'équipe", path: "team-management", icon: <Groups /> },
@@ -15,49 +14,21 @@ const menuItems: SidebarItem[] = [
 
 export const RugbyTeamsSidebar = () => {
   const { teamName, seasonName } = useParams<{ teamName: string; seasonName: string }>();
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamName, setSelectedTeamName] = useState<string | null>(null);
-  const [selectedSeasonName, setSelectedSeasonName] = useState<string | null>(null);
+  const { teams } = useTeamAndSeason();
   const navigate = useNavigate();
 
-  const seasons: Season[] = [];
-  if (Array.isArray(teams)) {
+  const seasons = useMemo(() => {
+    const seasonMap = new Map<number, Season>();
     for (const team of teams) {
       for (const season of team.seasons) {
-        if (!seasons.some((s) => s.id === season.id)) {
-          seasons.push(season);
-        }
+        seasonMap.set(season.id, season);
       }
     }
-  }
+    return Array.from(seasonMap.values());
+  }, [teams]);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await teamApi.getAll();
-        const teamsData = Array.isArray(res.data) ? res.data : [];
-        setTeams(teamsData);
-
-        const decodedTeam = teamName ? decodeURIComponent(teamName) : null;
-        const matchTeam = decodedTeam
-          ? teamsData.find((t) => t.name === decodedTeam)
-          : null;
-        const team = matchTeam ?? teamsData[0];
-
-        const decodedSeason = seasonName ? decodeURIComponent(seasonName) : null;
-        const matchSeason = decodedSeason
-          ? team?.seasons.find((s) => s.name === decodedSeason)
-          : null;
-        const season = matchSeason ?? team?.seasons[0];
-
-        setSelectedTeamName(team?.name ?? null);
-        setSelectedSeasonName(season?.name ?? null);
-      } catch (error) {
-        console.error("Erreur lors du chargement des équipes:", error);
-      }
-    };
-    init();
-  }, [teamName, seasonName]);
+  const selectedTeamName = teamName ? decodeURIComponent(teamName) : null;
+  const selectedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
 
   const visibleItems =
     selectedTeamName && selectedSeasonName ? menuItems : [];
@@ -69,19 +40,17 @@ export const RugbyTeamsSidebar = () => {
       seasons={seasons}
       selectedTeamName={selectedTeamName}
       selectedSeasonName={selectedSeasonName}
-      onTeamChange={(teamName) => {
-        setSelectedTeamName(teamName);
+      onTeamChange={(name) => {
         if (selectedSeasonName) {
           navigate(
-            `/rugby-teams/${encodeURIComponent(teamName)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
+            `/rugby-teams/${encodeURIComponent(name)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
           );
         }
       }}
-      onSeasonChange={(seasonName) => {
-        setSelectedSeasonName(seasonName);
+      onSeasonChange={(name) => {
         if (selectedTeamName) {
           navigate(
-            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(seasonName)}/team-management`,
+            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(name)}/team-management`,
           );
         }
       }}

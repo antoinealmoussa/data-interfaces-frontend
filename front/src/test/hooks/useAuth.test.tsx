@@ -4,19 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthProvider } from "../../contexts/AuthContext";
 
-vi.mock("axios", () => ({
-  default: {
-    get: vi.fn().mockRejectedValue(new Error("No cookie")),
-    post: vi.fn().mockResolvedValue({ data: {} }),
-    create: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn(), eject: vi.fn() },
-      response: { use: vi.fn(), eject: vi.fn() },
-    },
-    defaults: { withCredentials: false },
-  },
-}));
-
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
@@ -37,6 +24,8 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 describe("useAuth", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockedAxios.get.mockRejectedValue(new Error("No cookie"));
+        mockedAxios.post.mockResolvedValue({ data: {} });
     });
 
     it("devrait retourner le contexte d'authentification", async () => {

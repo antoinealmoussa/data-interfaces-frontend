@@ -4,9 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { RegisterForm } from "../../../components/authentication/RegisterForm";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
-
-// Mock axios
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 // Mock de la config API
@@ -82,7 +79,7 @@ describe("RegisterForm", () => {
 
         await waitFor(() => {
             expect(mockedAxios.post).toHaveBeenCalledWith(
-                "http://localhost:8000/api/v1/users/register",
+                "/users/register",
                 {
                     first_name: "John",
                     surname: "Doe",

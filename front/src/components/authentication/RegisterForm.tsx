@@ -2,8 +2,7 @@ import { TextField, Button, Box, Typography } from "@mui/material"
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type RegisterFormProps } from "../../types/authTypes";
-import axios from "axios";
-import API_URLS from "../../api/config";
+import apiClient from "../../api/client";
 
 
 export const RegisterForm: React.FC = () => {
@@ -16,8 +15,8 @@ export const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
 
     const onSubmit = async (data: RegisterFormProps) => {
-        await axios.post(
-            `${API_URLS.backend}/users/register`,
+        await apiClient.post(
+            "/users/register",
             data
         );
 

@@ -78,8 +78,7 @@ export const TeamCreationForm = ({
     setSubmitError(null);
 
     try {
-      const response = await teamApi.create(formData);
-      const team = response.data;
+      const team = await teamApi.create(formData);
       navigate(
         `/rugby-teams/${encodeURIComponent(team.name)}/${encodeURIComponent(team.seasons[0].name)}/team-management`,
         { state: { teamCreated: true } },

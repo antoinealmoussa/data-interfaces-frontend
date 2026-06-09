@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import { Home } from "../../pages/Home";
-import { AuthContext } from "../../contexts/AuthContext";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { AuthProvider } from "../../contexts/AuthContext";
+import { Home } from "../../pages/Home";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
@@ -78,7 +76,7 @@ describe("Home", () => {
 
         await waitFor(() => {
             expect(mockedAxios.get).toHaveBeenCalledWith(
-                "http://localhost:8000/api/v1/search/topic",
+                "/search/topic",
                 expect.objectContaining({
                     params: { query: "sujet de test" },
                 }),

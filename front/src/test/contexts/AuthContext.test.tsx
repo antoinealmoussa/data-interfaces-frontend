@@ -4,24 +4,6 @@ import { AuthProvider } from "../../contexts/AuthContext";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../hooks/useAuth";
 
-const { mockGet, mockPost } = vi.hoisted(() => ({
-  mockGet: vi.fn().mockRejectedValue(new Error("Default no cookie")),
-  mockPost: vi.fn().mockResolvedValue({ data: {} }),
-}));
-
-vi.mock("axios", () => ({
-  default: {
-    get: mockGet,
-    post: mockPost,
-    create: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn(), eject: vi.fn() },
-      response: { use: vi.fn(), eject: vi.fn() },
-    },
-    defaults: { withCredentials: false },
-  },
-}));
-
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 

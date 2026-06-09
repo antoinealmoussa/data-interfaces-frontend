@@ -6,8 +6,7 @@ import type {
   AuthContextType,
   MeResponse,
 } from "../types/authTypes";
-import axios from "axios";
-import API_URLS from "../api/config";
+import apiClient from "../api/client";
 
 const defaultAuthContext: AuthContextType = {
   isAuthenticated: false,
@@ -37,8 +36,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    axios
-      .get<MeResponse>(`${API_URLS.backend}/users/me`)
+    apiClient
+      .get<MeResponse>("/users/me")
       .then((response) => {
         setUser(response.data.user);
         setApplications(response.data.applications);
@@ -64,16 +63,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const login = async () => {
-    const response = await axios.get<MeResponse>(
-      `${API_URLS.backend}/users/me`
-    );
+    const response = await apiClient.get<MeResponse>("/users/me");
     setUser(response.data.user);
     setApplications(response.data.applications);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    await axios.post(`${API_URLS.backend}/users/logout`);
+    await apiClient.post("/users/logout");
     setIsAuthenticated(false);
     setApplications(null);
     setUser(null);

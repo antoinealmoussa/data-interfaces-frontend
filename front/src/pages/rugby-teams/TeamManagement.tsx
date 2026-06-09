@@ -48,8 +48,8 @@ export const TeamManagement = () => {
     setPlayersLoading(true);
     setPlayersError(null);
     try {
-      const res = await playerApi.getByTeam(team.name);
-      setPlayers(res.data);
+      const data = await playerApi.getByTeam(team.name);
+      setPlayers(data);
     } catch {
       setPlayersError("Erreur lors du chargement des joueurs");
     } finally {

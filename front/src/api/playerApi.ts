@@ -1,22 +1,38 @@
-import axios from "axios";
-import API_URLS from "./config";
+import apiClient from "./client";
 import type { Player, CreatePlayerDto } from "../types/playerTypes";
 
-const BASE_URL = `${API_URLS.backend}/teams`;
+const BASE_URL = "/teams";
 
 export const playerApi = {
   getByTeam: (teamName: string, skip = 0, limit = 100) =>
-    axios.get<Player[]>(`${BASE_URL}/${encodeURIComponent(teamName)}/players?skip=${skip}&limit=${limit}`),
+    apiClient
+      .get<Player[]>(
+        `${BASE_URL}/${encodeURIComponent(teamName)}/players?skip=${skip}&limit=${limit}`,
+      )
+      .then((r) => r.data),
 
   getById: (teamName: string, playerId: number) =>
-    axios.get<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`),
+    apiClient
+      .get<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`)
+      .then((r) => r.data),
 
   create: (teamName: string, data: CreatePlayerDto) =>
-    axios.post<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players`, data),
+    apiClient
+      .post<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players`, data)
+      .then((r) => r.data),
 
   update: (teamName: string, playerId: number, data: CreatePlayerDto) =>
-    axios.put<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`, data),
+    apiClient
+      .put<Player>(
+        `${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`,
+        data,
+      )
+      .then((r) => r.data),
 
   delete: (teamName: string, playerId: number) =>
-    axios.delete(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`),
+    apiClient.delete(
+      `${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`,
+    ),
 };
+
+export type PlayerApiType = typeof playerApi;

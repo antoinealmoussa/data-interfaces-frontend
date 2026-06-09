@@ -6,8 +6,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import axios from "axios";
-import API_URLS from "../../api/config";
+import apiClient from "../../api/client";
 import type { User } from "../../types/authTypes";
 import {
   UserInfoForm,
@@ -31,9 +30,7 @@ export const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get<{ user: User }>(
-          `${API_URLS.backend}/users/me`,
-        );
+        const response = await apiClient.get<{ user: User }>("/users/me");
         setUser(response.data.user);
       } catch {
         setSnackbar({
@@ -69,8 +66,8 @@ export const UserProfile = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.put<User>(
-        `${API_URLS.backend}/users/me`,
+      const response = await apiClient.put<User>(
+        "/users/me",
         modifiedData,
       );
       setUser(response.data);

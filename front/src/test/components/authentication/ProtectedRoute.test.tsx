@@ -4,24 +4,6 @@ import { Routes, Route, MemoryRouter } from "react-router-dom";
 import { ProtectedRoute } from "../../../components/authentication/ProtectedRoute";
 import { AuthProvider } from "../../../contexts/AuthContext";
 
-const { mockGet, mockPost } = vi.hoisted(() => ({
-  mockGet: vi.fn().mockRejectedValue(new Error("Default no auth")),
-  mockPost: vi.fn().mockResolvedValue({ data: {} }),
-}));
-
-vi.mock("axios", () => ({
-  default: {
-    get: mockGet,
-    post: mockPost,
-    create: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn(), eject: vi.fn() },
-      response: { use: vi.fn(), eject: vi.fn() },
-    },
-    defaults: { withCredentials: false },
-  },
-}));
-
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
@@ -34,6 +16,8 @@ vi.mock("../../../api/config", () => ({
 describe("ProtectedRoute", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedAxios.get.mockRejectedValue(new Error("Default no auth"));
+    mockedAxios.post.mockResolvedValue({ data: {} });
   });
 
   it("devrait rediriger vers /login si non authentifié", async () => {

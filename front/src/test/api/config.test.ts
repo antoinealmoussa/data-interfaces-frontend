@@ -1,39 +1,35 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import axios from "axios";
 
-vi.mock("axios", () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    defaults: { withCredentials: false },
-    interceptors: {
-      request: { use: vi.fn(), eject: vi.fn() },
-      response: { use: vi.fn(), eject: vi.fn() },
+vi.mock("../../api/config", () => ({
+    default: {
+        backend: "http://localhost:8000/api/v1",
     },
-    create: vi.fn(),
-  },
 }));
 
-describe("API Config", () => {
+describe("API Client", () => {
     let errorHandler: (error: any) => Promise<any>;
     let dispatchSpy: vi.SpyInstance;
+    let mockedApiClient: any;
 
     beforeEach(async () => {
         vi.clearAllMocks();
         vi.resetModules();
-        await import("../../api/config");
+        const mod = await import("../../api/client");
+        mockedApiClient = mod.default;
 
-        errorHandler = vi.mocked(axios.interceptors.response.use).mock.calls[0][1];
+        errorHandler = mockedApiClient.interceptors.response.use.mock.calls[0][1];
         dispatchSpy = vi.spyOn(window, "dispatchEvent");
     });
 
     afterEach(() => {
-        dispatchSpy.mockRestore();
+        dispatchSpy?.mockRestore();
     });
 
-    it("devrait être configuré avec withCredentials", () => {
-        expect(axios.defaults.withCredentials).toBe(true);
+    it("devrait être créé avec withCredentials", () => {
+        expect(vi.mocked(axios.create)).toHaveBeenCalledWith(
+            expect.objectContaining({ withCredentials: true })
+        );
     });
 
     it("devrait dispatcher auth:unauthorized pour une 401 sur endpoint non-auth", async () => {
@@ -42,7 +38,7 @@ describe("API Config", () => {
 
         const error = {
             response: { status: 401 },
-            config: { url: "/api/v1/users/me" },
+            config: { url: "/users/me" },
         };
 
         await expect(errorHandler(error)).rejects.toEqual(error);
@@ -54,7 +50,7 @@ describe("API Config", () => {
     it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /login", async () => {
         const error = {
             response: { status: 401 },
-            config: { url: "/api/v1/login" },
+            config: { url: "/login" },
         };
 
         await expect(errorHandler(error)).rejects.toEqual(error);
@@ -64,7 +60,7 @@ describe("API Config", () => {
     it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /register", async () => {
         const error = {
             response: { status: 401 },
-            config: { url: "/api/v1/register" },
+            config: { url: "/register" },
         };
 
         await expect(errorHandler(error)).rejects.toEqual(error);
@@ -74,7 +70,7 @@ describe("API Config", () => {
     it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /logout", async () => {
         const error = {
             response: { status: 401 },
-            config: { url: "/api/v1/logout" },
+            config: { url: "/logout" },
         };
 
         await expect(errorHandler(error)).rejects.toEqual(error);
@@ -84,7 +80,7 @@ describe("API Config", () => {
     it("ne devrait pas dispatcher pour une erreur non-401", async () => {
         const error = {
             response: { status: 403 },
-            config: { url: "/api/v1/users/me" },
+            config: { url: "/users/me" },
         };
 
         await expect(errorHandler(error)).rejects.toEqual(error);

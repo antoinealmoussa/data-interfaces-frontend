@@ -105,8 +105,8 @@ export const TournamentManagement = () => {
     setTournamentsLoading(true);
     setTournamentsError(null);
     try {
-      const res = await tournamentApi.getByTeam(team.name);
-      const sorted = res.data
+      const data = await tournamentApi.getByTeam(team.name);
+      const sorted = data
         .map((t) => ({
           ...t,
           player_names: [...t.player_names].sort((a, b) => a.localeCompare(b)),
@@ -123,9 +123,9 @@ export const TournamentManagement = () => {
   const loadPlayers = useCallback(async () => {
     if (!team) return;
     try {
-      const res = await playerApi.getByTeam(team.name);
+      const data = await playerApi.getByTeam(team.name);
       setPlayers(
-        res.data.map((p) => ({
+        data.map((p) => ({
           id: p.id,
           name: p.name,
           category_names: p.category_names,

@@ -3,8 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserProfile } from "../../../pages/management/UserProfile";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
@@ -223,7 +221,7 @@ describe("UserProfile", () => {
 
         await waitFor(() => {
             expect(mockedAxios.put).toHaveBeenCalledWith(
-                "http://localhost:8000/api/v1/users/me",
+                "/users/me",
                 { first_name: "Jane" }
             );
         });
