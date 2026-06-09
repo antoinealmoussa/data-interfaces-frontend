@@ -1,16 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import { AuthProvider } from "../../contexts/AuthContext";
-import { Home } from "../../pages/Home";
-import axios from "axios";
-const mockedAxios = vi.mocked(axios, true);
 
-vi.mock("../../api/config", () => ({
-  default: {
-    backend: "http://localhost:8000/api/v1",
-  },
+const mockedClient = vi.hoisted(() => ({
+  get: vi.fn(),
 }));
+
+vi.mock("../../api/client", () => ({
+  default: mockedClient,
+}));
+
+import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { AuthProvider, AuthContext } from "../../contexts/AuthContext";
+import { Home } from "../../pages/Home";
 
 const mockAuthContext = {
   isAuthenticated: true,
@@ -64,7 +65,7 @@ describe("Home", () => {
   });
 
   it("devrait faire une requête GET lors de la soumission", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
+    mockedClient.get.mockResolvedValueOnce({
       data: { text: "Résultat du test" },
     });
 
@@ -80,7 +81,7 @@ describe("Home", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => {
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(mockedClient.get).toHaveBeenCalledWith(
         "/search/topic",
         expect.objectContaining({
           params: { query: "sujet de test" },
@@ -90,7 +91,7 @@ describe("Home", () => {
   });
 
   it("devrait afficher la réponse du serveur", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
+    mockedClient.get.mockResolvedValueOnce({
       data: { text: "Voici la réponse du serveur" },
     });
 
@@ -113,7 +114,7 @@ describe("Home", () => {
   });
 
   it("devrait afficher un message d'erreur en cas d'échec", async () => {
-    mockedAxios.get.mockRejectedValueOnce(new Error("Erreur serveur"));
+    mockedClient.get.mockRejectedValueOnce(new Error("Erreur serveur"));
 
     await act(async () => {
       renderHome();
@@ -142,18 +143,16 @@ describe("Home", () => {
 
     fireEvent.keyDown(input, { key: "Enter" });
 
-    const searchCalls = mockedAxios.get.mock.calls.filter((call) =>
+    const searchCalls = mockedClient.get.mock.calls.filter((call) =>
       call[0].includes("/search/topic"),
     );
     expect(searchCalls).toHaveLength(0);
   });
 
   it("devrait afficher le détail de l'erreur quand response.data.detail est présent", async () => {
-    const axiosError = new Error("Axios error");
-    (axiosError as any).isAxiosError = true;
-    (axiosError as any).response = { data: { detail: "Message personnalisé" } };
-    mockedAxios.get.mockRejectedValue(axiosError);
-    mockedAxios.isAxiosError = vi.fn().mockReturnValue(true);
+    const apiError = new Error("API error");
+    (apiError as any).response = { data: { detail: "Message personnalisé" } };
+    mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {
       renderHome();
@@ -172,11 +171,9 @@ describe("Home", () => {
   });
 
   it("devrait afficher le message générique quand response.data n'a pas de detail", async () => {
-    const axiosError = new Error("Axios error");
-    (axiosError as any).isAxiosError = true;
-    (axiosError as any).response = { data: {} };
-    mockedAxios.get.mockRejectedValue(axiosError);
-    mockedAxios.isAxiosError = vi.fn().mockReturnValue(true);
+    const apiError = new Error("API error");
+    (apiError as any).response = { data: {} };
+    mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {
       renderHome();

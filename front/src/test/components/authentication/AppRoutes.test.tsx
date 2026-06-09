@@ -1,37 +1,45 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+
+const mockedClient = vi.hoisted(() => ({
+  get: vi.fn(),
+}));
+
+vi.mock("../../../api/client", () => ({
+  default: mockedClient,
+}));
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AppRoutes } from "../../../components/authentication/AppRoutes";
 import { AuthProvider } from "../../../contexts/AuthContext";
-import axios from "axios";
-const mockedAxios = vi.mocked(axios, true);
 
-vi.mock("../../../api/config", () => ({
-  default: {
-    backend: "http://localhost:8000/api/v1",
-  },
-}));
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
 
 const renderWithProviders = (initialEntries: string[]) => {
   return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 };
 
 describe("AppRoutes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedAxios.get.mockRejectedValue(new Error("No auth"));
+    mockedClient.get.mockRejectedValue(new Error("No auth"));
   });
 
   it("devrait afficher la page de login pour /login", async () => {
     renderWithProviders(["/login"]);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     });
   });
@@ -39,13 +47,13 @@ describe("AppRoutes", () => {
   it("devrait afficher la page d'inscription pour /register", async () => {
     renderWithProviders(["/register"]);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
   });
 
   it("devrait afficher la page d'accueil pour / quand authentifié", async () => {
-    mockedAxios.get.mockResolvedValue({
+    mockedClient.get.mockResolvedValue({
       data: {
         user: {
           id: 1,
@@ -59,13 +67,13 @@ describe("AppRoutes", () => {
 
     renderWithProviders(["/"]);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText(/Bonjour Jean/)).toBeInTheDocument();
     });
   });
 
   it("devrait afficher les routes dynamiques pour les applications de l'utilisateur", async () => {
-    mockedAxios.get.mockResolvedValue({
+    mockedClient.get.mockResolvedValue({
       data: {
         user: {
           id: 1,
@@ -79,13 +87,13 @@ describe("AppRoutes", () => {
 
     renderWithProviders(["/rugby-teams"]);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText(/Chargement\.\.\./i)).toBeInTheDocument();
     });
   });
 
   it("ne devrait pas afficher les routes dynamiques sans applications", async () => {
-    mockedAxios.get.mockResolvedValue({
+    mockedClient.get.mockResolvedValue({
       data: {
         user: {
           id: 1,
@@ -99,7 +107,7 @@ describe("AppRoutes", () => {
 
     renderWithProviders(["/rugby-teams"]);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.queryByText(/Chargement\.\.\./i)).not.toBeInTheDocument();
     });
   });

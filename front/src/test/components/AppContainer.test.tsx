@@ -1,21 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const mockedClient = vi.hoisted(() => ({
+  get: vi.fn(),
+}));
+
+vi.mock("../../api/client", () => ({
+  default: mockedClient,
+}));
+
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppContainer } from "../../components/AppContainer";
 import { AuthProvider } from "../../contexts/AuthContext";
-import axios from "axios";
-const mockedAxios = vi.mocked(axios, true);
-
-vi.mock("../../api/config", () => ({
-  default: {
-    backend: "http://localhost:8000/api/v1",
-  },
-}));
 
 describe("AppContainer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedAxios.get.mockResolvedValue({
+    mockedClient.get.mockResolvedValue({
       data: {
         user: {
           id: 1,
