@@ -6,14 +6,16 @@ const BASE_URL = "/teams";
 export const playerApi = {
   getByTeam: (teamName: string, skip = 0, limit = 100) =>
     apiClient
-      .get<Player[]>(
-        `${BASE_URL}/${encodeURIComponent(teamName)}/players?skip=${skip}&limit=${limit}`,
-      )
+      .get<
+        Player[]
+      >(`${BASE_URL}/${encodeURIComponent(teamName)}/players?skip=${skip}&limit=${limit}`)
       .then((r) => r.data),
 
   getById: (teamName: string, playerId: number) =>
     apiClient
-      .get<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`)
+      .get<Player>(
+        `${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`,
+      )
       .then((r) => r.data),
 
   create: (teamName: string, data: CreatePlayerDto) =>

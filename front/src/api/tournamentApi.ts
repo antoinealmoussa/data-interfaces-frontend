@@ -6,9 +6,9 @@ const BASE_URL = "/teams";
 export const tournamentApi = {
   getByTeam: (teamName: string) =>
     apiClient
-      .get<Tournament[]>(
-        `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments`,
-      )
+      .get<
+        Tournament[]
+      >(`${BASE_URL}/${encodeURIComponent(teamName)}/tournaments`)
       .then((r) => r.data),
 
   create: (teamName: string, data: CreateTournamentDto) =>

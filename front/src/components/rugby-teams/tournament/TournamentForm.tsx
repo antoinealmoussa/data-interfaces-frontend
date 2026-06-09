@@ -15,7 +15,10 @@ import {
 } from "@mui/material";
 import { FormActions } from "../../common/FormActions";
 import { toggleArrayItem } from "../../../utils/array";
-import type { Tournament, CreateTournamentDto } from "../../../types/tournamentTypes";
+import type {
+  Tournament,
+  CreateTournamentDto,
+} from "../../../types/tournamentTypes";
 
 interface TournamentFormProps {
   defaultValues?: Tournament;
@@ -119,7 +122,11 @@ export const TournamentForm = ({
                   control={
                     <Checkbox
                       checked={field.value.includes(player.name)}
-                      onChange={() => field.onChange(toggleArrayItem(field.value, player.name))}
+                      onChange={() =>
+                        field.onChange(
+                          toggleArrayItem(field.value, player.name),
+                        )
+                      }
                     />
                   }
                   label={player.name}

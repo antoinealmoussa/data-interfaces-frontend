@@ -66,10 +66,7 @@ export const UserProfile = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await apiClient.put<User>(
-        "/users/me",
-        modifiedData,
-      );
+      const response = await apiClient.put<User>("/users/me", modifiedData);
       setUser(response.data);
       setSnackbar({
         open: true,

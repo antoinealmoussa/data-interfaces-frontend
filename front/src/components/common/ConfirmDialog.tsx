@@ -33,7 +33,11 @@ export const ConfirmDialog = ({
   onCancel,
 }: ConfirmDialogProps) => {
   return (
-    <Dialog open={open} onClose={loading ? undefined : onCancel} disableEscapeKeyDown={loading}>
+    <Dialog
+      open={open}
+      onClose={loading ? undefined : onCancel}
+      disableEscapeKeyDown={loading}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>

@@ -57,8 +57,7 @@ export const TeamManagement = () => {
     queryClient.invalidateQueries({ queryKey: ["players", team?.name] });
 
   const createMutation = useMutation({
-    mutationFn: (data: CreatePlayerDto) =>
-      playerApi.create(team!.name, data),
+    mutationFn: (data: CreatePlayerDto) => playerApi.create(team!.name, data),
     onSuccess: () => {
       invalidatePlayers();
       setSnackbar({
@@ -163,9 +162,7 @@ export const TeamManagement = () => {
           rows={players}
           actions={playerActions}
           loading={playersLoading}
-          error={
-            playersError ? "Erreur lors du chargement des joueurs" : null
-          }
+          error={playersError ? "Erreur lors du chargement des joueurs" : null}
           emptyMessage="Aucun joueur dans cette équipe"
           getRowId={(p) => p.id}
         />

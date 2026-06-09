@@ -14,9 +14,17 @@ interface UseTeamAndSeasonResult {
 }
 
 export const useTeamAndSeason = (): UseTeamAndSeasonResult => {
-  const { teamName, seasonName } = useParams<{ teamName: string; seasonName: string }>();
+  const { teamName, seasonName } = useParams<{
+    teamName: string;
+    seasonName: string;
+  }>();
 
-  const { data: teams = [], isPending, error: queryError, refetch } = useQuery({
+  const {
+    data: teams = [],
+    isPending,
+    error: queryError,
+    refetch,
+  } = useQuery({
     queryKey: ["teams"],
     queryFn: () => teamApi.getAll(),
   });
@@ -25,12 +33,12 @@ export const useTeamAndSeason = (): UseTeamAndSeasonResult => {
   const decodedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
 
   const team = decodedTeamName
-    ? teams.find((t) => t.name === decodedTeamName) ?? null
+    ? (teams.find((t) => t.name === decodedTeamName) ?? null)
     : null;
 
   const season =
     team && decodedSeasonName
-      ? team.seasons.find((s) => s.name === decodedSeasonName) ?? null
+      ? (team.seasons.find((s) => s.name === decodedSeasonName) ?? null)
       : null;
 
   return {

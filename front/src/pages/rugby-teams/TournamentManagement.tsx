@@ -1,9 +1,4 @@
-import {
-  Box,
-  Button,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
+import { Box, Button, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -48,8 +43,9 @@ export const TournamentManagement = () => {
     message: "",
   });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingTournament, setEditingTournament] =
-    useState<Tournament | null>(null);
+  const [editingTournament, setEditingTournament] = useState<Tournament | null>(
+    null,
+  );
   const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
 
   const {
@@ -98,9 +94,7 @@ export const TournamentManagement = () => {
       label: "Joueurs",
       sortable: false,
       render: (value) =>
-        (value as string[]).length > 0
-          ? (value as string[]).join(", ")
-          : "—",
+        (value as string[]).length > 0 ? (value as string[]).join(", ") : "—",
     },
   ];
 

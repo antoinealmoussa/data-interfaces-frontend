@@ -23,7 +23,12 @@ interface PlayerFormProps {
   teamCategories: string[];
 }
 
-export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }: PlayerFormProps) => {
+export const PlayerForm = ({
+  defaultValues,
+  onSubmit,
+  onCancel,
+  teamCategories,
+}: PlayerFormProps) => {
   const {
     register,
     handleSubmit,
@@ -126,7 +131,9 @@ export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }
                   control={
                     <Checkbox
                       checked={field.value.includes(cat)}
-                      onChange={() => field.onChange(toggleArrayItem(field.value, cat))}
+                      onChange={() =>
+                        field.onChange(toggleArrayItem(field.value, cat))
+                      }
                     />
                   }
                   label={cat}

@@ -9,79 +9,77 @@ import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../api/config", () => ({
-    default: {
-        backend: "http://localhost:8000/api/v1",
-    },
+  default: {
+    backend: "http://localhost:8000/api/v1",
+  },
 }));
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-    return (
-        <BrowserRouter>
-            <AuthProvider>
-                {children}
-            </AuthProvider>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <AuthProvider>{children}</AuthProvider>
+    </BrowserRouter>
+  );
 };
 
 describe("useLogout", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        mockedAxios.get.mockResolvedValueOnce({
-            data: { user: null, applications: [] },
-        });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { user: null, applications: [] },
+    });
+  });
+
+  it("devrait retourner une fonction de logout", async () => {
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: AllTheProviders,
     });
 
-    it("devrait retourner une fonction de logout", async () => {
-        const { result } = renderHook(() => useLogout(), {
-            wrapper: AllTheProviders,
-        });
+    await waitFor(() => {
+      expect(typeof result.current).toBe("function");
+    });
+  });
 
-        await waitFor(() => {
-            expect(typeof result.current).toBe("function");
-        });
+  it("devrait être une fonction qui peut être appelée", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { user: null, applications: [] },
+    });
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { message: "Logged out" },
+    });
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { user: null, applications: [] },
     });
 
-    it("devrait être une fonction qui peut être appelée", async () => {
-        mockedAxios.get.mockResolvedValueOnce({
-            data: { user: null, applications: [] },
-        });
-        mockedAxios.post.mockResolvedValueOnce({
-            data: { message: "Logged out" },
-        });
-        mockedAxios.get.mockResolvedValueOnce({
-            data: { user: null, applications: [] },
-        });
+    const TestComponent: React.FC = () => {
+      const logout = useLogout();
+      const [called, setCalled] = useState(false);
 
-        const TestComponent: React.FC = () => {
-            const logout = useLogout();
-            const [called, setCalled] = useState(false);
-            
-            const handleClick = async () => {
-                await logout();
-                setCalled(true);
-            };
-            
-            return (
-                <button onClick={handleClick} data-testid="logout-btn">
-                    {called ? "Logged out" : "Not called"}
-                </button>
-            );
-        };
+      const handleClick = async () => {
+        await logout();
+        setCalled(true);
+      };
 
-        const { container } = render(
-            <BrowserRouter>
-                <AuthProvider>
-                    <TestComponent />
-                </AuthProvider>
-            </BrowserRouter>
-        );
+      return (
+        <button onClick={handleClick} data-testid="logout-btn">
+          {called ? "Logged out" : "Not called"}
+        </button>
+      );
+    };
 
-        const user = userEvent.setup();
-        await user.click(container.querySelector("button")!);
+    const { container } = render(
+      <BrowserRouter>
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      </BrowserRouter>,
+    );
 
-        await waitFor(() => {
-            expect(mockedAxios.post).toHaveBeenCalled();
-        });
+    const user = userEvent.setup();
+    await user.click(container.querySelector("button")!);
+
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalled();
     });
+  });
 });

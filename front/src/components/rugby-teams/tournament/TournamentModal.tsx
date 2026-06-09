@@ -1,6 +1,9 @@
 import { FormModal } from "../../common/FormModal";
 import { TournamentForm } from "./TournamentForm";
-import type { Tournament, CreateTournamentDto } from "../../../types/tournamentTypes";
+import type {
+  Tournament,
+  CreateTournamentDto,
+} from "../../../types/tournamentTypes";
 
 interface TournamentModalProps {
   open: boolean;

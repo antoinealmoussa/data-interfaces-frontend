@@ -15,11 +15,7 @@ export const TeamCreation = () => {
           {successMessage}
         </Alert>
       )}
-      {user && (
-        <TeamCreationForm
-          userId={user.id}
-        />
-      )}
+      {user && <TeamCreationForm userId={user.id} />}
     </Box>
   );
 };

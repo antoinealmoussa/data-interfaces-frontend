@@ -27,9 +27,9 @@ const BASE_URL = "/teams";
 export const trainingApi = {
   getAlgorithms: (teamName: string) =>
     apiClient
-      .get<AlgorithmInfo[]>(
-        `${BASE_URL}/${encodeURIComponent(teamName)}/training/algorithms`,
-      )
+      .get<
+        AlgorithmInfo[]
+      >(`${BASE_URL}/${encodeURIComponent(teamName)}/training/algorithms`)
       .then((r) => r.data),
 
   distribute: (teamName: string, data: DistributeRequest) =>

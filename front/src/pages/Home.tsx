@@ -19,12 +19,9 @@ export const Home = () => {
     setState("loading");
 
     try {
-      const response = await apiClient.get<{ text: string }>(
-        "/search/topic",
-        {
-          params: { query: searchValue },
-        },
-      );
+      const response = await apiClient.get<{ text: string }>("/search/topic", {
+        params: { query: searchValue },
+      });
       setResponseText(response.data.text);
       setState("success");
     } catch (error: unknown) {

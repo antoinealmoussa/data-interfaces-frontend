@@ -65,12 +65,18 @@ function getComparator<T>(
 
 const ROWS_PER_PAGE = 10;
 
-function matchesSearch<T>(row: T, columns: Column<T>[], search: string): boolean {
+function matchesSearch<T>(
+  row: T,
+  columns: Column<T>[],
+  search: string,
+): boolean {
   if (!search) return true;
   const lower = search.toLowerCase();
   return columns.some((col) => {
     const value = row[col.key as keyof T];
-    return String(value ?? "").toLowerCase().includes(lower);
+    return String(value ?? "")
+      .toLowerCase()
+      .includes(lower);
   });
 }
 
@@ -95,7 +101,9 @@ export const GenericDataTable = <T,>({
     if (!isControlled) setInternalSearch(value);
   };
 
-  const [orderBy, setOrderBy] = useState<keyof T | null>(defaultOrderBy ?? null);
+  const [orderBy, setOrderBy] = useState<keyof T | null>(
+    defaultOrderBy ?? null,
+  );
   const [order, setOrder] = useState<"asc" | "desc">(defaultOrder ?? "asc");
   const [page, setPage] = useState(0);
 
@@ -157,7 +165,9 @@ export const GenericDataTable = <T,>({
           }}
           slotProps={{
             input: {
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
+              startAdornment: (
+                <SearchIcon sx={{ mr: 1, color: "action.active" }} />
+              ),
             },
           }}
           sx={{ mb: 2, maxWidth: 320 }}
@@ -236,7 +246,9 @@ export const GenericDataTable = <T,>({
         rowsPerPage={ROWS_PER_PAGE}
         rowsPerPageOptions={[ROWS_PER_PAGE]}
         labelRowsPerPage=""
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} sur ${count}`
+        }
       />
     </Box>
   );

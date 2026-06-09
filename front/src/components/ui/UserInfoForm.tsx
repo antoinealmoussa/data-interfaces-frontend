@@ -81,11 +81,7 @@ export const UserInfoForm: React.FC<UserInfoFormProps> = ({
         helperText={errors.email?.message}
       />
 
-      <Button
-        variant="contained"
-        type="submit"
-        disabled={isSubmitting}
-      >
+      <Button variant="contained" type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Enregistrement..." : "Enregistrer"}
       </Button>
     </Box>

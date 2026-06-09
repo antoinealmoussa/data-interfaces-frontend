@@ -11,21 +11,33 @@ import { type AppName, type RouteProps } from "./types/routesTypes";
 import { AppNameMapper } from "./types/routesTypes";
 
 export const PRIVATE_STANDARD_ROUTES: Record<string, RouteProps> = {
-    HOME: { path: "/", element: <Home /> },
-    PROFILE: { path: "/profile", element: <UserProfile /> }
+  HOME: { path: "/", element: <Home /> },
+  PROFILE: { path: "/profile", element: <UserProfile /> },
 };
 
 export const DYNAMIC_APP_ROUTES: Record<AppName, RouteProps> = {
-    [AppNameMapper.BIKE_EXPLORATION]: { path: "/bike-exploration", element: <BikeExploration /> },
-    [AppNameMapper.RUGBY_TEAMS]: { 
-      path: "/rugby-teams",
-      element: <RugbyTeams />,
-      children: [
-        { path: "team-creation", element: <TeamCreation /> },
-        { path: ":teamName/:seasonName/team-management", element: <TeamManagement /> },
-        { path: ":teamName/:seasonName/tournament", element: <TournamentManagement /> },
-        { path: ":teamName/:seasonName/training", element: <Training /> },
-      ]
-    },
-    [AppNameMapper.RACE_PREPARATION]: { path: "/race-preparation", element: <RacePreparation /> },
-}
+  [AppNameMapper.BIKE_EXPLORATION]: {
+    path: "/bike-exploration",
+    element: <BikeExploration />,
+  },
+  [AppNameMapper.RUGBY_TEAMS]: {
+    path: "/rugby-teams",
+    element: <RugbyTeams />,
+    children: [
+      { path: "team-creation", element: <TeamCreation /> },
+      {
+        path: ":teamName/:seasonName/team-management",
+        element: <TeamManagement />,
+      },
+      {
+        path: ":teamName/:seasonName/tournament",
+        element: <TournamentManagement />,
+      },
+      { path: ":teamName/:seasonName/training", element: <Training /> },
+    ],
+  },
+  [AppNameMapper.RACE_PREPARATION]: {
+    path: "/race-preparation",
+    element: <RacePreparation />,
+  },
+};

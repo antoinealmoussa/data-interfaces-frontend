@@ -8,7 +8,12 @@ interface FormModalProps {
   onClose: () => void;
 }
 
-export const FormModal = ({ open, title, children, onClose }: FormModalProps) => (
+export const FormModal = ({
+  open,
+  title,
+  children,
+  onClose,
+}: FormModalProps) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
     <DialogTitle>{title}</DialogTitle>
     <DialogContent>{children}</DialogContent>

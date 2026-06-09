@@ -6,10 +6,16 @@ interface FormActionsProps {
   submitLabel?: string;
 }
 
-export const FormActions = ({ onCancel, isSubmitting, submitLabel = "Enregistrer" }: FormActionsProps) => (
+export const FormActions = ({
+  onCancel,
+  isSubmitting,
+  submitLabel = "Enregistrer",
+}: FormActionsProps) => (
   <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
     {onCancel && (
-      <Button onClick={onCancel} disabled={isSubmitting}>Annuler</Button>
+      <Button onClick={onCancel} disabled={isSubmitting}>
+        Annuler
+      </Button>
     )}
     <Button type="submit" variant="contained" disabled={isSubmitting}>
       {isSubmitting ? "Enregistrement..." : submitLabel}

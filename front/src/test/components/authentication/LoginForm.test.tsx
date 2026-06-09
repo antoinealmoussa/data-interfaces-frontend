@@ -8,140 +8,160 @@ const mockedAxios = vi.mocked(axios, true);
 
 // Mock de la config API
 vi.mock("../../../api/config", () => ({
-    default: {
-        backend: "http://localhost:8000/api/v1",
-    },
+  default: {
+    backend: "http://localhost:8000/api/v1",
+  },
 }));
 
 const renderWithRouter = (component: React.ReactElement) => {
-    return render(<BrowserRouter>{component}</BrowserRouter>);
+  return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
 describe("LoginForm", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("devrait afficher les champs email et mot de passe", () => {
+    renderWithRouter(<LoginForm />);
+
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument();
+  });
+
+  it("devrait afficher le bouton de connexion", () => {
+    renderWithRouter(<LoginForm />);
+
+    expect(
+      screen.getByRole("button", { name: /se connecter/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("devrait afficher le bouton d'inscription", () => {
+    renderWithRouter(<LoginForm />);
+
+    expect(
+      screen.getByRole("link", { name: /s'inscrire/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("devrait permettre la saisie d'email et de mot de passe", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<LoginForm />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/mot de passe/i);
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "password123");
+
+    expect(emailInput).toHaveValue("test@example.com");
+    expect(passwordInput).toHaveValue("password123");
+  });
+
+  it("devrait soumettre le formulaire avec les données correctes", async () => {
+    const user = userEvent.setup();
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { message: "Login successful" },
+    });
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        user: {
+          id: 1,
+          email: "test@example.com",
+          first_name: "Test",
+          surname: "User",
+        },
+        applications: [],
+      },
     });
 
-    it("devrait afficher les champs email et mot de passe", () => {
-        renderWithRouter(<LoginForm />);
+    renderWithRouter(<LoginForm />);
 
-        expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/mot de passe/i)).toBeInTheDocument();
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/mot de passe/i);
+    const submitButton = screen.getByRole("button", { name: /se connecter/i });
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "password123");
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalled();
     });
+    const [url, body] = mockedAxios.post.mock.calls[0] as [
+      string,
+      URLSearchParams,
+    ];
+    expect(url).toBe("/users/login");
+    expect(body.get("username")).toBe("test@example.com");
+    expect(body.get("password")).toBe("password123");
+  });
 
-    it("devrait afficher le bouton de connexion", () => {
-        renderWithRouter(<LoginForm />);
+  it("devrait afficher 'Connexion...' pendant la soumission", async () => {
+    const user = userEvent.setup();
+    mockedAxios.post.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve({ data: {} }), 100);
+        }),
+    );
 
-        expect(screen.getByRole("button", { name: /se connecter/i })).toBeInTheDocument();
+    renderWithRouter(<LoginForm />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/mot de passe/i);
+    const submitButton = screen.getByRole("button", { name: /se connecter/i });
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "password123");
+    await user.click(submitButton);
+
+    expect(
+      screen.getByRole("button", { name: /connexion\.\.\./i }),
+    ).toBeInTheDocument();
+  });
+
+  it("devrait afficher la citation de Wout Van Aert", () => {
+    renderWithRouter(<LoginForm />);
+
+    expect(
+      screen.getByText(/Roule aussi vite que t'es con/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Wout Van Aert/)).toBeInTheDocument();
+  });
+
+  it("devrait gérer l'erreur de connexion", async () => {
+    const user = userEvent.setup();
+    mockedAxios.post.mockRejectedValueOnce(new Error("Network Error"));
+
+    renderWithRouter(<LoginForm />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/mot de passe/i);
+    const submitButton = screen.getByRole("button", { name: /se connecter/i });
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "wrongpassword");
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Erreur lors de la connexion"),
+      ).toBeInTheDocument();
     });
+  });
 
-    it("devrait afficher le bouton d'inscription", () => {
-        renderWithRouter(<LoginForm />);
+  it("devrait avoir un lien vers la page d'inscription", () => {
+    renderWithRouter(<LoginForm />);
 
-        expect(screen.getByRole("link", { name: /s'inscrire/i })).toBeInTheDocument();
-    });
+    const link = screen.getByRole("link", { name: /s'inscrire/i });
+    expect(link).toHaveAttribute("href", "/register");
+  });
 
-    it("devrait permettre la saisie d'email et de mot de passe", async () => {
-        const user = userEvent.setup();
-        renderWithRouter(<LoginForm />);
+  it("devrait avoir un Divider avec le texte OU", () => {
+    renderWithRouter(<LoginForm />);
 
-        const emailInput = screen.getByLabelText(/email/i);
-        const passwordInput = screen.getByLabelText(/mot de passe/i);
-
-        await user.type(emailInput, "test@example.com");
-        await user.type(passwordInput, "password123");
-
-        expect(emailInput).toHaveValue("test@example.com");
-        expect(passwordInput).toHaveValue("password123");
-    });
-
-    it("devrait soumettre le formulaire avec les données correctes", async () => {
-        const user = userEvent.setup();
-        mockedAxios.post.mockResolvedValueOnce({
-            data: { message: "Login successful" },
-        });
-        mockedAxios.get.mockResolvedValueOnce({
-            data: { user: { id: 1, email: "test@example.com", first_name: "Test", surname: "User" }, applications: [] },
-        });
-
-        renderWithRouter(<LoginForm />);
-
-        const emailInput = screen.getByLabelText(/email/i);
-        const passwordInput = screen.getByLabelText(/mot de passe/i);
-        const submitButton = screen.getByRole("button", { name: /se connecter/i });
-
-        await user.type(emailInput, "test@example.com");
-        await user.type(passwordInput, "password123");
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(mockedAxios.post).toHaveBeenCalled();
-        });
-        const [url, body] = mockedAxios.post.mock.calls[0] as [string, URLSearchParams];
-        expect(url).toBe("/users/login");
-        expect(body.get('username')).toBe("test@example.com");
-        expect(body.get('password')).toBe("password123");
-    });
-
-    it("devrait afficher 'Connexion...' pendant la soumission", async () => {
-        const user = userEvent.setup();
-        mockedAxios.post.mockImplementation(
-            () =>
-                new Promise((resolve) => {
-                    setTimeout(() => resolve({ data: {} }), 100);
-                })
-        );
-
-        renderWithRouter(<LoginForm />);
-
-        const emailInput = screen.getByLabelText(/email/i);
-        const passwordInput = screen.getByLabelText(/mot de passe/i);
-        const submitButton = screen.getByRole("button", { name: /se connecter/i });
-
-        await user.type(emailInput, "test@example.com");
-        await user.type(passwordInput, "password123");
-        await user.click(submitButton);
-
-        expect(screen.getByRole("button", { name: /connexion\.\.\./i })).toBeInTheDocument();
-    });
-
-    it("devrait afficher la citation de Wout Van Aert", () => {
-        renderWithRouter(<LoginForm />);
-
-        expect(screen.getByText(/Roule aussi vite que t'es con/)).toBeInTheDocument();
-        expect(screen.getByText(/Wout Van Aert/)).toBeInTheDocument();
-    });
-
-    it("devrait gérer l'erreur de connexion", async () => {
-        const user = userEvent.setup();
-        mockedAxios.post.mockRejectedValueOnce(new Error("Network Error"));
-
-        renderWithRouter(<LoginForm />);
-
-        const emailInput = screen.getByLabelText(/email/i);
-        const passwordInput = screen.getByLabelText(/mot de passe/i);
-        const submitButton = screen.getByRole("button", { name: /se connecter/i });
-
-        await user.type(emailInput, "test@example.com");
-        await user.type(passwordInput, "wrongpassword");
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(screen.getByText("Erreur lors de la connexion")).toBeInTheDocument();
-        });
-    });
-
-    it("devrait avoir un lien vers la page d'inscription", () => {
-        renderWithRouter(<LoginForm />);
-
-        const link = screen.getByRole("link", { name: /s'inscrire/i });
-        expect(link).toHaveAttribute("href", "/register");
-    });
-
-    it("devrait avoir un Divider avec le texte OU", () => {
-        renderWithRouter(<LoginForm />);
-
-        expect(screen.getByText("OU")).toBeInTheDocument();
-    });
+    expect(screen.getByText("OU")).toBeInTheDocument();
+  });
 });
-

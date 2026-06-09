@@ -60,7 +60,13 @@ const DraggablePlayer = ({ player }: { player: Player }) => {
   );
 };
 
-const TeamCard = ({ team, isOver }: { team: TrainingTeam; isOver: boolean }) => (
+const TeamCard = ({
+  team,
+  isOver,
+}: {
+  team: TrainingTeam;
+  isOver: boolean;
+}) => (
   <Card
     sx={{
       outline: isOver ? "2px solid" : undefined,
@@ -96,15 +102,17 @@ export const Training = () => {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
   const [teamCount, setTeamCount] = useState(2);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
-  const [trainingTeams, setTrainingTeams] = useState<TrainingTeam[] | null>(null);
+  const [trainingTeams, setTrainingTeams] = useState<TrainingTeam[] | null>(
+    null,
+  );
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
 
   const { data: players = [], isLoading: playersLoading } = useQuery({
     queryKey: ["players", team?.name],
     queryFn: () =>
-      playerApi.getByTeam(team!.name).then((data) =>
-        data.sort((a, b) => a.name.localeCompare(b.name)),
-      ),
+      playerApi
+        .getByTeam(team!.name)
+        .then((data) => data.sort((a, b) => a.name.localeCompare(b.name))),
     enabled: !!team,
   });
 
@@ -294,15 +302,9 @@ export const Training = () => {
 
         {trainingTeams && (
           <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
-            >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Typography variant="h6">Équipes constituées</Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleGenerate}
-              >
+              <Button variant="outlined" size="small" onClick={handleGenerate}>
                 Regénérer
               </Button>
             </Box>

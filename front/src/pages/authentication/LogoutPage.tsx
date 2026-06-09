@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { useLogout } from "../../hooks/useLogout"
+import { useLogout } from "../../hooks/useLogout";
 
 export const LogoutPage: React.FC = () => {
-    const logout = useLogout();
+  const logout = useLogout();
 
-    useEffect(() => {
-       logout()
-    }, [logout]);
+  useEffect(() => {
+    logout();
+  }, [logout]);
 
-    return null;
-}
+  return null;
+};

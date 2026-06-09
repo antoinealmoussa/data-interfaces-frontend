@@ -10,5 +10,3 @@ export interface CreateTournamentDto {
   category_name: string;
   player_names: string[];
 }
-
-

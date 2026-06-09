@@ -16,13 +16,13 @@ describe("LogoutPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedAxios.get.mockResolvedValueOnce({
-        data: { user: null, applications: [] },
+      data: { user: null, applications: [] },
     });
   });
 
   it("devrait rediriger vers la page de login", async () => {
     mockedAxios.get.mockResolvedValueOnce({
-        data: { user: null, applications: [] },
+      data: { user: null, applications: [] },
     });
     mockedAxios.post.mockResolvedValueOnce({
       data: { message: "Logged out" },

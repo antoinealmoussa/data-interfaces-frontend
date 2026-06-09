@@ -13,7 +13,10 @@ const menuItems: SidebarItem[] = [
 ];
 
 export const RugbyTeamsSidebar = () => {
-  const { teamName, seasonName } = useParams<{ teamName: string; seasonName: string }>();
+  const { teamName, seasonName } = useParams<{
+    teamName: string;
+    seasonName: string;
+  }>();
   const { teams } = useTeamAndSeason();
   const navigate = useNavigate();
 
@@ -30,8 +33,7 @@ export const RugbyTeamsSidebar = () => {
   const selectedTeamName = teamName ? decodeURIComponent(teamName) : null;
   const selectedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
 
-  const visibleItems =
-    selectedTeamName && selectedSeasonName ? menuItems : [];
+  const visibleItems = selectedTeamName && selectedSeasonName ? menuItems : [];
 
   return (
     <GenericSidebar

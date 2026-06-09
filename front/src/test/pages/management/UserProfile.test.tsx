@@ -6,224 +6,235 @@ import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
-    default: {
-        backend: "http://localhost:8000/api/v1",
-    },
+  default: {
+    backend: "http://localhost:8000/api/v1",
+  },
 }));
 
 const mockUser = {
-    id: 1,
-    email: "test@example.com",
-    first_name: "John",
-    surname: "Doe",
+  id: 1,
+  email: "test@example.com",
+  first_name: "John",
+  surname: "Doe",
 };
 
 const mockUserResponse = { user: mockUser };
 
 describe("UserProfile", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("devrait afficher un chargement pendant le chargement des données", () => {
+    mockedAxios.get.mockImplementation(() => new Promise(() => {}));
+
+    render(<UserProfile />);
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+  });
+
+  it("devrait afficher le titre Mon profil", async () => {
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
     });
 
-    it("devrait afficher un chargement pendant le chargement des données", () => {
-        mockedAxios.get.mockImplementation(
-            () => new Promise(() => {})
-        );
+    render(<UserProfile />);
 
-        render(<UserProfile />);
-        expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Mon profil")).toBeInTheDocument();
+    });
+  });
+
+  it("devrait afficher le formulaire avec les données utilisateur", async () => {
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
     });
 
-    it("devrait afficher le titre Mon profil", async () => {
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
+    render(<UserProfile />);
 
-        render(<UserProfile />);
-
-        await waitFor(() => {
-            expect(screen.getByText("Mon profil")).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
 
-    it("devrait afficher le formulaire avec les données utilisateur", async () => {
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
+    expect(screen.getByLabelText(/prénom/i)).toHaveValue("John");
+    expect(screen.getByLabelText(/nom de famille/i)).toHaveValue("Doe");
+    expect(screen.getByLabelText(/email/i)).toHaveValue("test@example.com");
+  });
 
-        render(<UserProfile />);
-
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
-
-        expect(screen.getByLabelText(/prénom/i)).toHaveValue("John");
-        expect(screen.getByLabelText(/nom de famille/i)).toHaveValue("Doe");
-        expect(screen.getByLabelText(/email/i)).toHaveValue("test@example.com");
+  it("devrait afficher un message de succès après une mise à jour réussie", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
+    });
+    mockedAxios.put.mockResolvedValue({
+      data: { ...mockUser, first_name: "Jane" },
     });
 
-    it("devrait afficher un message de succès après une mise à jour réussie", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
-        mockedAxios.put.mockResolvedValue({
-            data: { ...mockUser, first_name: "Jane" },
-        });
+    render(<UserProfile />);
 
-        render(<UserProfile />);
-
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
-
-        const firstNameInput = screen.getByLabelText(/prénom/i);
-        await user.clear(firstNameInput);
-        await user.type(firstNameInput, "Jane");
-
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(screen.getByText(/profil mis à jour avec succès/i)).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
 
-    it("devrait afficher un message d'erreur si la mise à jour échoue", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
-        mockedAxios.put.mockRejectedValue(new Error("Network Error"));
+    const firstNameInput = screen.getByLabelText(/prénom/i);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Jane");
 
-        render(<UserProfile />);
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
 
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(
+        screen.getByText(/profil mis à jour avec succès/i),
+      ).toBeInTheDocument();
+    });
+  });
 
-        const firstNameInput = screen.getByLabelText(/prénom/i);
-        await user.clear(firstNameInput);
-        await user.type(firstNameInput, "Jane");
+  it("devrait afficher un message d'erreur si la mise à jour échoue", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
+    });
+    mockedAxios.put.mockRejectedValue(new Error("Network Error"));
 
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
+    render(<UserProfile />);
 
-        await waitFor(() => {
-            expect(screen.getByText(/erreur lors de la mise à jour/i)).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
 
-    it("ne devrait pas envoyer de requête si aucune modification n'a été faite", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
+    const firstNameInput = screen.getByLabelText(/prénom/i);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Jane");
 
-        render(<UserProfile />);
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
 
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(
+        screen.getByText(/erreur lors de la mise à jour/i),
+      ).toBeInTheDocument();
+    });
+  });
 
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(screen.getByText(/aucune modification détectée/i)).toBeInTheDocument();
-        });
-        expect(mockedAxios.put).not.toHaveBeenCalled();
+  it("ne devrait pas envoyer de requête si aucune modification n'a été faite", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
     });
 
-    it("devrait afficher un message d'erreur si le chargement échoue", async () => {
-        mockedAxios.get.mockRejectedValue(new Error("Network Error"));
+    render(<UserProfile />);
 
-        render(<UserProfile />);
-
-        await waitFor(() => {
-            expect(screen.getByText(/erreur lors du chargement du profil/i)).toBeInTheDocument();
-        });
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
 
-    it("devrait désactiver le bouton pendant la soumission", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
-        mockedAxios.put.mockImplementation(
-            () => new Promise((resolve) => setTimeout(resolve, 100))
-        );
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
 
-        render(<UserProfile />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/aucune modification détectée/i),
+      ).toBeInTheDocument();
+    });
+    expect(mockedAxios.put).not.toHaveBeenCalled();
+  });
 
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
+  it("devrait afficher un message d'erreur si le chargement échoue", async () => {
+    mockedAxios.get.mockRejectedValue(new Error("Network Error"));
 
-        const firstNameInput = screen.getByLabelText(/prénom/i);
-        await user.clear(firstNameInput);
-        await user.type(firstNameInput, "Jane");
+    render(<UserProfile />);
 
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
+    await waitFor(() => {
+      expect(
+        screen.getByText(/erreur lors du chargement du profil/i),
+      ).toBeInTheDocument();
+    });
+  });
 
-        expect(screen.getByRole("button", { name: /enregistrement\.\.\./i })).toBeDisabled();
+  it("devrait désactiver le bouton pendant la soumission", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
+    });
+    mockedAxios.put.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100)),
+    );
+
+    render(<UserProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
 
-    it("devrait fermer le snackbar quand on clique sur le bouton de fermeture", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
+    const firstNameInput = screen.getByLabelText(/prénom/i);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Jane");
 
-        render(<UserProfile />);
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
 
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
+    expect(
+      screen.getByRole("button", { name: /enregistrement\.\.\./i }),
+    ).toBeDisabled();
+  });
 
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(screen.getByText(/aucune modification détectée/i)).toBeInTheDocument();
-        });
-
-        const closeButton = screen.getByRole("button", { name: /close/i });
-        await user.click(closeButton);
-
-        await waitFor(() => {
-            expect(screen.queryByText(/aucune modification détectée/i)).not.toBeInTheDocument();
-        });
+  it("devrait fermer le snackbar quand on clique sur le bouton de fermeture", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
     });
 
-    it("devrait n'envoyer que les champs modifiés", async () => {
-        const user = userEvent.setup();
-        mockedAxios.get.mockResolvedValue({
-            data: mockUserResponse,
-        });
-        mockedAxios.put.mockResolvedValue({
-            data: { ...mockUser, first_name: "Jane" },
-        });
+    render(<UserProfile />);
 
-        render(<UserProfile />);
-
-        await waitFor(() => {
-            expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-        });
-
-        const firstNameInput = screen.getByLabelText(/prénom/i);
-        await user.clear(firstNameInput);
-        await user.type(firstNameInput, "Jane");
-
-        const submitButton = screen.getByRole("button", { name: /enregistrer/i });
-        await user.click(submitButton);
-
-        await waitFor(() => {
-            expect(mockedAxios.put).toHaveBeenCalledWith(
-                "/users/me",
-                { first_name: "Jane" }
-            );
-        });
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
     });
+
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/aucune modification détectée/i),
+      ).toBeInTheDocument();
+    });
+
+    const closeButton = screen.getByRole("button", { name: /close/i });
+    await user.click(closeButton);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/aucune modification détectée/i),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("devrait n'envoyer que les champs modifiés", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
+    });
+    mockedAxios.put.mockResolvedValue({
+      data: { ...mockUser, first_name: "Jane" },
+    });
+
+    render(<UserProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
+    });
+
+    const firstNameInput = screen.getByLabelText(/prénom/i);
+    await user.clear(firstNameInput);
+    await user.type(firstNameInput, "Jane");
+
+    const submitButton = screen.getByRole("button", { name: /enregistrer/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockedAxios.put).toHaveBeenCalledWith("/users/me", {
+        first_name: "Jane",
+      });
+    });
+  });
 });

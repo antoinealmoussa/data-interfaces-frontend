@@ -33,11 +33,14 @@ export interface MultiTypeMenuItemProps {
   item: MenuItemConfig;
 }
 
-export const mapUserApplicationToMenuItem = (apiData: Application, config: RouteProps): MenuItemConfig => ({
-  type: 'link',
+export const mapUserApplicationToMenuItem = (
+  apiData: Application,
+  config: RouteProps,
+): MenuItemConfig => ({
+  type: "link",
   label: apiData.pretty_name,
-  href: config.path
-})
+  href: config.path,
+});
 
 export interface LoadingSpinnerProps {
   size?: number;

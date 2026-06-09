@@ -3,31 +3,33 @@ import { Header } from "./layout/Header";
 import { Outlet } from "react-router-dom";
 
 interface AppContainerProps {
-    headerHeight: number;
+  headerHeight: number;
 }
 
-export const AppContainer: React.FC<AppContainerProps> = ({
-    headerHeight,
-}) => {
-    return (
-        <Box sx={{
-            display: "flex",
-            width: "100vw",
-            height: "100vh",
-            overflow: "hidden"
-        }}>
-            <Box sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                height: "100%"
-            }}>
-                <Header height={headerHeight} />
-                <Box sx={{ flex: 1, minHeight: 0 }}>
-                    <Outlet />
-                </Box>
-            </Box>
+export const AppContainer: React.FC<AppContainerProps> = ({ headerHeight }) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          height: "100%",
+        }}
+      >
+        <Header height={headerHeight} />
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <Outlet />
         </Box>
-    );
+      </Box>
+    </Box>
+  );
 };
