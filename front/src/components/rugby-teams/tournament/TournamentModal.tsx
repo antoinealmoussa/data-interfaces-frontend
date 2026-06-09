@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent } from "@mui/material";
+import { FormModal } from "../../common/FormModal";
 import { TournamentForm } from "./TournamentForm";
 import type { Tournament, CreateTournamentDto } from "../../../types/tournamentTypes";
 
@@ -22,19 +22,18 @@ export const TournamentModal = ({
   teamPlayers,
 }: TournamentModalProps) => {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {mode === "create" ? "Ajouter un tournoi" : "Modifier le tournoi"}
-      </DialogTitle>
-      <DialogContent>
-        <TournamentForm
-          defaultValues={tournament ?? undefined}
-          onSubmit={onSave}
-          onCancel={onClose}
-          teamCategories={teamCategories}
-          teamPlayers={teamPlayers}
-        />
-      </DialogContent>
-    </Dialog>
+    <FormModal
+      open={open}
+      title={mode === "create" ? "Ajouter un tournoi" : "Modifier le tournoi"}
+      onClose={onClose}
+    >
+      <TournamentForm
+        defaultValues={tournament ?? undefined}
+        onSubmit={onSave}
+        onCancel={onClose}
+        teamCategories={teamCategories}
+        teamPlayers={teamPlayers}
+      />
+    </FormModal>
   );
 };

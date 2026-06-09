@@ -1,4 +1,5 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -55,7 +56,7 @@ export const RugbyTeams = () => {
   if (hasTeams === null) {
     return (
       <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-        <Typography>Chargement...</Typography>
+        <LoadingSpinner />
       </Box>
     );
   }

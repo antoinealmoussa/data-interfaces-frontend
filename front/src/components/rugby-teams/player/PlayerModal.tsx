@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent } from "@mui/material";
+import { FormModal } from "../../common/FormModal";
 import { PlayerForm } from "./PlayerForm";
 import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
 
@@ -20,18 +20,17 @@ export const PlayerModal = ({
   teamCategories,
 }: PlayerModalProps) => {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {mode === "create" ? "Ajouter un joueur" : "Modifier le joueur"}
-      </DialogTitle>
-      <DialogContent>
-        <PlayerForm
-          defaultValues={player ?? undefined}
-          onSubmit={onSave}
-          onCancel={onClose}
-          teamCategories={teamCategories}
-        />
-      </DialogContent>
-    </Dialog>
+    <FormModal
+      open={open}
+      title={mode === "create" ? "Ajouter un joueur" : "Modifier le joueur"}
+      onClose={onClose}
+    >
+      <PlayerForm
+        defaultValues={player ?? undefined}
+        onSubmit={onSave}
+        onCancel={onClose}
+        teamCategories={teamCategories}
+      />
+    </FormModal>
   );
 };

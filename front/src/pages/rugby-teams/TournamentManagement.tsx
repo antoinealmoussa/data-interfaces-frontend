@@ -1,12 +1,9 @@
 import {
   Box,
-  Typography,
   Button,
-  TextField,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PeopleIcon from "@mui/icons-material/People";
@@ -19,6 +16,7 @@ import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { TournamentModal } from "../../components/rugby-teams/tournament/TournamentModal";
+import { PageGuard } from "../../components/common/PageGuard";
 import type {
   Tournament,
   CreateTournamentDto,
@@ -99,7 +97,6 @@ export const TournamentManagement = () => {
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(
     null,
   );
-  const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -207,26 +204,9 @@ export const TournamentManagement = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-        <Typography>Chargement...</Typography>
-      </Box>
-    );
-  }
-
-  if (error || !team || !season) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="error">
-          {error || "Équipe ou saison introuvable"}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box>
+    <PageGuard loading={loading} error={error || (!team || !season ? "Équipe ou saison introuvable" : null)}>
+      <Box>
       <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
         <ToggleButtonGroup
           value={viewMode}
@@ -262,20 +242,6 @@ export const TournamentManagement = () => {
             >
               Ajouter un tournoi
             </Button>
-            <TextField
-              size="small"
-              placeholder="Rechercher..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <SearchIcon sx={{ mr: 1, color: "action.active" }} />
-                  ),
-                },
-              }}
-              sx={{ maxWidth: 280 }}
-            />
           </Box>
 
           <GenericDataTable
@@ -286,8 +252,6 @@ export const TournamentManagement = () => {
             error={tournamentsError}
             emptyMessage="Aucun tournoi dans cette équipe"
             getRowId={(t) => t.id}
-            search={search}
-            onSearchChange={setSearch}
           />
         </>
       )}
@@ -312,7 +276,7 @@ export const TournamentManagement = () => {
           setModalMode(null);
           setEditingTournament(null);
         }}
-        teamCategories={team.categories}
+        teamCategories={team?.categories ?? []}
         teamPlayers={players}
       />
 
@@ -334,5 +298,6 @@ export const TournamentManagement = () => {
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
     </Box>
+    </PageGuard>
   );
 };

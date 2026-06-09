@@ -8,13 +8,13 @@ import {
   TableRow,
   TableSortLabel,
   IconButton,
-  CircularProgress,
   Alert,
   Box,
   Typography,
   TextField,
   TablePagination,
 } from "@mui/material";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 import SearchIcon from "@mui/icons-material/Search";
 
 export interface Column<T> {
@@ -133,7 +133,7 @@ export const GenericDataTable = <T,>({
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress />
+        <LoadingSpinner />
       </Box>
     );
   }

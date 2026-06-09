@@ -3,7 +3,6 @@ import { useForm, Controller } from "react-hook-form";
 import {
   Box,
   TextField,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -14,6 +13,8 @@ import {
   FormLabel,
   Typography,
 } from "@mui/material";
+import { FormActions } from "../../common/FormActions";
+import { toggleArrayItem } from "../../../utils/array";
 import type { Tournament, CreateTournamentDto } from "../../../types/tournamentTypes";
 
 interface TournamentFormProps {
@@ -118,13 +119,7 @@ export const TournamentForm = ({
                   control={
                     <Checkbox
                       checked={field.value.includes(player.name)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          field.onChange([...field.value, player.name]);
-                        } else {
-                          field.onChange(field.value.filter((name) => name !== player.name));
-                        }
-                      }}
+                      onChange={() => field.onChange(toggleArrayItem(field.value, player.name))}
                     />
                   }
                   label={player.name}
@@ -135,14 +130,7 @@ export const TournamentForm = ({
         />
       </FormControl>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
-        <Button onClick={onCancel} disabled={isSubmitting}>
-          Annuler
-        </Button>
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-        </Button>
-      </Box>
+      <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
     </Box>
   );
 };

@@ -17,7 +17,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  CircularProgress,
   Paper,
 } from "@mui/material";
 import { useEffect, useState, useCallback } from "react";
@@ -33,6 +32,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import type { TrainingTeam } from "../../api/trainingApi";
+import { PageGuard } from "../../components/common/PageGuard";
 
 const DraggablePlayer = ({ player }: { player: Player }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -186,25 +186,8 @@ export const Training = () => {
     });
   };
 
-  if (loading || playersLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !team || !season) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="error">
-          {error || "Équipe ou saison introuvable"}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
+    <PageGuard loading={loading || playersLoading} error={error || (!team || !season ? "Équipe ou saison introuvable" : null)}>
     <Box
       sx={{
         display: "flex",
@@ -340,5 +323,6 @@ export const Training = () => {
         </Box>
       )}
     </Box>
+    </PageGuard>
   );
 };

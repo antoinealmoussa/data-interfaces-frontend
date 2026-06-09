@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   TextField,
   FormControl,
   FormLabel,
@@ -17,6 +16,8 @@ import {
   TEAM_CATEGORIES,
   type TeamCategory,
 } from "../../types/teamTypes";
+import { FormActions } from "../common/FormActions";
+import { toggleArrayItem } from "../../utils/array";
 import { useNavigate } from "react-router-dom";
 
 interface TeamCreationFormProps {
@@ -61,16 +62,15 @@ export const TeamCreationForm = ({
     };
   }, [formData]);
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
+  const handleCategoryChange = (category: string) => {
     setFormData((prev) => ({
       ...prev,
-      categories: checked
-        ? [...prev.categories, category as TeamCategory]
-        : prev.categories.filter((c) => c !== category),
+      categories: toggleArrayItem(prev.categories, category as TeamCategory),
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSubmitted(true);
     if (!validation.isFormValid) return;
 
@@ -108,6 +108,7 @@ export const TeamCreationForm = ({
 
       <Box
         component="form"
+        onSubmit={handleSubmit}
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >
         <TextField
@@ -141,9 +142,7 @@ export const TeamCreationForm = ({
                 control={
                   <Checkbox
                     checked={formData.categories.includes(category)}
-                    onChange={(e) =>
-                      handleCategoryChange(category, e.target.checked)
-                    }
+                    onChange={() => handleCategoryChange(category)}
                   />
                 }
                 label={category}
@@ -157,15 +156,7 @@ export const TeamCreationForm = ({
           )}
         </FormControl>
 
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={!validation.isFormValid || isSubmitting}
-          size="large"
-          sx={{ mt: 2 }}
-        >
-          {isSubmitting ? "Création en cours..." : "Créer l'équipe"}
-        </Button>
+        <FormActions isSubmitting={isSubmitting} submitLabel="Créer l'équipe" />
       </Box>
 
     </Box>

@@ -1,5 +1,4 @@
-import { Box, Typography, Button, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Button } from "@mui/material";
 import { useEffect, useState, useCallback } from "react";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EditIcon from "@mui/icons-material/Edit";
@@ -10,6 +9,7 @@ import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { PlayerModal } from "../../components/rugby-teams/player/PlayerModal";
+import { PageGuard } from "../../components/common/PageGuard";
 import type { Player, CreatePlayerDto } from "../../types/playerTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
 import type { SnackbarState } from "../../types/uiTypes";
@@ -40,7 +40,6 @@ export const TeamManagement = () => {
   });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Player | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -125,66 +124,35 @@ export const TeamManagement = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-        <Typography>Chargement...</Typography>
-      </Box>
-    );
-  }
-
-  if (error || !team || !season) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="error">
-          {error || "Équipe ou saison introuvable"}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 1,
-        }}
-      >
-        <Button
-          variant="contained"
-          startIcon={<PersonAddIcon />}
-          onClick={() => setModalMode("create")}
-        >
-          Ajouter un joueur
-        </Button>
-        <TextField
-          size="small"
-          placeholder="Rechercher..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
-            },
+    <PageGuard loading={loading} error={error || (!team || !season ? "Équipe ou saison introuvable" : null)}>
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
           }}
-          sx={{ maxWidth: 280 }}
-        />
-      </Box>
+        >
+          <Button
+            variant="contained"
+            startIcon={<PersonAddIcon />}
+            onClick={() => setModalMode("create")}
+          >
+            Ajouter un joueur
+          </Button>
+        </Box>
 
-      <GenericDataTable
-        columns={playerColumns}
-        rows={players}
-        actions={playerActions}
-        loading={playersLoading}
-        error={playersError}
-        emptyMessage="Aucun joueur dans cette équipe"
-        getRowId={(p) => p.id}
-        search={search}
-        onSearchChange={setSearch}
-      />
+        <GenericDataTable
+          columns={playerColumns}
+          rows={players}
+          actions={playerActions}
+          loading={playersLoading}
+          error={playersError}
+          emptyMessage="Aucun joueur dans cette équipe"
+          getRowId={(p) => p.id}
+        />
 
       <PlayerModal
         open={modalMode !== null}
@@ -195,7 +163,7 @@ export const TeamManagement = () => {
           setModalMode(null);
           setEditingPlayer(null);
         }}
-        teamCategories={team.categories}
+        teamCategories={team?.categories ?? []}
       />
 
       <ConfirmDialog
@@ -215,6 +183,7 @@ export const TeamManagement = () => {
         message={snackbar.message}
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
-    </Box>
+      </Box>
+    </PageGuard>
   );
 };

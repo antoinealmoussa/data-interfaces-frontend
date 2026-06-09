@@ -10,10 +10,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
   Typography,
 } from "@mui/material";
 import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
+import { FormActions } from "../../common/FormActions";
+import { toggleArrayItem } from "../../../utils/array";
 
 interface PlayerFormProps {
   defaultValues?: Player;
@@ -125,13 +126,7 @@ export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }
                   control={
                     <Checkbox
                       checked={field.value.includes(cat)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          field.onChange([...field.value, cat]);
-                        } else {
-                          field.onChange(field.value.filter((v) => v !== cat));
-                        }
-                      }}
+                      onChange={() => field.onChange(toggleArrayItem(field.value, cat))}
                     />
                   }
                   label={cat}
@@ -147,14 +142,7 @@ export const PlayerForm = ({ defaultValues, onSubmit, onCancel, teamCategories }
         )}
       </FormControl>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
-        <Button onClick={onCancel} disabled={isSubmitting}>
-          Annuler
-        </Button>
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-        </Button>
-      </Box>
+      <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
     </Box>
   );
 };

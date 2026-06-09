@@ -1,6 +1,6 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { teamApi } from "../../api/teamApi";
 import type { Team } from "../../types/teamTypes";
@@ -20,46 +20,44 @@ export const RugbyTeamsSidebar = () => {
   const [selectedSeasonName, setSelectedSeasonName] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const seasons = useMemo(() => {
-    const seasonMap = new Map<number, Season>();
-    teams.forEach(team => team.seasons.forEach(s => seasonMap.set(s.id, s)));
-    return Array.from(seasonMap.values());
-  }, [teams]);
+  const seasons: Season[] = [];
+  if (Array.isArray(teams)) {
+    for (const team of teams) {
+      for (const season of team.seasons) {
+        if (!seasons.some((s) => s.id === season.id)) {
+          seasons.push(season);
+        }
+      }
+    }
+  }
 
   useEffect(() => {
-    const loadData = async () => {
+    const init = async () => {
       try {
-        const teamsRes = await teamApi.getAll();
-        setTeams(teamsRes.data);
+        const res = await teamApi.getAll();
+        const teamsData = Array.isArray(res.data) ? res.data : [];
+        setTeams(teamsData);
+
+        const decodedTeam = teamName ? decodeURIComponent(teamName) : null;
+        const matchTeam = decodedTeam
+          ? teamsData.find((t) => t.name === decodedTeam)
+          : null;
+        const team = matchTeam ?? teamsData[0];
+
+        const decodedSeason = seasonName ? decodeURIComponent(seasonName) : null;
+        const matchSeason = decodedSeason
+          ? team?.seasons.find((s) => s.name === decodedSeason)
+          : null;
+        const season = matchSeason ?? team?.seasons[0];
+
+        setSelectedTeamName(team?.name ?? null);
+        setSelectedSeasonName(season?.name ?? null);
       } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
+        console.error("Erreur lors du chargement des équipes:", error);
       }
     };
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (teams.length > 0 && !selectedTeamName) {
-      const decodedTeamName = teamName ? decodeURIComponent(teamName) : null;
-      const match = decodedTeamName
-        ? teams.find((t) => t.name === decodedTeamName)
-        : null;
-      setSelectedTeamName(match ? match.name : teams[0].name);
-    }
-  }, [teams, teamName, selectedTeamName]);
-
-  useEffect(() => {
-    const currentTeam = teams.find((t) => t.name === selectedTeamName);
-    const teamSeasons = currentTeam?.seasons ?? [];
-
-    if (teamSeasons.length > 0 && !selectedSeasonName) {
-      const decodedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
-      const match = decodedSeasonName
-        ? teamSeasons.find((s) => s.name === decodedSeasonName)
-        : null;
-      setSelectedSeasonName(match ? match.name : teamSeasons[0].name);
-    }
-  }, [selectedTeamName, teams, seasonName, selectedSeasonName]);
+    init();
+  }, [teamName, seasonName]);
 
   const visibleItems =
     selectedTeamName && selectedSeasonName ? menuItems : [];

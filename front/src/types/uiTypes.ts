@@ -41,6 +41,7 @@ export const mapUserApplicationToMenuItem = (apiData: Application, config: Route
 
 export interface LoadingSpinnerProps {
   size?: number;
+  text?: string;
 }
 
 export interface SearchInputProps {
