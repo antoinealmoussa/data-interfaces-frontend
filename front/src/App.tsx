@@ -1,5 +1,3 @@
 import { AppContainer } from "./components/AppContainer";
 
-export default function App() {
-  return <AppContainer headerHeight={64} />;
-}
+export const App = () => <AppContainer headerHeight={64} />;

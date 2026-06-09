@@ -19,10 +19,11 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import { playerApi } from "../../api/playerApi";
-import { trainingApi, type AlgorithmInfo } from "../../api/trainingApi";
+import { trainingApi } from "../../api/trainingApi";
 import type { Player } from "../../types/playerTypes";
 import {
   DndContext,
@@ -31,7 +32,7 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import type { TrainingTeam } from "../../api/trainingApi";
+import type { TrainingTeam, DistributeRequest } from "../../api/trainingApi";
 import { PageGuard } from "../../components/common/PageGuard";
 
 const DraggablePlayer = ({ player }: { player: Player }) => {
@@ -92,40 +93,38 @@ const TeamDroppable = ({ team }: { team: TrainingTeam }) => {
 
 export const Training = () => {
   const { team, season, loading, error } = useTeamAndSeason();
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [playersLoading, setPlayersLoading] = useState(true);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
   const [teamCount, setTeamCount] = useState(2);
-  const [algorithms, setAlgorithms] = useState<AlgorithmInfo[]>([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("");
-  const [teams, setTeams] = useState<TrainingTeam[] | null>(null);
-  const [generating, setGenerating] = useState(false);
+  const [trainingTeams, setTrainingTeams] = useState<TrainingTeam[] | null>(null);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
 
-  const loadPlayers = useCallback(async () => {
-    if (!team) return;
-    setPlayersLoading(true);
-    try {
-      const data = await playerApi.getByTeam(team.name);
-      setPlayers(data.sort((a, b) => a.name.localeCompare(b.name)));
-    } catch {
-      // Silently fail
-    } finally {
-      setPlayersLoading(false);
+  const { data: players = [], isLoading: playersLoading } = useQuery({
+    queryKey: ["players", team?.name],
+    queryFn: () =>
+      playerApi.getByTeam(team!.name).then((data) =>
+        data.sort((a, b) => a.name.localeCompare(b.name)),
+      ),
+    enabled: !!team,
+  });
+
+  const { data: algorithms = [] } = useQuery({
+    queryKey: ["algorithms", team?.name],
+    queryFn: () => trainingApi.getAlgorithms(team!.name),
+    enabled: !!team,
+  });
+
+  useEffect(() => {
+    if (algorithms.length > 0 && !selectedAlgorithm) {
+      setSelectedAlgorithm(algorithms[0].id);
     }
-  }, [team]);
+  }, [algorithms, selectedAlgorithm]);
 
-  useEffect(() => {
-    loadPlayers();
-  }, [loadPlayers]);
-
-  useEffect(() => {
-    if (!team) return;
-    trainingApi.getAlgorithms(team.name).then((data) => {
-      setAlgorithms(data);
-      if (data.length > 0) setSelectedAlgorithm(data[0].id);
-    });
-  }, [team]);
+  const distributeMutation = useMutation({
+    mutationFn: (req: DistributeRequest) =>
+      trainingApi.distribute(team!.name, req),
+    onSuccess: (data) => setTrainingTeams(data.teams),
+  });
 
   const handleTogglePlayer = (playerId: number) => {
     setSelectedPlayerIds((prev) =>
@@ -135,27 +134,19 @@ export const Training = () => {
     );
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!team || selectedPlayerIds.length < 2 || !selectedAlgorithm) return;
-    setGenerating(true);
-    try {
-      const data = await trainingApi.distribute(team.name, {
-        player_ids: selectedPlayerIds,
-        team_count: teamCount,
-        algorithm: selectedAlgorithm,
-      });
-      setTeams(data.teams);
-    } catch {
-      // Silently fail
-    } finally {
-      setGenerating(false);
-    }
+    distributeMutation.mutate({
+      player_ids: selectedPlayerIds,
+      team_count: teamCount,
+      algorithm: selectedAlgorithm,
+    });
   };
 
   const findPlayer = (id: string): Player | null => {
-    if (!teams) return null;
+    if (!trainingTeams) return null;
     const playerId = Number(String(id).replace("player-", ""));
-    for (const t of teams) {
+    for (const t of trainingTeams) {
       const found = t.players.find((p) => p.id === playerId);
       if (found) return found;
     }
@@ -172,9 +163,11 @@ export const Training = () => {
     const movedPlayer = findPlayer(String(active.id));
     if (!movedPlayer) return;
 
-    setTeams((prev) => {
+    setTrainingTeams((prev) => {
       if (!prev) return prev;
-      const sourceTeam = prev.find((t) => t.players.some((p) => p.id === playerId));
+      const sourceTeam = prev.find((t) =>
+        t.players.some((p) => p.id === playerId),
+      );
       if (!sourceTeam) return prev;
       return prev.map((t) =>
         t.id === sourceTeam.id
@@ -187,142 +180,168 @@ export const Training = () => {
   };
 
   return (
-    <PageGuard loading={loading || playersLoading} error={error || (!team || !season ? "Équipe ou saison introuvable" : null)}>
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        gap: 3,
-        alignItems: "stretch",
-        height: "100%",
-      }}
+    <PageGuard
+      loading={loading || playersLoading}
+      error={
+        error || (!team || !season ? "Équipe ou saison introuvable" : null)
+      }
     >
       <Box
         sx={{
-          width: 350,
-          flexShrink: 0,
           display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
+          flexDirection: "row",
+          gap: 3,
+          alignItems: "stretch",
+          height: "100%",
         }}
       >
-        <FormControl
-          component="fieldset"
+        <Box
           sx={{
-            mb: 2,
-            width: "100%",
+            width: 350,
+            flexShrink: 0,
             display: "flex",
             flexDirection: "column",
-            flex: 1,
             minHeight: 0,
           }}
         >
-          <FormLabel component="legend">
-            Joueurs présents ({selectedPlayerIds.length})
-          </FormLabel>
-          <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-            <FormGroup>
-              {players.map((player) => (
-                <FormControlLabel
-                  key={player.id}
-                  control={
-                    <Checkbox
-                      checked={selectedPlayerIds.includes(player.id)}
-                      onChange={() => handleTogglePlayer(player.id)}
-                    />
-                  }
-                  label={player.name}
-                />
-              ))}
-            </FormGroup>
-          </Box>
-        </FormControl>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: "0 0 auto",
-          }}
-        >
-          <TextField
-            label="Nombre d'équipes"
-            type="number"
-            value={teamCount}
-            onChange={(e) => {
-              const val = Math.max(
-                1,
-                Math.min(6, parseInt(e.target.value) || 1),
-              );
-              setTeamCount(val);
+          <FormControl
+            component="fieldset"
+            sx={{
+              mb: 2,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
             }}
-            slotProps={{
-              htmlInput: { min: 1, max: 6 },
-            }}
-            sx={{ mb: 2, width: "100%" }}
-          />
-
-          <FormControl sx={{ mb: 2, width: "100%" }}>
-            <InputLabel>Mode de sélection</InputLabel>
-            <Select
-              value={selectedAlgorithm}
-              label="Mode de sélection"
-              onChange={(e) => setSelectedAlgorithm(e.target.value)}
-            >
-              {algorithms.map((algo) => (
-                <MenuItem key={algo.id} value={algo.id}>
-                  {algo.label}
-                </MenuItem>
-              ))}
-            </Select>
+          >
+            <FormLabel component="legend">
+              Joueurs présents ({selectedPlayerIds.length})
+            </FormLabel>
+            <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+              <FormGroup>
+                {players.map((player) => (
+                  <FormControlLabel
+                    key={player.id}
+                    control={
+                      <Checkbox
+                        checked={selectedPlayerIds.includes(player.id)}
+                        onChange={() => handleTogglePlayer(player.id)}
+                      />
+                    }
+                    label={player.name}
+                  />
+                ))}
+              </FormGroup>
+            </Box>
           </FormControl>
 
-          <Button
-            variant="contained"
-            fullWidth
-            disabled={selectedPlayerIds.length < 2 || generating || !selectedAlgorithm}
-            onClick={handleGenerate}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "0 0 auto",
+            }}
           >
-            {generating ? "Génération..." : "Générer les équipes"}
-          </Button>
-        </Box>
-      </Box>
+            <TextField
+              label="Nombre d'équipes"
+              type="number"
+              value={teamCount}
+              onChange={(e) => {
+                const val = Math.max(
+                  1,
+                  Math.min(6, parseInt(e.target.value) || 1),
+                );
+                setTeamCount(val);
+              }}
+              slotProps={{
+                htmlInput: { min: 1, max: 6 },
+              }}
+              sx={{ mb: 2, width: "100%" }}
+            />
 
-      {teams && (
-        <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Typography variant="h6">Équipes constituées</Typography>
-            <Button variant="outlined" size="small" onClick={handleGenerate}>
-              Regénérer
+            <FormControl sx={{ mb: 2, width: "100%" }}>
+              <InputLabel>Mode de sélection</InputLabel>
+              <Select
+                value={selectedAlgorithm}
+                label="Mode de sélection"
+                onChange={(e) => setSelectedAlgorithm(e.target.value)}
+              >
+                {algorithms.map((algo) => (
+                  <MenuItem key={algo.id} value={algo.id}>
+                    {algo.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={
+                selectedPlayerIds.length < 2 ||
+                distributeMutation.isPending ||
+                !selectedAlgorithm
+              }
+              onClick={handleGenerate}
+            >
+              {distributeMutation.isPending
+                ? "Génération..."
+                : "Générer les équipes"}
             </Button>
           </Box>
-
-          <DndContext
-            onDragStart={(e) => setActivePlayer(findPlayer(String(e.active.id)))}
-            onDragEnd={handleDragEnd}
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 2,
-              }}
-            >
-              {teams.map((team) => (
-                <TeamDroppable key={team.id} team={team} />
-              ))}
-            </Box>
-            <DragOverlay>
-              {activePlayer ? (
-                <Paper sx={{ p: 1, bgcolor: "background.paper", borderRadius: 1, boxShadow: 3 }}>
-                  {activePlayer.name}
-                </Paper>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
         </Box>
-      )}
-    </Box>
+
+        {trainingTeams && (
+          <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+            >
+              <Typography variant="h6">Équipes constituées</Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleGenerate}
+              >
+                Regénérer
+              </Button>
+            </Box>
+
+            <DndContext
+              onDragStart={(e) =>
+                setActivePlayer(findPlayer(String(e.active.id)))
+              }
+              onDragEnd={handleDragEnd}
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                }}
+              >
+                {trainingTeams.map((team) => (
+                  <TeamDroppable key={team.id} team={team} />
+                ))}
+              </Box>
+              <DragOverlay>
+                {activePlayer ? (
+                  <Paper
+                    sx={{
+                      p: 1,
+                      bgcolor: "background.paper",
+                      borderRadius: 1,
+                      boxShadow: 3,
+                    }}
+                  >
+                    {activePlayer.name}
+                  </Paper>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          </Box>
+        )}
+      </Box>
     </PageGuard>
   );
 };

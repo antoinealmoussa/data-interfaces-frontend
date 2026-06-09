@@ -9,7 +9,8 @@ import {
   Alert,
   Typography,
 } from "@mui/material";
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { teamApi } from "../../api/teamApi";
 import {
   type CreateTeamDto,
@@ -17,76 +18,43 @@ import {
   type TeamCategory,
 } from "../../types/teamTypes";
 import { FormActions } from "../common/FormActions";
-import { toggleArrayItem } from "../../utils/array";
 import { useNavigate } from "react-router-dom";
 
 interface TeamCreationFormProps {
   userId: number;
 }
 
-export const TeamCreationForm = ({
-  userId,
-}: TeamCreationFormProps) => {
+export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<CreateTeamDto>({
-    name: "",
-    categories: [],
-    user_id: userId,
-    season_name: "",
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const validation = useMemo(() => {
-    const errors: Record<string, string> = {};
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateTeamDto>({
+    defaultValues: {
+      name: "",
+      categories: [],
+      user_id: userId,
+      season_name: "",
+    },
+  });
 
-    if (!formData.name.trim()) {
-      errors.name = "Le nom de l'équipe est obligatoire";
-    } else if (formData.name.length > 50) {
-      errors.name = "Le nom ne doit pas dépasser 50 caractères";
-    }
+  const nameValue = watch("name");
 
-    if (!formData.season_name) {
-      errors.season = "Veuillez saisir une saison.";
-    }
-
-    if (formData.categories.length === 0) {
-      errors.categories = "Veuillez sélectionner au moins une catégorie.";
-    }
-
-    return {
-      errors,
-      isFormValid: Object.keys(errors).length === 0,
-    };
-  }, [formData]);
-
-  const handleCategoryChange = (category: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      categories: toggleArrayItem(prev.categories, category as TeamCategory),
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    if (!validation.isFormValid) return;
-
-    setIsSubmitting(true);
+  const onSubmit = async (data: CreateTeamDto) => {
     setSubmitError(null);
-
     try {
-      const team = await teamApi.create(formData);
+      const team = await teamApi.create(data);
       navigate(
         `/rugby-teams/${encodeURIComponent(team.name)}/${encodeURIComponent(team.seasons[0].name)}/team-management`,
         { state: { teamCreated: true } },
       );
     } catch {
       setSubmitError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -107,57 +75,84 @@ export const TeamCreationForm = ({
 
       <Box
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >
         <TextField
           label="Nom de l'équipe"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          error={submitted && !!validation.errors.name}
-          helperText={submitted && validation.errors.name ? validation.errors.name : `${formData.name.length}/50 caractères`}
-          inputProps={{ maxLength: 50 }}
+          {...register("name", {
+            required: "Le nom de l'équipe est obligatoire",
+            maxLength: {
+              value: 50,
+              message: "Le nom ne doit pas dépasser 50 caractères",
+            },
+          })}
+          error={!!errors.name}
+          helperText={
+            errors.name
+              ? errors.name.message
+              : `${nameValue.length}/50 caractères`
+          }
+          slotProps={{ htmlInput: { maxLength: 50 } }}
           fullWidth
         />
 
         <TextField
           label="Saison (ex: 2025-2026)"
-          value={formData.season_name}
-          onChange={(e) => setFormData({ ...formData, season_name: e.target.value })}
-          required
-          error={submitted && !!validation.errors.season}
-          helperText={submitted && validation.errors.season ? validation.errors.season : " "}
+          {...register("season_name", {
+            required: "Veuillez saisir une saison.",
+          })}
+          error={!!errors.season_name}
+          helperText={errors.season_name?.message}
           placeholder="Saisissez une saison"
           fullWidth
         />
 
-        <FormControl error={submitted && !!validation.errors.categories} required>
-          <FormLabel>Catégories jouées</FormLabel>
-          <FormGroup>
-            {TEAM_CATEGORIES.map((category) => (
-              <FormControlLabel
-                key={category}
-                control={
-                  <Checkbox
-                    checked={formData.categories.includes(category)}
-                    onChange={() => handleCategoryChange(category)}
+        <Controller
+          control={control}
+          name="categories"
+          rules={{
+            validate: (value) =>
+              value.length > 0 ||
+              "Veuillez sélectionner au moins une catégorie.",
+          }}
+          render={({ field, fieldState }) => (
+            <FormControl error={!!fieldState.error} required>
+              <FormLabel>Catégories jouées</FormLabel>
+              <FormGroup>
+                {TEAM_CATEGORIES.map((category) => (
+                  <FormControlLabel
+                    key={category}
+                    control={
+                      <Checkbox
+                        checked={field.value.includes(category)}
+                        onChange={() => {
+                          const updated = field.value.includes(category)
+                            ? field.value.filter((c) => c !== category)
+                            : [...field.value, category];
+                          field.onChange(updated);
+                        }}
+                      />
+                    }
+                    label={category}
                   />
-                }
-                label={category}
-              />
-            ))}
-          </FormGroup>
-          {submitted && validation.errors.categories && (
-            <Typography variant="caption" color="error">
-              {validation.errors.categories}
-            </Typography>
+                ))}
+              </FormGroup>
+              {fieldState.error && (
+                <Typography variant="caption" color="error">
+                  {fieldState.error.message}
+                </Typography>
+              )}
+            </FormControl>
           )}
-        </FormControl>
+        />
 
-        <FormActions isSubmitting={isSubmitting} submitLabel="Créer l'équipe" />
+        <FormActions
+          onCancel={() => navigate("/")}
+          isSubmitting={isSubmitting}
+          submitLabel="Créer l'équipe"
+        />
       </Box>
-
     </Box>
   );
 };

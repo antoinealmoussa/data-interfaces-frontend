@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import App from "../../App";
+import { App } from "../../App";
 import { PRIVATE_STANDARD_ROUTES, DYNAMIC_APP_ROUTES } from "../../routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicLayout } from "../../pages/authentication/PublicLayout";
