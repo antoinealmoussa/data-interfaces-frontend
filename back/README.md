@@ -2,78 +2,93 @@
 
 API FastAPI modulaire pour l'application Stravoska.
 
-## Structure
+## Stack technique
 
-```bash
+| Technologie | Usage |
+|-------------|-------|
+| Python 3.12 | Langage |
+| FastAPI | Framework HTTP |
+| SQLAlchemy | ORM |
+| PostgreSQL 15 | Base de données |
+| Pydantic v2 | Validation |
+| pytest + httpx | Tests |
+| Ruff | Linter |
+| MyPy | Types |
+
+## Structure du projet
+
+```
 app/
-├── main.py                    # Initialisation FastAPI, CORS, inclusion routeur
-├── api/
-│   ├── v1/
-│   │   ├── api_router.py      # Hub central de tous les routeurs
-│   │   ├── helpers.py         # Helpers HTTP (set/delete cookies)
-│   │   └── endpoints/         # Routes par domaine métier
-│   │       ├── users.py
-│   │       ├── teams.py
-│   │       ├── seasons.py
-│   │       └── search_topic.py
-├── core/
-│   ├── config.py              # Settings pydantic (.env)
-│   ├── logging_config.py      # Configuration logging
-│   ├── security.py            # Hashage, vérification mot de passe (bcrypt)
-│   └── token.py               # JWT : création, validation, dépendance current_user
-├── db/
-│   └── session.py             # Engine SQLAlchemy + get_db
-├── models/
-│   ├── user.py
-│   ├── team.py
-│   ├── season.py
-│   ├── team_season.py
-│   ├── application.py
-│   └── user_application.py
-├── schemas/
-│   ├── user.py
-│   ├── team.py
-│   ├── season.py
-│   └── search_topic.py
-├── services/
-│   ├── user_service.py
-│   ├── team_service.py
-│   ├── season_service.py
-│   └── search_topic_service.py
-├── prompts/
-│   └── search_topic_prompt.py
-└── tests/
+├── main.py                   # Initialisation FastAPI, CORS, inclusion routeurs
+├── api/v1/
+│   ├── api_router.py         # Hub central des routeurs
+│   ├── helpers.py            # Helpers HTTP
+│   └── endpoints/            # Routes par domaine
+│       ├── users.py
+│       ├── teams.py
+│       ├── seasons.py
+│       ├── players.py
+│       ├── tournaments.py
+│       ├── training.py
+│       ├── token.py
+│       └── search_topic.py
+├── core/                     # Config, logs, dépendances
+├── db/                       # Session SQLAlchemy
+├── models/                   # Modèles ORM
+├── schemas/                  # Schémas Pydantic
+├── services/                 # Logique métier
+│   └── training/algorithms/  # Algorithmes d'entraînement (registry pattern)
+├── prompts/                  # Prompts IA (Mistral)
+├── utils/                    # Validateurs
+└── tests/                    # Tests unitaires
     ├── api/
     ├── core/
-    └── services/
+    ├── schemas/
+    ├── services/
+    └── utils/
 ```
 
-## Configuration
+## Architecture en couches
 
-Copier `.env.example` vers `.env` et remplir les valeurs :
-
-```bash
-cp .env.example .env
+```
+endpoints/ (couche HTTP)
+    ↓
+services/ (logique métier)
+    ↓
+models/ + schemas/ (ORM + validation)
 ```
 
-Variables requises : `SECRET_KEY`, `MISTRAL_API_KEY`.
+## Points d'entrée API
 
-## Lancement
+Tous sous `/api/v1`. Domaines couverts : utilisateurs, équipes, saisons, joueurs, tournois, distribution d'entraînement, recherche, rafraîchissement de token.
 
-```bash
-poetry install
-poetry run uvicorn app.main:app --reload
-```
+## Commandes (Docker)
 
-## Tests
+Toutes les commandes s'exécutent dans le conteneur via Docker Compose.
 
 ```bash
-poetry run pytest app/tests
+# Développement
+docker compose up backend
+
+# Lancer une commande dans le conteneur backend
+docker compose exec backend poetry run uvicorn app.main:app --reload
+docker compose exec backend poetry run pytest app/tests
+docker compose exec backend poetry run ruff check app/
+docker compose exec backend poetry run mypy app/
 ```
 
 ## Migrations
 
+Les migrations SQL brutes sont appliquées automatiquement au démarrage via le service `migration` de Docker Compose.
+
+Pour exécuter les migrations manuellement :
+
 ```bash
-poetry run alembic revision --autogenerate -m "description"
-poetry run alembic upgrade head
+docker compose up migration
+```
+
+Ou via le script dédié depuis la racine du projet :
+
+```bash
+./scripts/migrate.sh
 ```
