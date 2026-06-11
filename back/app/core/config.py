@@ -1,6 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from fastapi.security import OAuth2PasswordBearer
 from typing import ClassVar
+
+from fastapi.security import OAuth2PasswordBearer
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):

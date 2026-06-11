@@ -1,6 +1,5 @@
-from pydantic import BaseModel, ConfigDict, field_validator
-from typing import Optional
 
+from pydantic import BaseModel, ConfigDict, field_validator
 
 VALID_CATEGORIES = {"Mixte", "+35", "+50", "Open masculin", "Open féminin"}
 

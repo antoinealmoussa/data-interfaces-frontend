@@ -1,7 +1,9 @@
-from pydantic import BaseModel, ConfigDict, field_validator
 from typing import List
-from app.utils.validators import validate_season_format
+
+from pydantic import BaseModel, ConfigDict, field_validator
+
 from app.schemas.season import ApiReturnSeason
+from app.utils.validators import validate_season_format
 
 
 class TeamBase(BaseModel):

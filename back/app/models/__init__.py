@@ -1,11 +1,11 @@
-from app.models.user import User
-from app.models.application import Application
-from app.models.user_application import user_application
-from app.models.team import Team
-from app.models.season import Season
-from app.models.team_season import TeamSeason
-from app.models.category import Category
-from app.models.team_category import TeamCategory
-from app.models.player_category import PlayerCategory
-from app.models.tournament import Tournament
-from app.models.tournament_player import TournamentPlayer
+from app.models.application import Application as Application
+from app.models.category import Category as Category
+from app.models.player_category import PlayerCategory as PlayerCategory
+from app.models.season import Season as Season
+from app.models.team import Team as Team
+from app.models.team_category import TeamCategory as TeamCategory
+from app.models.team_season import TeamSeason as TeamSeason
+from app.models.tournament import Tournament as Tournament
+from app.models.tournament_player import TournamentPlayer as TournamentPlayer
+from app.models.user import User as User
+from app.models.user_application import user_application as user_application

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
-from app.models.user import User
+
 from app.core.token import get_current_active_user
+from app.models.user import User
 from app.schemas.search_topic import SearchTopicResponse
 from app.services.search_topic_service import get_search_result
 

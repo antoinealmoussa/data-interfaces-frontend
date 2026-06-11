@@ -1,10 +1,10 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.models.category import Category
 from app.models.player import Player
 from app.models.team import Team
-from app.models.category import Category
-from app.schemas.player import ApiCreatePlayer, ApiUpdatePlayer, ApiReturnPlayer
+from app.schemas.player import ApiCreatePlayer, ApiReturnPlayer, ApiUpdatePlayer
 
 
 def get_player_by_id(db: Session, player_id: int) -> Player | None:
@@ -58,7 +58,10 @@ def create_player(db: Session, team_name: str, player_in: ApiCreatePlayer) -> Ap
     return ApiReturnPlayer.model_validate(db_player)
 
 
-def update_player(db: Session, player_id: int, team_name: str, user_id: int, player_in: ApiUpdatePlayer) -> ApiReturnPlayer:
+def update_player(
+    db: Session, player_id: int, team_name: str, user_id: int,
+    player_in: ApiUpdatePlayer,
+) -> ApiReturnPlayer:
     player = get_player_by_id(db, player_id)
     if not player:
         raise HTTPException(status_code=404, detail="Joueur non trouvé")

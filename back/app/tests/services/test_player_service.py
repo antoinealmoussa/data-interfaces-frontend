@@ -1,10 +1,10 @@
 import pytest
 from fastapi import HTTPException
+
 from app.models.season import Season
-from app.schemas.team import ApiCreateTeam
-from app.services import team_service
-from app.services import player_service
 from app.schemas.player import ApiCreatePlayer, ApiUpdatePlayer
+from app.schemas.team import ApiCreateTeam
+from app.services import player_service, team_service
 
 
 @pytest.fixture

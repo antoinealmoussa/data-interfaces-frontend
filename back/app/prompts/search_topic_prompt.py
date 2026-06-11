@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 SEARCH_TOPIC_PROMPT = """
 Tu es un assistant expert, créatif et précis. L'utilisateur va te soumettre un sujet sous forme de mot, phrase, question ou idée (parfois incohérente).
 Ta mission est de :

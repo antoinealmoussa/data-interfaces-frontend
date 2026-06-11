@@ -1,12 +1,14 @@
-import pytest
 from datetime import timedelta
 from unittest.mock import MagicMock
-from jose import jwt
-from app.core.token import create_access_token, get_current_user, get_current_active_user
-from app.core.config import settings
-from app.services import user_service
-from app.schemas.user import ApiCreateUser
+
+import pytest
 from fastapi import HTTPException
+from jose import jwt
+
+from app.core.config import settings
+from app.core.token import create_access_token, get_current_active_user, get_current_user
+from app.schemas.user import ApiCreateUser
+from app.services import user_service
 
 
 def test_create_access_token():
@@ -56,7 +58,9 @@ async def test_get_current_user_valid_token(db_session):
     )
     created_user = user_service.create_user(db_session, user_in=user)
 
-    token = create_access_token(data={"sub": created_user.email, "token_version": created_user.token_version})
+    token = create_access_token(
+        data={"sub": created_user.email, "token_version": created_user.token_version}
+    )
     mock_request = create_mock_request_with_cookie("access_token", token)
 
     current_user = await get_current_user(mock_request, db_session)
@@ -201,7 +205,9 @@ async def test_get_current_user_with_bearer_token(db_session):
     )
     created_user = user_service.create_user(db_session, user_in=user)
 
-    token = create_access_token(data={"sub": created_user.email, "token_version": created_user.token_version})
+    token = create_access_token(
+        data={"sub": created_user.email, "token_version": created_user.token_version}
+    )
 
     mock_request = MagicMock()
     mock_request.cookies = {}

@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, field_validator
+
 from app.utils.validators import validate_season_format
+
 
 class SeasonBase(BaseModel):
     name: str  # Format AAAA-AAAA

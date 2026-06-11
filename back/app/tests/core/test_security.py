@@ -11,7 +11,7 @@ def test_hash_password_returns_string():
 
 
 def test_hash_password_different_salts():
-    """Test que deux hashages du même mot de passe produisent des résultats différents (salts différents)."""
+    """Test que deux hashages du même mot de passe donnent des hashs différents."""
     password = "test_password"
     hashed1 = hash_password(password)
     hashed2 = hash_password(password)

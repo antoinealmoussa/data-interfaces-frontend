@@ -1,6 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from app.models.user import User
 from typing import List
+
+from pydantic import BaseModel, ConfigDict
+
+from app.models.user import User
 from app.schemas.application import ApiReturnApplication
 
 

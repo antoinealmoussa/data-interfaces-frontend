@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, ForeignKey, PrimaryKeyConstraint
+from sqlalchemy import Column, ForeignKey, Integer, PrimaryKeyConstraint
+
 from app.db.session import Base
 
 

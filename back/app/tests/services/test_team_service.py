@@ -1,8 +1,9 @@
 import pytest
 from fastapi import HTTPException
-from app.schemas.team import ApiCreateTeam
-from app.services import team_service, season_service
+
 from app.models.season import Season
+from app.schemas.team import ApiCreateTeam
+from app.services import season_service, team_service
 
 
 def test_get_teams_by_user_empty(db_session, test_user):

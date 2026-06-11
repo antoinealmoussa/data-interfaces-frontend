@@ -1,8 +1,9 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from app.models.team import Team
-from app.models.season import Season
+
 from app.models.category import Category
+from app.models.season import Season
+from app.models.team import Team
 from app.models.team_season import TeamSeason
 from app.schemas.team import ApiCreateTeam, ApiReturnTeam
 from app.services import season_service

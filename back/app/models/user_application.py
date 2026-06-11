@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy import Column, ForeignKey, Integer, Table
+
 from app.db.session import Base
 
 user_application = Table(

@@ -1,8 +1,10 @@
+from typing import TYPE_CHECKING, List
+
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import Mapped, relationship
+
 from app.db.session import Base
 from app.models.user_application import user_application
-from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.application import Application

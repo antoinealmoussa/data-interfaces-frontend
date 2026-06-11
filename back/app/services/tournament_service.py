@@ -1,14 +1,14 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.tournament import Tournament
-from app.models.team import Team
 from app.models.category import Category
 from app.models.player import Player
+from app.models.team import Team
+from app.models.tournament import Tournament
 from app.schemas.tournament import (
     ApiCreateTournament,
-    ApiUpdateTournament,
     ApiReturnTournament,
+    ApiUpdateTournament,
 )
 
 
