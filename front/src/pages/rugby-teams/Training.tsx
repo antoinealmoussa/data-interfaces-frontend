@@ -19,7 +19,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import { playerApi } from "../../api/playerApi";
@@ -122,11 +122,7 @@ export const Training = () => {
     enabled: !!team,
   });
 
-  useEffect(() => {
-    if (algorithms.length > 0 && !selectedAlgorithm) {
-      setSelectedAlgorithm(algorithms[0].id);
-    }
-  }, [algorithms, selectedAlgorithm]);
+  const effectiveAlgorithm = selectedAlgorithm || (algorithms.length > 0 ? algorithms[0].id : "");
 
   const distributeMutation = useMutation({
     mutationFn: (req: DistributeRequest) =>
@@ -147,7 +143,7 @@ export const Training = () => {
     distributeMutation.mutate({
       player_ids: selectedPlayerIds,
       team_count: teamCount,
-      algorithm: selectedAlgorithm,
+      algorithm: effectiveAlgorithm,
     });
   };
 
@@ -271,7 +267,7 @@ export const Training = () => {
             <FormControl sx={{ mb: 2, width: "100%" }}>
               <InputLabel>Mode de sélection</InputLabel>
               <Select
-                value={selectedAlgorithm}
+                value={effectiveAlgorithm}
                 label="Mode de sélection"
                 onChange={(e) => setSelectedAlgorithm(e.target.value)}
               >
@@ -289,7 +285,7 @@ export const Training = () => {
               disabled={
                 selectedPlayerIds.length < 2 ||
                 distributeMutation.isPending ||
-                !selectedAlgorithm
+                !effectiveAlgorithm
               }
               onClick={handleGenerate}
             >

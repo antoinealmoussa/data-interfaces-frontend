@@ -11,7 +11,6 @@ import {
   Checkbox,
   FormGroup,
   FormLabel,
-  Typography,
 } from "@mui/material";
 import { FormActions } from "../../common/FormActions";
 import { toggleArrayItem } from "../../../utils/array";

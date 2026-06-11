@@ -1,23 +1,12 @@
-import { useState, createContext, type ReactNode, useEffect } from "react";
+import { useState, type ReactNode, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
-  AuthContextType,
   MeResponse,
 } from "../types/authTypes";
 import apiClient from "../api/client";
-
-const defaultAuthContext: AuthContextType = {
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
-  applications: null,
-  login: async () => {},
-  logout: async () => {},
-};
-
-export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,

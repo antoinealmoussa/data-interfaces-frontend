@@ -51,31 +51,31 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       <ReactMarkdown
         rehypePlugins={[rehypeRaw]} // Pour autoriser le HTML dans le Markdown
         components={{
-          h1: ({ node, ...props }) => (
+          h1: (props) => (
             <Typography variant="h4" gutterBottom {...props} />
           ),
-          h2: ({ node, ...props }) => (
+          h2: (props) => (
             <Typography variant="h5" gutterBottom {...props} />
           ),
-          h3: ({ node, ...props }) => (
+          h3: (props) => (
             <Typography variant="h6" gutterBottom {...props} />
           ),
-          p: ({ node, ...props }) => (
+          p: (props) => (
             <Typography variant="body1" paragraph {...props} />
           ),
-          strong: ({ node, ...props }) => (
+          strong: (props) => (
             <Typography component="span" fontWeight="bold" {...props} />
           ),
-          em: ({ node, ...props }) => (
+          em: (props) => (
             <Typography component="span" fontStyle="italic" {...props} />
           ),
-          ul: ({ node, ...props }) => (
+          ul: (props) => (
             <Typography component="ul" sx={{ my: 1, pl: 3 }} {...props} />
           ),
-          ol: ({ node, ...props }) => (
+          ol: (props) => (
             <Typography component="ol" sx={{ my: 1, pl: 3 }} {...props} />
           ),
-          li: ({ node, ...props }) => <Typography component="li" {...props} />,
+          li: (props) => <Typography component="li" {...props} />,
         }}
       >
         {children}

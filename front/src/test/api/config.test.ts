@@ -8,9 +8,9 @@ vi.mock("../../api/config", () => ({
 }));
 
 describe("API Client", () => {
-  let errorHandler: (error: any) => Promise<any>;
-  let dispatchSpy: vi.SpyInstance;
-  let mockedApiClient: any;
+  let errorHandler: (error: unknown) => Promise<unknown>;
+  let dispatchSpy: ReturnType<typeof vi.spyOn>;
+  let mockedApiClient: Record<string, unknown>;
 
   beforeEach(async () => {
     vi.clearAllMocks();

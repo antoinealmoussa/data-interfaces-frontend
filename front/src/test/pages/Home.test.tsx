@@ -10,7 +10,7 @@ vi.mock("../../api/client", () => ({
 
 import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { AuthProvider, AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../contexts/AuthContextDefinition";
 import { Home } from "../../pages/Home";
 
 const mockAuthContext = {
@@ -151,7 +151,7 @@ describe("Home", () => {
 
   it("devrait afficher le détail de l'erreur quand response.data.detail est présent", async () => {
     const apiError = new Error("API error");
-    (apiError as any).response = { data: { detail: "Message personnalisé" } };
+    (apiError as Record<string, unknown>).response = { data: { detail: "Message personnalisé" } };
     mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {
@@ -172,7 +172,7 @@ describe("Home", () => {
 
   it("devrait afficher le message générique quand response.data n'a pas de detail", async () => {
     const apiError = new Error("API error");
-    (apiError as any).response = { data: {} };
+    (apiError as Record<string, unknown>).response = { data: {} };
     mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {

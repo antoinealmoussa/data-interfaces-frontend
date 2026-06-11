@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Header } from "../../../components/layout/Header";
 import { AuthProvider } from "../../../contexts/AuthContext";
+import type { User } from "../../../types/authTypes";
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
@@ -13,7 +14,7 @@ vi.mock("../../../api/config", () => ({
   },
 }));
 
-const renderWithProviders = (ui: React.ReactElement, userData: any = null) => {
+const renderWithProviders = (ui: React.ReactElement, userData: Partial<User> | null = null) => {
   const user = userData || {
     id: 1,
     email: "test@test.com",

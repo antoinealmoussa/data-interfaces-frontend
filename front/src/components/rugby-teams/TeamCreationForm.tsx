@@ -10,12 +10,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { teamApi } from "../../api/teamApi";
 import {
   type CreateTeamDto,
   TEAM_CATEGORIES,
-  type TeamCategory,
 } from "../../types/teamTypes";
 import { FormActions } from "../common/FormActions";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +31,6 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateTeamDto>({
     defaultValues: {
@@ -43,7 +41,7 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
     },
   });
 
-  const nameValue = watch("name");
+  const nameValue = useWatch({ control, name: "name" });
 
   const onSubmit = async (data: CreateTeamDto) => {
     setSubmitError(null);

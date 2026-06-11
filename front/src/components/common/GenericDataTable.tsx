@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type ReactNode } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -99,6 +99,7 @@ export const GenericDataTable = <T,>({
   const setSearch = (value: string) => {
     if (onSearchChange) onSearchChange(value);
     if (!isControlled) setInternalSearch(value);
+    setPage(0);
   };
 
   const [orderBy, setOrderBy] = useState<keyof T | null>(
@@ -106,10 +107,6 @@ export const GenericDataTable = <T,>({
   );
   const [order, setOrder] = useState<"asc" | "desc">(defaultOrder ?? "asc");
   const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setPage(0);
-  }, [search]);
 
   const handleSort = (key: keyof T) => {
     if (orderBy === key) {

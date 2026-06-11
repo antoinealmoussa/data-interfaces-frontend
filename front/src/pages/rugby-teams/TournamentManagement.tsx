@@ -20,12 +20,6 @@ import type {
 import type { Column, Action } from "../../components/common/GenericDataTable";
 import type { SnackbarState } from "../../types/uiTypes";
 
-interface PlayerOption {
-  id: number;
-  name: string;
-  category_names: string[];
-}
-
 interface PlayerStatsRow {
   id: number;
   name: string;
@@ -113,9 +107,9 @@ export const TournamentManagement = () => {
     });
   }, [players, tournaments]);
 
-  const categories = team?.categories ?? [];
   const playerColumns = useMemo((): Column<PlayerStatsRow>[] => {
-    const categoryCols: Column<PlayerStatsRow>[] = categories.map((cat) => ({
+    const cats = team?.categories ?? [];
+    const categoryCols: Column<PlayerStatsRow>[] = cats.map((cat) => ({
       key: cat,
       label: cat,
     }));
@@ -124,7 +118,7 @@ export const TournamentManagement = () => {
       ...categoryCols,
       { key: "total", label: "Total" },
     ];
-  }, [categories]);
+  }, [team?.categories]);
 
   const createMutation = useMutation({
     mutationFn: (data: CreateTournamentDto) =>
