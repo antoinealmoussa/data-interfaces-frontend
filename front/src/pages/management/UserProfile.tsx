@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import apiClient from "../../api/client";
 import type { User } from "../../types/authTypes";
 import {

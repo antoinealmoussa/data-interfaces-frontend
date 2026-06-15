@@ -9,6 +9,8 @@ const mockedClient = {
 
 vi.mock("../../api/client", () => ({
   default: mockedClient,
+  teamPath: (teamName: string, ...segments: string[]) =>
+    `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
 }));
 
 describe("playerApi", () => {

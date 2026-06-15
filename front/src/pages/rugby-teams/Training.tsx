@@ -152,6 +152,7 @@ const Training = () => {
     selectedAlgorithm,
     distributeMutation,
     effectiveAlgorithm,
+    teamCount,
   ]);
 
   const findPlayer = (id: string): Player | null => {

@@ -11,7 +11,7 @@ vi.mock("../../api/client", () => ({
 import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContextDefinition";
-import { Home } from "../../pages/Home";
+import Home from "../../pages/Home";
 
 const mockAuthContext = {
   isAuthenticated: true,

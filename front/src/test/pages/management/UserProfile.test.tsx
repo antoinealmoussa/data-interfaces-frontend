@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { UserProfile } from "../../../pages/management/UserProfile";
+import UserProfile from "../../../pages/management/UserProfile";
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
@@ -157,7 +157,7 @@ describe("UserProfile", () => {
       data: mockUserResponse,
     });
     mockedAxios.put.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100)),
+      () => new Promise((resolve) => setTimeout(() => resolve({ data: { ...mockUser, first_name: "Jane" } }), 200)),
     );
 
     render(<UserProfile />);
@@ -173,9 +173,11 @@ describe("UserProfile", () => {
     const submitButton = screen.getByRole("button", { name: /enregistrer/i });
     await user.click(submitButton);
 
-    expect(
-      screen.getByRole("button", { name: /enregistrement\.\.\./i }),
-    ).toBeDisabled();
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /enregistrement\.\.\./i }),
+      ).toBeDisabled();
+    });
   });
 
   it("devrait fermer le snackbar quand on clique sur le bouton de fermeture", async () => {
