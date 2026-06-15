@@ -19,7 +19,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import { playerApi } from "../../api/playerApi";
@@ -97,7 +97,7 @@ const TeamDroppable = ({ team }: { team: TrainingTeam }) => {
   );
 };
 
-export const Training = () => {
+const Training = () => {
   const { team, season, loading, error } = useTeamAndSeason();
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
   const [teamCount, setTeamCount] = useState(2);
@@ -122,7 +122,8 @@ export const Training = () => {
     enabled: !!team,
   });
 
-  const effectiveAlgorithm = selectedAlgorithm || (algorithms.length > 0 ? algorithms[0].id : "");
+  const effectiveAlgorithm =
+    selectedAlgorithm || (algorithms.length > 0 ? algorithms[0].id : "");
 
   const distributeMutation = useMutation({
     mutationFn: (req: DistributeRequest) =>
@@ -130,22 +131,28 @@ export const Training = () => {
     onSuccess: (data) => setTrainingTeams(data.teams),
   });
 
-  const handleTogglePlayer = (playerId: number) => {
+  const handleTogglePlayer = useCallback((playerId: number) => {
     setSelectedPlayerIds((prev) =>
       prev.includes(playerId)
         ? prev.filter((id) => id !== playerId)
         : [...prev, playerId],
     );
-  };
+  }, []);
 
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     if (!team || selectedPlayerIds.length < 2 || !selectedAlgorithm) return;
     distributeMutation.mutate({
       player_ids: selectedPlayerIds,
       team_count: teamCount,
       algorithm: effectiveAlgorithm,
     });
-  };
+  }, [
+    team,
+    selectedPlayerIds,
+    selectedAlgorithm,
+    distributeMutation,
+    effectiveAlgorithm,
+  ]);
 
   const findPlayer = (id: string): Player | null => {
     if (!trainingTeams) return null;
@@ -343,3 +350,5 @@ export const Training = () => {
     </PageGuard>
   );
 };
+
+export default Training;

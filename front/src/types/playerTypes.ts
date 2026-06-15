@@ -15,3 +15,9 @@ export interface CreatePlayerDto {
   position: "Ailier" | "Meneur";
   category_names: string[];
 }
+
+export interface PlayerSimple {
+  id: number;
+  name: string;
+  category_names: string[];
+}

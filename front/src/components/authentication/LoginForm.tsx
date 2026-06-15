@@ -1,19 +1,13 @@
 import { useState } from "react";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Divider,
-  Snackbar,
-  Alert,
-} from "@mui/material";
+import { TextField, Button, Box, Typography, Divider } from "@mui/material";
 import { Link as BaseLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type LoginFormProps } from "../../types/authTypes";
 import apiClient from "../../api/client";
 import { useAuth } from "../../hooks/useAuth";
+import { NotificationSnackbar } from "../common/NotificationSnackbar";
+import { WVA_QUOTE_TEXT } from "../../utils/constants";
 
 export const LoginForm: React.FC = () => {
   const {
@@ -42,16 +36,12 @@ export const LoginForm: React.FC = () => {
 
   return (
     <>
-      <Snackbar
+      <NotificationSnackbar
         open={errorSnackbar}
-        autoHideDuration={5000}
+        severity="error"
+        message="Erreur lors de la connexion"
         onClose={() => setErrorSnackbar(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity="error" onClose={() => setErrorSnackbar(false)}>
-          Erreur lors de la connexion
-        </Alert>
-      </Snackbar>
+      />
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
@@ -92,7 +82,7 @@ export const LoginForm: React.FC = () => {
           S'inscrire
         </Button>
         <Typography variant="subtitle2" color="primary">
-          <i>"Roule aussi vite que t'es con"</i> - Wout Van Aert
+          {WVA_QUOTE_TEXT}
         </Typography>
       </Box>
     </>

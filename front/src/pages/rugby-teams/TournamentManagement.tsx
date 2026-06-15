@@ -1,6 +1,6 @@
 import { Box, Button, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,7 +18,8 @@ import type {
   CreateTournamentDto,
 } from "../../types/tournamentTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
-import type { SnackbarState } from "../../types/uiTypes";
+import type { PlayerSimple } from "../../types/playerTypes";
+import { useCrudManager } from "../../hooks/useCrudManager";
 
 interface PlayerStatsRow {
   id: number;
@@ -27,26 +28,11 @@ interface PlayerStatsRow {
   [category: string]: number | string;
 }
 
-export const TournamentManagement = () => {
+const TournamentManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();
-  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<"player" | "tournament">("player");
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    severity: "success",
-    message: "",
-  });
-  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingTournament, setEditingTournament] = useState<Tournament | null>(
-    null,
-  );
-  const [deleteTarget, setDeleteTarget] = useState<Tournament | null>(null);
 
-  const {
-    data: tournaments = [],
-    isLoading: tournamentsLoading,
-    error: tournamentsError,
-  } = useQuery({
+  const tournamentManager = useCrudManager<Tournament, CreateTournamentDto>({
     queryKey: ["tournaments", team?.name],
     queryFn: () =>
       tournamentApi.getByTeam(team!.name).then((data) =>
@@ -59,10 +45,29 @@ export const TournamentManagement = () => {
           }))
           .sort((a, b) => b.id - a.id),
       ),
+    createFn: (data) => tournamentApi.create(team!.name, data),
+    updateFn: (id, data) => tournamentApi.update(team!.name, id, data),
+    deleteFn: (id) => tournamentApi.delete(team!.name, id),
+    entityName: "tournoi",
     enabled: !!team,
   });
 
-  const { data: players = [] } = useQuery({
+  const {
+    entities: tournaments,
+    isLoading: tournamentsLoading,
+    error: tournamentsError,
+    modalMode,
+    editingEntity: editingTournament,
+    deleteTarget,
+    snackbar,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    handleCloseSnackbar,
+    deleteMutation,
+  } = tournamentManager;
+
+  const { data: players = [] } = useQuery<PlayerSimple[]>({
     queryKey: ["tournament-players", team?.name],
     queryFn: () =>
       playerApi.getByTeam(team!.name).then((data) =>
@@ -74,11 +79,6 @@ export const TournamentManagement = () => {
       ),
     enabled: !!team,
   });
-
-  const invalidateTournaments = () =>
-    queryClient.invalidateQueries({
-      queryKey: ["tournaments", team?.name],
-    });
 
   const tournamentColumns: Column<Tournament>[] = [
     { key: "name", label: "Nom" },
@@ -120,80 +120,20 @@ export const TournamentManagement = () => {
     ];
   }, [team?.categories]);
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateTournamentDto) =>
-      tournamentApi.create(team!.name, data),
-    onSuccess: () => {
-      invalidateTournaments();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Tournoi ajouté avec succès",
-      });
-      setModalMode(null);
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: CreateTournamentDto) =>
-      tournamentApi.update(team!.name, editingTournament!.id, data),
-    onSuccess: () => {
-      invalidateTournaments();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Tournoi modifié avec succès",
-      });
-      setModalMode(null);
-      setEditingTournament(null);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => tournamentApi.delete(team!.name, deleteTarget!.id),
-    onSuccess: () => {
-      invalidateTournaments();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Tournoi supprimé avec succès",
-      });
-      setDeleteTarget(null);
-    },
-    onError: () => {
-      setSnackbar({
-        open: true,
-        severity: "error",
-        message: "Erreur lors de la suppression",
-      });
-      setDeleteTarget(null);
-    },
-  });
-
-  const handleCreate = async (data: CreateTournamentDto) => {
-    createMutation.mutate(data);
-  };
-  const handleUpdate = async (data: CreateTournamentDto) => {
-    updateMutation.mutate(data);
-  };
-  const handleDelete = async () => {
-    deleteMutation.mutate();
-  };
-
   const tournamentActions: Action<Tournament>[] = [
     {
       label: "Modifier",
       icon: <EditIcon />,
       onClick: (t) => {
-        setEditingTournament(t);
-        setModalMode("edit");
+        tournamentManager.setEditingEntity(t);
+        tournamentManager.setModalMode("edit");
       },
     },
     {
       label: "Supprimer",
       icon: <DeleteIcon />,
       color: "error",
-      onClick: (t) => setDeleteTarget(t),
+      onClick: (t) => tournamentManager.setDeleteTarget(t),
     },
   ];
 
@@ -236,7 +176,7 @@ export const TournamentManagement = () => {
               <Button
                 variant="contained"
                 startIcon={<EmojiEventsIcon />}
-                onClick={() => setModalMode("create")}
+                onClick={() => tournamentManager.setModalMode("create")}
               >
                 Ajouter un tournoi
               </Button>
@@ -275,8 +215,8 @@ export const TournamentManagement = () => {
           tournament={editingTournament}
           onSave={modalMode === "create" ? handleCreate : handleUpdate}
           onClose={() => {
-            setModalMode(null);
-            setEditingTournament(null);
+            tournamentManager.setModalMode(null);
+            tournamentManager.setEditingEntity(null);
           }}
           teamCategories={team?.categories ?? []}
           teamPlayers={players}
@@ -290,16 +230,18 @@ export const TournamentManagement = () => {
           confirmColor="error"
           loading={deleteMutation.isPending}
           onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => tournamentManager.setDeleteTarget(null)}
         />
 
         <NotificationSnackbar
           open={snackbar.open}
           severity={snackbar.severity}
           message={snackbar.message}
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          onClose={handleCloseSnackbar}
         />
       </Box>
     </PageGuard>
   );
 };
+
+export default TournamentManagement;

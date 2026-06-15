@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export const RacePreparation = () => {
+const RacePreparation = () => {
   return (
     <Box
       sx={{
@@ -17,3 +17,5 @@ export const RacePreparation = () => {
     </Box>
   );
 };
+
+export default RacePreparation;

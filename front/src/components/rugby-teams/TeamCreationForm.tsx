@@ -12,12 +12,10 @@ import {
 import { useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { teamApi } from "../../api/teamApi";
-import {
-  type CreateTeamDto,
-  TEAM_CATEGORIES,
-} from "../../types/teamTypes";
+import { type CreateTeamDto, TEAM_CATEGORIES } from "../../types/teamTypes";
 import { FormActions } from "../common/FormActions";
 import { useNavigate } from "react-router-dom";
+import { toggleArrayItem } from "../../utils/array";
 
 interface TeamCreationFormProps {
   userId: number;
@@ -124,12 +122,9 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
                     control={
                       <Checkbox
                         checked={field.value.includes(category)}
-                        onChange={() => {
-                          const updated = field.value.includes(category)
-                            ? field.value.filter((c) => c !== category)
-                            : [...field.value, category];
-                          field.onChange(updated);
-                        }}
+                        onChange={() =>
+                          field.onChange(toggleArrayItem(field.value, category))
+                        }
                       />
                     }
                     label={category}

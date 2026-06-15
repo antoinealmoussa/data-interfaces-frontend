@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { type RegisterFormProps } from "../../types/authTypes";
 import apiClient from "../../api/client";
+import { WVA_QUOTE_TEXT } from "../../utils/constants";
 
 export const RegisterForm: React.FC = () => {
   const {
@@ -31,7 +32,6 @@ export const RegisterForm: React.FC = () => {
       }}
     >
       <TextField
-        key="firstName"
         variant="outlined"
         color="primary"
         label="Prénom"
@@ -39,7 +39,6 @@ export const RegisterForm: React.FC = () => {
       />
 
       <TextField
-        key="surname"
         variant="outlined"
         color="primary"
         label="Nom de famille"
@@ -47,7 +46,6 @@ export const RegisterForm: React.FC = () => {
       />
 
       <TextField
-        key="email"
         variant="outlined"
         color="primary"
         label="Email"
@@ -55,7 +53,6 @@ export const RegisterForm: React.FC = () => {
       />
 
       <TextField
-        key="password"
         variant="outlined"
         color="primary"
         label="Mot de passe"
@@ -63,17 +60,12 @@ export const RegisterForm: React.FC = () => {
         {...register("password")}
       />
 
-      <Button
-        key="submitButton"
-        variant="contained"
-        color="primary"
-        type="submit"
-      >
+      <Button variant="contained" color="primary" type="submit">
         {isSubmitting ? "Inscription..." : "S'inscrire"}
       </Button>
 
       <Typography key="caption" variant="subtitle2" color="primary">
-        <i>"Roule aussi vite que t'es con"</i> - Wout Van Aert
+        {WVA_QUOTE_TEXT}
       </Typography>
     </Box>
   );

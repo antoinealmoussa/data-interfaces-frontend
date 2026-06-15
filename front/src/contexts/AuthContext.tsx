@@ -1,9 +1,10 @@
 import { useState, type ReactNode, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
   MeResponse,
+  AuthContextType,
 } from "../types/authTypes";
 import apiClient from "../api/client";
 import { AuthContext } from "./AuthContextDefinition";
@@ -15,7 +16,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[] | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   const unauthorize = () => {
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [location]);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

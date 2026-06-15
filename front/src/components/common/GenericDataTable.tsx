@@ -44,6 +44,10 @@ interface GenericDataTableProps<T> {
   onSearchChange?: (value: string) => void;
   defaultOrderBy?: keyof T;
   defaultOrder?: "asc" | "desc";
+  /** Controlled sort props (optional). When `orderBy` is provided, sort is controlled by parent. */
+  orderBy?: keyof T | null;
+  order?: "asc" | "desc";
+  onSortChange?: (orderBy: keyof T | null, order: "asc" | "desc") => void;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -92,6 +96,9 @@ export const GenericDataTable = <T,>({
   onSearchChange,
   defaultOrderBy,
   defaultOrder,
+  orderBy: controlledOrderBy,
+  order: controlledOrder,
+  onSortChange,
 }: GenericDataTableProps<T>) => {
   const isControlled = controlledSearch !== undefined;
   const [internalSearch, setInternalSearch] = useState("");
@@ -102,18 +109,32 @@ export const GenericDataTable = <T,>({
     setPage(0);
   };
 
-  const [orderBy, setOrderBy] = useState<keyof T | null>(
+  const isSortControlled = controlledOrderBy !== undefined;
+  const [internalOrderBy, setInternalOrderBy] = useState<keyof T | null>(
     defaultOrderBy ?? null,
   );
-  const [order, setOrder] = useState<"asc" | "desc">(defaultOrder ?? "asc");
+  const [internalOrder, setInternalOrder] = useState<"asc" | "desc">(
+    defaultOrder ?? "asc",
+  );
   const [page, setPage] = useState(0);
 
+  const orderBy = isSortControlled ? controlledOrderBy : internalOrderBy;
+  const order = isSortControlled
+    ? (controlledOrder ?? "asc")
+    : internalOrder;
+
   const handleSort = (key: keyof T) => {
-    if (orderBy === key) {
-      setOrder(order === "asc" ? "desc" : "asc");
+    if (isSortControlled && onSortChange) {
+      const newOrder =
+        orderBy === key && order === "asc" ? "desc" : "asc";
+      onSortChange(key, newOrder);
     } else {
-      setOrderBy(key);
-      setOrder("asc");
+      if (internalOrderBy === key) {
+        setInternalOrder(internalOrder === "asc" ? "desc" : "asc");
+      } else {
+        setInternalOrderBy(key);
+        setInternalOrder("asc");
+      }
     }
   };
 

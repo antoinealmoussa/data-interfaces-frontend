@@ -1,4 +1,4 @@
-import apiClient from "./client";
+import apiClient, { teamPath } from "./client";
 import type { Player } from "../types/playerTypes";
 
 export interface AlgorithmInfo {
@@ -22,20 +22,18 @@ export interface DistributeResponse {
   teams: TrainingTeam[];
 }
 
-const BASE_URL = "/teams";
-
 export const trainingApi = {
   getAlgorithms: (teamName: string) =>
     apiClient
       .get<
         AlgorithmInfo[]
-      >(`${BASE_URL}/${encodeURIComponent(teamName)}/training/algorithms`)
+      >(teamPath(teamName, "training", "algorithms"))
       .then((r) => r.data),
 
   distribute: (teamName: string, data: DistributeRequest) =>
     apiClient
       .post<DistributeResponse>(
-        `${BASE_URL}/${encodeURIComponent(teamName)}/training/distribute`,
+        teamPath(teamName, "training", "distribute"),
         data,
       )
       .then((r) => r.data),

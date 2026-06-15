@@ -5,7 +5,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import { RugbyTeamsSidebar } from "../../components/rugby-teams/RugbyTeamsSidebar";
 
-export const RugbyTeams = () => {
+const RugbyTeams = () => {
   const { teams, loading, refetch } = useTeamAndSeason();
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,3 +56,5 @@ export const RugbyTeams = () => {
     </Box>
   );
 };
+
+export default RugbyTeams;

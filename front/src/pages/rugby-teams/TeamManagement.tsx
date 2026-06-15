@@ -1,6 +1,4 @@
 import { Box, Button } from "@mui/material";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,7 +11,7 @@ import { PlayerModal } from "../../components/rugby-teams/player/PlayerModal";
 import { PageGuard } from "../../components/common/PageGuard";
 import type { Player, CreatePlayerDto } from "../../types/playerTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
-import type { SnackbarState } from "../../types/uiTypes";
+import { useCrudManager } from "../../hooks/useCrudManager";
 
 const playerColumns: Column<Player>[] = [
   { key: "name", label: "Nom" },
@@ -31,104 +29,48 @@ const playerColumns: Column<Player>[] = [
   },
 ];
 
-export const TeamManagement = () => {
+const TeamManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();
-  const queryClient = useQueryClient();
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    severity: "success",
-    message: "",
-  });
-  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Player | null>(null);
 
-  const {
-    data: players = [],
-    isLoading: playersLoading,
-    error: playersError,
-  } = useQuery({
+  const playerManager = useCrudManager<Player, CreatePlayerDto>({
     queryKey: ["players", team?.name],
     queryFn: () => playerApi.getByTeam(team!.name),
+    createFn: (data) => playerApi.create(team!.name, data),
+    updateFn: (id, data) => playerApi.update(team!.name, id, data),
+    deleteFn: (id) => playerApi.delete(team!.name, id),
+    entityName: "joueur",
     enabled: !!team,
   });
 
-  const invalidatePlayers = () =>
-    queryClient.invalidateQueries({ queryKey: ["players", team?.name] });
-
-  const createMutation = useMutation({
-    mutationFn: (data: CreatePlayerDto) => playerApi.create(team!.name, data),
-    onSuccess: () => {
-      invalidatePlayers();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Joueur ajouté avec succès",
-      });
-      setModalMode(null);
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: CreatePlayerDto) =>
-      playerApi.update(team!.name, editingPlayer!.id, data),
-    onSuccess: () => {
-      invalidatePlayers();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Joueur modifié avec succès",
-      });
-      setModalMode(null);
-      setEditingPlayer(null);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => playerApi.delete(team!.name, deleteTarget!.id),
-    onSuccess: () => {
-      invalidatePlayers();
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Joueur supprimé avec succès",
-      });
-      setDeleteTarget(null);
-    },
-    onError: () => {
-      setSnackbar({
-        open: true,
-        severity: "error",
-        message: "Erreur lors de la suppression",
-      });
-      setDeleteTarget(null);
-    },
-  });
-
-  const handleCreate = async (data: CreatePlayerDto) => {
-    createMutation.mutate(data);
-  };
-  const handleUpdate = async (data: CreatePlayerDto) => {
-    updateMutation.mutate(data);
-  };
-  const handleDelete = async () => {
-    deleteMutation.mutate();
-  };
+  const {
+    entities: players,
+    isLoading: playersLoading,
+    error: playersError,
+    modalMode,
+    editingEntity: editingPlayer,
+    deleteTarget,
+    snackbar,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    handleCloseSnackbar,
+    deleteMutation,
+  } = playerManager;
 
   const playerActions: Action<Player>[] = [
     {
       label: "Modifier",
       icon: <EditIcon />,
       onClick: (p) => {
-        setEditingPlayer(p);
-        setModalMode("edit");
+        playerManager.setEditingEntity(p);
+        playerManager.setModalMode("edit");
       },
     },
     {
       label: "Supprimer",
       icon: <DeleteIcon />,
       color: "error",
-      onClick: (p) => setDeleteTarget(p),
+      onClick: (p) => playerManager.setDeleteTarget(p),
     },
   ];
 
@@ -151,7 +93,7 @@ export const TeamManagement = () => {
           <Button
             variant="contained"
             startIcon={<PersonAddIcon />}
-            onClick={() => setModalMode("create")}
+            onClick={() => playerManager.setModalMode("create")}
           >
             Ajouter un joueur
           </Button>
@@ -173,8 +115,8 @@ export const TeamManagement = () => {
           player={editingPlayer}
           onSave={modalMode === "create" ? handleCreate : handleUpdate}
           onClose={() => {
-            setModalMode(null);
-            setEditingPlayer(null);
+            playerManager.setModalMode(null);
+            playerManager.setEditingEntity(null);
           }}
           teamCategories={team?.categories ?? []}
         />
@@ -187,16 +129,18 @@ export const TeamManagement = () => {
           confirmColor="error"
           loading={deleteMutation.isPending}
           onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => playerManager.setDeleteTarget(null)}
         />
 
         <NotificationSnackbar
           open={snackbar.open}
           severity={snackbar.severity}
           message={snackbar.message}
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          onClose={handleCloseSnackbar}
         />
       </Box>
     </PageGuard>
   );
 };
+
+export default TeamManagement;

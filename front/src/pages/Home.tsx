@@ -7,7 +7,7 @@ import apiClient from "../api/client";
 import type { HomeState } from "../types/uiTypes";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 
-export const Home = () => {
+const Home = () => {
   const { user } = useAuth();
   const [searchValue, setSearchValue] = useState("");
   const [state, setState] = useState<HomeState>("idle");
@@ -97,3 +97,5 @@ export const Home = () => {
     </Box>
   );
 };
+
+export default Home;

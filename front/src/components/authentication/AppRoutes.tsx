@@ -7,6 +7,7 @@ import { PublicLayout } from "../../pages/authentication/PublicLayout";
 import { authRoutes } from "../../pages/authentication/routes";
 import { useAuth } from "../../hooks/useAuth";
 import type { AppName, RouteProps } from "../../types/routesTypes";
+import { ErrorBoundary } from "../common/ErrorBoundary";
 
 const renderRoute = (route: RouteProps): React.ReactNode => {
   if (route.children) {
@@ -33,7 +34,9 @@ export const AppRoutes: React.FC = () => {
       <Route
         element={
           <ProtectedRoute>
-            <App />
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       >

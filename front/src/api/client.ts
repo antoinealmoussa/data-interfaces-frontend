@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import API_URLS from "./config";
 
 const apiClient = axios.create({
@@ -8,7 +8,7 @@ const apiClient = axios.create({
 
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value: unknown) => void;
+  resolve: (value: AxiosResponse | PromiseLike<AxiosResponse>) => void;
   reject: (reason?: unknown) => void;
 }> = [];
 
@@ -17,7 +17,7 @@ const processQueue = (error: unknown) => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(undefined);
+      prom.resolve(undefined as unknown as AxiosResponse);
     }
   });
   failedQueue = [];
@@ -64,3 +64,6 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+
+export const teamPath = (teamName: string, ...segments: string[]) =>
+  `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`;

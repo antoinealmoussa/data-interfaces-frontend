@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export const BikeExploration = () => {
+const BikeExploration = () => {
   return (
     <Box
       sx={{
@@ -17,3 +17,5 @@ export const BikeExploration = () => {
     </Box>
   );
 };
+
+export default BikeExploration;

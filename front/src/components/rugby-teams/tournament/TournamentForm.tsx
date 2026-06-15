@@ -18,13 +18,14 @@ import type {
   Tournament,
   CreateTournamentDto,
 } from "../../../types/tournamentTypes";
+import type { PlayerSimple } from "../../../types/playerTypes";
 
 interface TournamentFormProps {
   defaultValues?: Tournament;
   onSubmit: (data: CreateTournamentDto) => Promise<void>;
   onCancel: () => void;
   teamCategories: string[];
-  teamPlayers: { id: number; name: string; category_names: string[] }[];
+  teamPlayers: PlayerSimple[];
 }
 
 export const TournamentForm = ({
