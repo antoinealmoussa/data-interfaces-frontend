@@ -1,5 +1,7 @@
 import re
 
+TEAM_CATEGORIES: list[str] = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
+
 
 def validate_season_format(season: str) -> bool:
     """

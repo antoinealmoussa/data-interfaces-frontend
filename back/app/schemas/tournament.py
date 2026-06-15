@@ -10,10 +10,14 @@ class TournamentBase(BaseModel):
 
 
 class ApiCreateTournament(TournamentBase):
+    """Données requises pour la création d'un tournoi (identique à TournamentBase aujourd'hui,
+    mais séparé pour permettre une divergence future Create vs Update)."""
     pass
 
 
 class ApiUpdateTournament(TournamentBase):
+    """Données requises pour la modification d'un tournoi (identique à TournamentBase aujourd'hui,
+    mais séparé pour permettre une divergence future Create vs Update)."""
     pass
 
 

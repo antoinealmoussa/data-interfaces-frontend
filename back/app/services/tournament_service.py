@@ -1,61 +1,50 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models.category import Category
+from app.db.repositories import TournamentRepository
 from app.models.player import Player
-from app.models.team import Team
 from app.models.tournament import Tournament
 from app.schemas.tournament import (
     ApiCreateTournament,
     ApiReturnTournament,
     ApiUpdateTournament,
 )
+from app.services.category_service import get_category_by_name
+from app.services.team_service import get_team_by_name
+from app.utils.exceptions import (
+    CategoryNotFoundError,
+    ForbiddenError,
+    TournamentNotFoundError,
+)
 
 
 def get_tournament_by_id(
     db: Session, tournament_id: int
 ) -> Tournament | None:
-    return (
-        db.query(Tournament)
-        .filter(Tournament.id == tournament_id)
-        .first()
-    )
+    repo = TournamentRepository(db)
+    return repo.get_by_id(tournament_id)
 
 
 def get_tournaments_by_team(
     db: Session, team_name: str, skip: int = 0, limit: int = 100
 ) -> list[Tournament]:
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
-    return (
-        db.query(Tournament)
-        .filter(Tournament.team_id == team.id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    team = get_team_by_name(db, team_name)
+    repo = TournamentRepository(db)
+    return repo.get_by_team(team.id, skip, limit)
 
 
 def create_tournament(
     db: Session,
     team_name: str,
     tournament_in: ApiCreateTournament,
+    user_id: int,
 ) -> ApiReturnTournament:
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
+    team = get_team_by_name(db, team_name)
+    if team.user_id != user_id:
+        raise ForbiddenError()
 
-    category = (
-        db.query(Category)
-        .filter(Category.name == tournament_in.category_name)
-        .first()
-    )
+    category = get_category_by_name(db, tournament_in.category_name)
     if not category:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Catégorie '{tournament_in.category_name}' non trouvée",
-        )
+        raise CategoryNotFoundError(tournament_in.category_name)
 
     players = (
         db.query(Player)
@@ -66,21 +55,15 @@ def create_tournament(
         .all()
     )
     if len(players) != len(tournament_in.player_names):
-        raise HTTPException(
-            status_code=404,
-            detail="Certains joueurs n'existent pas dans cette équipe",
-        )
+        raise TournamentNotFoundError(0)
 
-    db_tournament = Tournament(
-        name=tournament_in.name,
+    repo = TournamentRepository(db)
+    return repo.create(
+        tournament_in,
         category_id=category.id,
         team_id=team.id,
         players=players,
     )
-    db.add(db_tournament)
-    db.commit()
-    db.refresh(db_tournament)
-    return ApiReturnTournament.model_validate(db_tournament)
 
 
 def update_tournament(
@@ -88,27 +71,22 @@ def update_tournament(
     tournament_id: int,
     team_name: str,
     tournament_in: ApiUpdateTournament,
+    user_id: int,
 ) -> ApiReturnTournament:
-    tournament = get_tournament_by_id(db, tournament_id)
+    repo = TournamentRepository(db)
+    tournament = repo.get_by_id(tournament_id)
     if not tournament:
-        raise HTTPException(status_code=404, detail="Tournoi non trouvé")
+        raise TournamentNotFoundError(tournament_id)
 
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team or tournament.team_id != team.id:
-        raise HTTPException(
-            status_code=404, detail="Tournoi non trouvé dans cette équipe"
-        )
+    team = get_team_by_name(db, team_name)
+    if tournament.team_id != team.id:
+        raise TournamentNotFoundError(tournament_id)
+    if team.user_id != user_id:
+        raise ForbiddenError()
 
-    category = (
-        db.query(Category)
-        .filter(Category.name == tournament_in.category_name)
-        .first()
-    )
+    category = get_category_by_name(db, tournament_in.category_name)
     if not category:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Catégorie '{tournament_in.category_name}' non trouvée",
-        )
+        raise CategoryNotFoundError(tournament_in.category_name)
 
     players = (
         db.query(Player)
@@ -119,10 +97,7 @@ def update_tournament(
         .all()
     )
     if len(players) != len(tournament_in.player_names):
-        raise HTTPException(
-            status_code=404,
-            detail="Certains joueurs n'existent pas dans cette équipe",
-        )
+        raise TournamentNotFoundError(0)
 
     tournament.name = tournament_in.name
     tournament.category_id = category.id
@@ -133,17 +108,18 @@ def update_tournament(
 
 
 def delete_tournament(
-    db: Session, tournament_id: int, team_name: str
+    db: Session, tournament_id: int, team_name: str, user_id: int
 ) -> None:
-    tournament = get_tournament_by_id(db, tournament_id)
+    repo = TournamentRepository(db)
+    tournament = repo.get_by_id(tournament_id)
     if not tournament:
-        raise HTTPException(status_code=404, detail="Tournoi non trouvé")
+        raise TournamentNotFoundError(tournament_id)
 
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team or tournament.team_id != team.id:
-        raise HTTPException(
-            status_code=404, detail="Tournoi non trouvé dans cette équipe"
-        )
+    team = get_team_by_name(db, team_name)
+    if tournament.team_id != team.id:
+        raise TournamentNotFoundError(tournament_id)
+    if team.user_id != user_id:
+        raise ForbiddenError()
 
     db.delete(tournament)
     db.commit()

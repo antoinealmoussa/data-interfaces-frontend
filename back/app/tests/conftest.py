@@ -10,8 +10,7 @@ from app.main import app
 from app.models.category import Category
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
-
-TEAM_CATEGORIES = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
+from app.utils.validators import TEAM_CATEGORIES
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

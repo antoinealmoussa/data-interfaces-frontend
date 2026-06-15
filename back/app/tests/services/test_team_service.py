@@ -1,9 +1,9 @@
 import pytest
-from fastapi import HTTPException
 
 from app.models.season import Season
 from app.schemas.team import ApiCreateTeam
 from app.services import season_service, team_service
+from app.utils.exceptions import ForbiddenError, TeamNotFoundError
 
 
 def test_get_teams_by_user_empty(db_session, test_user):
@@ -172,9 +172,8 @@ def test_delete_team_success(db_session, test_user):
 
 
 def test_delete_team_not_found(db_session, test_user):
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(TeamNotFoundError):
         team_service.delete_team(db_session, 999, test_user.id)
-    assert exc.value.status_code == 404
 
 
 def test_delete_team_forbidden(db_session, test_user):
@@ -188,9 +187,8 @@ def test_delete_team_forbidden(db_session, test_user):
     )
     created = team_service.create_team(db_session, team_in)
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(ForbiddenError):
         team_service.delete_team(db_session, created.id, 999)
-    assert exc.value.status_code == 403
 
 
 def test_delete_team_keeps_shared_season(db_session, test_user):

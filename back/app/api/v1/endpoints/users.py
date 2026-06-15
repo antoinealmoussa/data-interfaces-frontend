@@ -10,6 +10,7 @@ from app.api.v1.helpers import (
     set_auth_cookie,
     set_refresh_cookie,
 )
+from app.core.rate_limit import RateLimiter
 from app.core.token import create_access_token, create_refresh_token, get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
@@ -22,6 +23,8 @@ from app.schemas.user import (
 from app.services import user_service
 
 router = APIRouter()
+
+rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
 
 
 @router.get("/", response_model=List[ApiReturnUser], status_code=status.HTTP_200_OK)
@@ -49,6 +52,7 @@ def login(
     response: Response,
     user_in: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
+    _: None = Depends(rate_limiter),
 ) -> dict:
     user = user_service.authenticate_user(
         db, email=user_in.username, password=user_in.password

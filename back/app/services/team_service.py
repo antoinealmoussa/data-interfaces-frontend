@@ -1,20 +1,34 @@
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.db.repositories import TeamRepository
 from app.models.category import Category
 from app.models.season import Season
 from app.models.team import Team
 from app.models.team_season import TeamSeason
 from app.schemas.team import ApiCreateTeam, ApiReturnTeam
 from app.services import season_service
+from app.utils.exceptions import ForbiddenError, TeamNotFoundError
 
 
 def get_team_by_id(db: Session, team_id: int) -> Team | None:
-    return db.query(Team).filter(Team.id == team_id).first()
+    repo = TeamRepository(db)
+    return repo.get_by_id(team_id)
+
+
+def get_team_by_name(db: Session, team_name: str) -> Team:
+    team = db.query(Team).filter(Team.name == team_name).first()
+    if not team:
+        raise TeamNotFoundError(team_name)
+    return team
+
+
+def get_team_by_name_optional(db: Session, team_name: str) -> Team | None:
+    return db.query(Team).filter(Team.name == team_name).first()
 
 
 def get_teams_by_user(db: Session, user_id: int):
-    return db.query(Team).filter(Team.user_id == user_id).all()
+    repo = TeamRepository(db)
+    return repo.get_many(user_id=user_id)
 
 
 def get_teams_by_season(db: Session, season_id: int):
@@ -22,7 +36,8 @@ def get_teams_by_season(db: Session, season_id: int):
 
 
 def has_user_teams(db: Session, user_id: int) -> bool:
-    return db.query(Team).filter(Team.user_id == user_id).count() > 0
+    repo = TeamRepository(db)
+    return repo.db.query(Team).filter(Team.user_id == user_id).count() > 0
 
 
 def create_team(db: Session, team_in: ApiCreateTeam) -> ApiReturnTeam:
@@ -48,12 +63,9 @@ def create_team(db: Session, team_in: ApiCreateTeam) -> ApiReturnTeam:
 def delete_team(db: Session, team_id: int, user_id: int) -> None:
     team = get_team_by_id(db, team_id)
     if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
+        raise TeamNotFoundError(str(team_id))
     if team.user_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas autorisé à supprimer cette équipe",
-        )
+        raise ForbiddenError("Vous n'êtes pas autorisé à supprimer cette équipe")
 
     seasons = list(team.seasons)
 

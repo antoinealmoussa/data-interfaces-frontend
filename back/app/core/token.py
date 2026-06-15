@@ -84,5 +84,7 @@ async def get_current_user(
     return user
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    """Get the current user"""
+    """Vérifie que l'utilisateur est actif (réservé pour extension future : bannissement, vérification email, etc.)"""
+    # if not current_user.is_active:
+    #     raise HTTPException(status_code=403, detail="Compte désactivé")
     return current_user

@@ -31,7 +31,7 @@ def create_player(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnPlayer:
-    return player_service.create_player(db, team_name, player_in)
+    return player_service.create_player(db, team_name, player_in, current_user.id)
 
 
 @router.put("/{player_id}", response_model=ApiReturnPlayer)

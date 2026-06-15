@@ -1,10 +1,10 @@
 import pytest
-from fastapi import HTTPException
 
 from app.models.season import Season
 from app.schemas.player import ApiCreatePlayer, ApiUpdatePlayer
 from app.schemas.team import ApiCreateTeam
 from app.services import player_service, team_service
+from app.utils.exceptions import ForbiddenError, PlayerNotFoundError, TeamNotFoundError
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ class TestGetPlayersByTeam:
         players = player_service.get_players_by_team(db_session, team.name)
         assert players == []
 
-    def test_get_players_by_team_with_data(self, db_session, team):
+    def test_get_players_by_team_with_data(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
             name="Jean",
             level=2,
@@ -35,18 +35,17 @@ class TestGetPlayersByTeam:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         players = player_service.get_players_by_team(db_session, team.name)
         assert len(players) == 1
         assert players[0].id == created.id
 
     def test_get_players_by_team_not_found(self, db_session):
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(TeamNotFoundError):
             player_service.get_players_by_team(db_session, "Equipe inexistante")
-        assert exc.value.status_code == 404
 
-    def test_get_players_by_team_with_pagination(self, db_session, team):
+    def test_get_players_by_team_with_pagination(self, db_session, team, test_user):
         for name in ["Alice", "Bob", "Charlie"]:
             player_service.create_player(
                 db_session,
@@ -58,6 +57,7 @@ class TestGetPlayersByTeam:
                     position="Ailier",
                     category_names=["Mixte"],
                 ),
+                test_user.id,
             )
 
         players = player_service.get_players_by_team(
@@ -68,7 +68,7 @@ class TestGetPlayersByTeam:
 
 
 class TestCreatePlayer:
-    def test_create_player_success(self, db_session, team):
+    def test_create_player_success(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
             name="Jean Dupont",
             level=3,
@@ -76,7 +76,7 @@ class TestCreatePlayer:
             position="Meneur",
             category_names=["Mixte", "+35"],
         )
-        result = player_service.create_player(db_session, team.name, player_in)
+        result = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         assert result.id is not None
         assert result.name == "Jean Dupont"
@@ -94,9 +94,8 @@ class TestCreatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        with pytest.raises(HTTPException) as exc:
-            player_service.create_player(db_session, "Equipe inexistante", player_in)
-        assert exc.value.status_code == 404
+        with pytest.raises(TeamNotFoundError):
+            player_service.create_player(db_session, "Equipe inexistante", player_in, 0)
 
 
 class TestUpdatePlayer:
@@ -108,7 +107,7 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         update_in = ApiUpdatePlayer(
             name="Jean Modifié",
@@ -139,11 +138,10 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(PlayerNotFoundError):
             player_service.update_player(
                 db_session, 999, team.name, test_user.id, update_in
             )
-        assert exc.value.status_code == 404
 
     def test_update_player_wrong_team(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
@@ -153,7 +151,7 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         update_in = ApiUpdatePlayer(
             name="Jean",
@@ -162,11 +160,10 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(TeamNotFoundError):
             player_service.update_player(
                 db_session, created.id, "Autre equipe", test_user.id, update_in
             )
-        assert exc.value.status_code == 404
 
     def test_update_player_forbidden(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
@@ -176,7 +173,7 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         update_in = ApiUpdatePlayer(
             name="Jean",
@@ -185,11 +182,10 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(ForbiddenError):
             player_service.update_player(
                 db_session, created.id, team.name, 999, update_in
             )
-        assert exc.value.status_code == 403
 
     def test_update_player_categories_add_and_remove(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
@@ -199,7 +195,7 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         update_in = ApiUpdatePlayer(
             name="Jean",
@@ -227,16 +223,15 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         player_service.delete_player(db_session, created.id, team.name, test_user.id)
 
         assert player_service.get_player_by_id(db_session, created.id) is None
 
     def test_delete_player_not_found(self, db_session, team, test_user):
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(PlayerNotFoundError):
             player_service.delete_player(db_session, 999, team.name, test_user.id)
-        assert exc.value.status_code == 404
 
     def test_delete_player_forbidden(self, db_session, team, test_user):
         player_in = ApiCreatePlayer(
@@ -246,11 +241,10 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(ForbiddenError):
             player_service.delete_player(db_session, created.id, team.name, 999)
-        assert exc.value.status_code == 403
 
     def test_delete_player_does_not_delete_category(self, db_session, team, test_user):
         from app.models.category import Category
@@ -262,7 +256,7 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in)
+        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
         player_service.delete_player(db_session, created.id, team.name, test_user.id)
 

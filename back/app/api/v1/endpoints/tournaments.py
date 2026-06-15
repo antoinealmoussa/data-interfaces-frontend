@@ -56,7 +56,7 @@ def create_tournament(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
-    return tournament_service.create_tournament(db, team_name, tournament_in)
+    return tournament_service.create_tournament(db, team_name, tournament_in, current_user.id)
 
 
 @router.put("/{tournament_id}", response_model=ApiReturnTournament)
@@ -68,7 +68,7 @@ def update_tournament(
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
     return tournament_service.update_tournament(
-        db, tournament_id, team_name, tournament_in
+        db, tournament_id, team_name, tournament_in, current_user.id
     )
 
 
@@ -79,4 +79,4 @@ def delete_tournament(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> None:
-    tournament_service.delete_tournament(db, tournament_id, team_name)
+    tournament_service.delete_tournament(db, tournament_id, team_name, current_user.id)

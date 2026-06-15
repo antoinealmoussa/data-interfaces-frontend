@@ -1,6 +1,3 @@
-from typing import ClassVar
-
-from fastapi.security import OAuth2PasswordBearer
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,9 +12,6 @@ class Settings(BaseSettings):
     # JWT Configuration
     SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-
-    # Access Token (JWT) Configuration
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Cookie Configuration — Access Token
@@ -52,9 +46,6 @@ class Settings(BaseSettings):
 
     # Chargement automatique du fichier .env
     model_config = SettingsConfigDict(env_file=".env")
-
-    # OAuth2 scheme
-    oauth2_scheme: ClassVar = OAuth2PasswordBearer(tokenUrl="api/v1/users/login")
 
 
 settings = Settings()

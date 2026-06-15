@@ -81,8 +81,8 @@ def test_get_user_by_id_exists(db_session):
     assert found_user.email == "findbyid@test.com"
 
 
-def test_get_user_by_email_case_sensitive(db_session):
-    """Test que get_user_by_email est sensible à la casse."""
+def test_get_user_by_email_case_insensitive(db_session):
+    """Test que l'email est normalisé en minuscules (insensible à la casse)."""
     user = ApiCreateUser(
         email="Case@test.com",
         password="password",
@@ -93,7 +93,8 @@ def test_get_user_by_email_case_sensitive(db_session):
 
     found_user = user_service.get_user_by_email(db_session, email="case@test.com")
 
-    assert found_user is None
+    assert found_user is not None
+    assert found_user.email == "case@test.com"
 
 
 def test_create_user_success(db_session):
