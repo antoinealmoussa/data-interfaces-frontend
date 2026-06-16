@@ -1,24 +1,13 @@
-import { useState, createContext, type ReactNode, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, type ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
-  AuthContextType,
   MeResponse,
+  AuthContextType,
 } from "../types/authTypes";
-import axios from "axios";
-import API_URLS from "../api/config";
-
-const defaultAuthContext: AuthContextType = {
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
-  applications: null,
-  login: async () => {},
-  logout: async () => {},
-};
-
-export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+import apiClient from "../api/client";
+import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -27,7 +16,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[] | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   const unauthorize = () => {
@@ -37,8 +25,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    axios
-      .get<MeResponse>(`${API_URLS.backend}/users/me`)
+    apiClient
+      .get<MeResponse>("/users/me")
       .then((response) => {
         setUser(response.data.user);
         setApplications(response.data.applications);
@@ -50,7 +38,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [location]);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -64,16 +52,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const login = async () => {
-    const response = await axios.get<MeResponse>(
-      `${API_URLS.backend}/users/me`
-    );
+    const response = await apiClient.get<MeResponse>("/users/me");
     setUser(response.data.user);
     setApplications(response.data.applications);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    await axios.post(`${API_URLS.backend}/users/logout`);
+    await apiClient.post("/users/logout");
     setIsAuthenticated(false);
     setApplications(null);
     setUser(null);

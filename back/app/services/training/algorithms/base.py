@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from app.schemas.training import DistributeInput, DistributeOutput
 
 

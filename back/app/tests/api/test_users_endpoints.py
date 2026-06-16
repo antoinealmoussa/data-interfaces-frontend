@@ -1,5 +1,5 @@
 from fastapi import status
-from app.core.token import create_access_token
+
 from app.services import user_service
 
 
@@ -209,8 +209,6 @@ def test_logout_clears_cookie(authenticated_client):
 
 def test_logout_invalidates_token(client):
     """Test POST /api/v1/users/logout invalide le token après déconnexion."""
-    from app.services import user_service
-    from app.schemas.user import ApiCreateUser
 
     user_data = {
         "email": "logout_invalid@test.com",
@@ -254,9 +252,6 @@ def test_read_users_me(authenticated_client):
 
 def test_read_users_me_with_cookie(client):
     """Test GET /api/v1/users/me avec le cookie d'authentification."""
-    from app.services import user_service
-    from app.schemas.user import ApiCreateUser
-    from app.core.token import create_access_token
 
     user_data = {
         "email": "cookie_me@test.com",
@@ -362,7 +357,7 @@ def test_update_user_empty_body(authenticated_client, test_user):
 def test_update_user_duplicate_email(authenticated_client, test_user, db_session):
     """Test PUT /api/v1/users/me avec un email déjà utilisé par un autre utilisateur."""
     from app.schemas.user import ApiCreateUser
-    
+
     other_user = ApiCreateUser(
         email="other@test.com",
         password="password123",
@@ -370,11 +365,11 @@ def test_update_user_duplicate_email(authenticated_client, test_user, db_session
         surname="User"
     )
     user_service.create_user(db_session, user_in=other_user)
-    
+
     update_data = {"email": "other@test.com"}
-    
+
     response = authenticated_client.put("/api/v1/users/me", json=update_data)
-    
+
     assert response.status_code == 409
     detail = response.json()["detail"].lower()
     assert "déjà utilisé" in detail or "email" in detail
@@ -383,9 +378,9 @@ def test_update_user_duplicate_email(authenticated_client, test_user, db_session
 def test_update_user_same_email(authenticated_client, test_user):
     """Test PUT /api/v1/users/me avec le même email (doit réussir)."""
     update_data = {"email": test_user.email}
-    
+
     response = authenticated_client.put("/api/v1/users/me", json=update_data)
-    
+
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["email"] == test_user.email
@@ -394,9 +389,9 @@ def test_update_user_same_email(authenticated_client, test_user):
 def test_update_user_only_email_change(authenticated_client, test_user):
     """Test PUT /api/v1/users/me avec seulement un changement d'email."""
     update_data = {"email": "newemail@test.com"}
-    
+
     response = authenticated_client.put("/api/v1/users/me", json=update_data)
-    
+
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["email"] == "newemail@test.com"
@@ -410,9 +405,9 @@ def test_update_user_email_to_own_existing_email(authenticated_client, test_user
         "first_name": "UpdatedName",
         "email": test_user.email
     }
-    
+
     response = authenticated_client.put("/api/v1/users/me", json=update_data)
-    
+
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["email"] == test_user.email

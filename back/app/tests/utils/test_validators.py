@@ -1,4 +1,5 @@
 import pytest
+
 from app.utils.validators import validate_season_format
 
 

@@ -1,7 +1,5 @@
-import pytest
-from app.services import user_service
 from app.schemas.user import ApiCreateUser
-from app.models.user import User
+from app.services import user_service
 
 
 def test_get_all_users_empty(db_session):
@@ -83,8 +81,8 @@ def test_get_user_by_id_exists(db_session):
     assert found_user.email == "findbyid@test.com"
 
 
-def test_get_user_by_email_case_sensitive(db_session):
-    """Test que get_user_by_email est sensible à la casse."""
+def test_get_user_by_email_case_insensitive(db_session):
+    """Test que l'email est normalisé en minuscules (insensible à la casse)."""
     user = ApiCreateUser(
         email="Case@test.com",
         password="password",
@@ -95,7 +93,8 @@ def test_get_user_by_email_case_sensitive(db_session):
 
     found_user = user_service.get_user_by_email(db_session, email="case@test.com")
 
-    assert found_user is None
+    assert found_user is not None
+    assert found_user.email == "case@test.com"
 
 
 def test_create_user_success(db_session):
@@ -244,7 +243,9 @@ def test_update_user_success(db_session):
         email="updated@test.com"
     )
 
-    updated_user = user_service.update_user(db_session, user_id=created_user.id, user_in=update_data)
+    updated_user = user_service.update_user(
+        db_session, user_id=created_user.id, user_in=update_data
+    )
 
     assert updated_user is not None
     assert updated_user.id == created_user.id
@@ -266,7 +267,9 @@ def test_update_user_partial(db_session):
 
     update_data = ApiUpdateUser(first_name="NewFirst")
 
-    updated_user = user_service.update_user(db_session, user_id=created_user.id, user_in=update_data)
+    updated_user = user_service.update_user(
+        db_session, user_id=created_user.id, user_in=update_data
+    )
 
     assert updated_user is not None
     assert updated_user.first_name == "NewFirst"

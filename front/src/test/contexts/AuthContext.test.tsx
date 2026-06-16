@@ -1,35 +1,18 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const mockedClient = vi.hoisted(() => ({
+  get: vi.fn().mockRejectedValue(new Error("No mock")),
+  post: vi.fn().mockRejectedValue(new Error("No mock")),
+}));
+
+vi.mock("../../api/client", () => ({
+  default: mockedClient,
+}));
+
 import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../contexts/AuthContext";
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../hooks/useAuth";
-
-const { mockGet, mockPost } = vi.hoisted(() => ({
-  mockGet: vi.fn().mockRejectedValue(new Error("Default no cookie")),
-  mockPost: vi.fn().mockResolvedValue({ data: {} }),
-}));
-
-vi.mock("axios", () => ({
-  default: {
-    get: mockGet,
-    post: mockPost,
-    create: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn(), eject: vi.fn() },
-      response: { use: vi.fn(), eject: vi.fn() },
-    },
-    defaults: { withCredentials: false },
-  },
-}));
-
-import axios from "axios";
-const mockedAxios = vi.mocked(axios, true);
-
-vi.mock("../../api/config", () => ({
-  default: {
-    backend: "http://localhost:8000/api/v1",
-  },
-}));
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -49,7 +32,7 @@ describe("AuthContext", () => {
   });
 
   it("devrait s'initialiser avec isLoading à false et isAuthenticated à false quand pas de cookie", async () => {
-    mockedAxios.get.mockRejectedValueOnce(new Error("No cookie"));
+    mockedClient.get.mockRejectedValueOnce(new Error("No cookie"));
 
     const { result } = renderHook(() => useAuth(), {
       wrapper: Wrapper,
@@ -63,7 +46,7 @@ describe("AuthContext", () => {
   });
 
   it("devrait mettre à jour l'état après un login", async () => {
-    mockedAxios.get
+    mockedClient.get
       .mockResolvedValueOnce({
         data: {
           user: {
@@ -109,7 +92,7 @@ describe("AuthContext", () => {
   });
 
   it("devrait réinitialiser l'état après un login puis un logout", async () => {
-    mockedAxios.get
+    mockedClient.get
       .mockResolvedValueOnce({
         data: {
           user: {
@@ -133,7 +116,7 @@ describe("AuthContext", () => {
         },
       });
 
-    mockedAxios.post.mockResolvedValueOnce({
+    mockedClient.post.mockResolvedValueOnce({
       data: { message: "Logged out" },
     });
 
@@ -162,7 +145,7 @@ describe("AuthContext", () => {
   });
 
   it("devrait charger l'état depuis l'API au démarrage", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
+    mockedClient.get.mockResolvedValueOnce({
       data: {
         user: {
           id: 2,

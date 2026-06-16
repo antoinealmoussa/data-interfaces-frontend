@@ -1,7 +1,8 @@
 from app.schemas.training import AlgorithmInfo
-from .algorithms.random import RandomAlgorithm
+
 from .algorithms.balanced import BalancedAlgorithm
 from .algorithms.base import BaseDistributionAlgorithm
+from .algorithms.random import RandomAlgorithm
 
 _algorithms: list[BaseDistributionAlgorithm] = [
     RandomAlgorithm(),

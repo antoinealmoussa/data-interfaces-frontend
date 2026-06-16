@@ -1,77 +1,59 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.db.repositories import PlayerRepository
 from app.models.player import Player
-from app.models.team import Team
-from app.models.category import Category
-from app.schemas.player import ApiCreatePlayer, ApiUpdatePlayer, ApiReturnPlayer
+from app.schemas.player import ApiCreatePlayer, ApiReturnPlayer, ApiUpdatePlayer
+from app.services.category_service import resolve_categories
+from app.services.team_service import get_team_by_name
+from app.utils.exceptions import ForbiddenError, PlayerNotFoundError
 
 
 def get_player_by_id(db: Session, player_id: int) -> Player | None:
-    return db.query(Player).filter(Player.id == player_id).first()
+    repo = PlayerRepository(db)
+    return repo.get_by_id(player_id)
 
 
 def get_players_by_team(db: Session, team_name: str, skip: int = 0, limit: int = 100):
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
-
-    return (
-        db.query(Player)
-        .filter(Player.team_id == team.id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    team = get_team_by_name(db, team_name)
+    repo = PlayerRepository(db)
+    return repo.get_by_team(team.id, skip, limit)
 
 
-def _resolve_categories(db: Session, category_names: list[str]) -> list[Category]:
-    categories = db.query(Category).filter(Category.name.in_(category_names)).all()
-    if len(categories) != len(category_names):
-        found = {c.name for c in categories}
-        missing = [n for n in category_names if n not in found]
-        raise HTTPException(
-            status_code=404,
-            detail=f"Catégories non trouvées : {', '.join(missing)}",
-        )
-    return categories
-
-
-def create_player(db: Session, team_name: str, player_in: ApiCreatePlayer) -> ApiReturnPlayer:
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
-
-    categories = _resolve_categories(db, player_in.category_names)
-
-    db_player = Player(
-        name=player_in.name,
-        level=player_in.level,
-        sex=player_in.sex,
-        position=player_in.position,
-        team_id=team.id,
-        categories=categories,
-    )
-    db.add(db_player)
-    db.commit()
-    db.refresh(db_player)
-    return ApiReturnPlayer.model_validate(db_player)
-
-
-def update_player(db: Session, player_id: int, team_name: str, user_id: int, player_in: ApiUpdatePlayer) -> ApiReturnPlayer:
-    player = get_player_by_id(db, player_id)
-    if not player:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé")
-
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
-    if player.team_id != team.id:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé dans cette équipe")
+def create_player(
+    db: Session, team_name: str, player_in: ApiCreatePlayer, user_id: int
+) -> ApiReturnPlayer:
+    team = get_team_by_name(db, team_name)
     if team.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Non autorisé")
+        raise ForbiddenError()
 
-    categories = _resolve_categories(db, player_in.category_names)
+    try:
+        categories = resolve_categories(db, player_in.category_names)
+    except ValueError:
+        raise PlayerNotFoundError(0)
+
+    repo = PlayerRepository(db)
+    return repo.create(player_in, team_id=team.id, categories=categories)
+
+
+def update_player(
+    db: Session, player_id: int, team_name: str, user_id: int,
+    player_in: ApiUpdatePlayer,
+) -> ApiReturnPlayer:
+    repo = PlayerRepository(db)
+    player = repo.get_by_id(player_id)
+    if not player:
+        raise PlayerNotFoundError(player_id)
+
+    team = get_team_by_name(db, team_name)
+    if player.team_id != team.id:
+        raise PlayerNotFoundError(player_id)
+    if team.user_id != user_id:
+        raise ForbiddenError()
+
+    try:
+        categories = resolve_categories(db, player_in.category_names)
+    except ValueError:
+        raise PlayerNotFoundError(player_id)
 
     player.name = player_in.name
     player.level = player_in.level
@@ -85,17 +67,16 @@ def update_player(db: Session, player_id: int, team_name: str, user_id: int, pla
 
 
 def delete_player(db: Session, player_id: int, team_name: str, user_id: int) -> None:
-    player = get_player_by_id(db, player_id)
+    repo = PlayerRepository(db)
+    player = repo.get_by_id(player_id)
     if not player:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé")
+        raise PlayerNotFoundError(player_id)
 
-    team = db.query(Team).filter(Team.name == team_name).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="Équipe non trouvée")
+    team = get_team_by_name(db, team_name)
     if player.team_id != team.id:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé dans cette équipe")
+        raise PlayerNotFoundError(player_id)
     if team.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Non autorisé")
+        raise ForbiddenError()
 
     db.delete(player)
     db.commit()

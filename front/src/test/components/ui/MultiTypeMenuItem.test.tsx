@@ -7,177 +7,176 @@ import { Home } from "@mui/icons-material";
 import type { MenuItemConfig } from "../../../types/uiTypes";
 
 const renderWithRouter = (component: React.ReactElement) => {
-    return render(<BrowserRouter>{component}</BrowserRouter>);
+  return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
 describe("MultiTypeMenuItem", () => {
-    describe("Type 'label'", () => {
-        it("devrait afficher un élément de menu désactivé avec le label", () => {
-            const labelItem: MenuItemConfig = {
-                type: "label",
-                label: "Section Label",
-            };
+  describe("Type 'label'", () => {
+    it("devrait afficher un élément de menu désactivé avec le label", () => {
+      const labelItem: MenuItemConfig = {
+        type: "label",
+        label: "Section Label",
+      };
 
-            renderWithRouter(<MultiTypeMenuItem item={labelItem} />);
+      renderWithRouter(<MultiTypeMenuItem item={labelItem} />);
 
-            const menuItem = screen.getByRole("menuitem");
-            expect(menuItem).toBeInTheDocument();
-            expect(menuItem).toHaveAttribute("aria-disabled", "true");
-            expect(screen.getByText("Section Label")).toBeInTheDocument();
-        });
-
-        it("devrait être désactivé même si une icône est fournie", () => {
-            const labelItem: MenuItemConfig = {
-                type: "label",
-                label: "Section avec icône",
-                icon: Home,
-            };
-
-            renderWithRouter(<MultiTypeMenuItem item={labelItem} />);
-
-            const menuItem = screen.getByRole("menuitem");
-            expect(menuItem).toHaveAttribute("aria-disabled", "true");
-            expect(screen.getByText("Section avec icône")).toBeInTheDocument();
-        });
+      const menuItem = screen.getByRole("menuitem");
+      expect(menuItem).toBeInTheDocument();
+      expect(menuItem).toHaveAttribute("aria-disabled", "true");
+      expect(screen.getByText("Section Label")).toBeInTheDocument();
     });
 
-    describe("Type 'link'", () => {
-        it("devrait afficher un lien avec le label et le href", () => {
-            const linkItem: MenuItemConfig = {
-                type: "link",
-                label: "Accueil",
-                href: "/home",
-            };
+    it("devrait être désactivé même si une icône est fournie", () => {
+      const labelItem: MenuItemConfig = {
+        type: "label",
+        label: "Section avec icône",
+        icon: Home,
+      };
 
-            renderWithRouter(<MultiTypeMenuItem item={linkItem} />);
+      renderWithRouter(<MultiTypeMenuItem item={labelItem} />);
 
-            const link = screen.getByRole("menuitem");
-            expect(link).toBeInTheDocument();
-            expect(link).toHaveAttribute("href", "/home");
-            expect(screen.getByText("Accueil")).toBeInTheDocument();
-        });
+      const menuItem = screen.getByRole("menuitem");
+      expect(menuItem).toHaveAttribute("aria-disabled", "true");
+      expect(screen.getByText("Section avec icône")).toBeInTheDocument();
+    });
+  });
 
-        it("devrait fonctionner avec différents chemins href", () => {
-            const linkItem: MenuItemConfig = {
-                type: "link",
-                label: "Profil",
-                href: "/users/profile",
-            };
+  describe("Type 'link'", () => {
+    it("devrait afficher un lien avec le label et le href", () => {
+      const linkItem: MenuItemConfig = {
+        type: "link",
+        label: "Accueil",
+        href: "/home",
+      };
 
-            renderWithRouter(<MultiTypeMenuItem item={linkItem} />);
+      renderWithRouter(<MultiTypeMenuItem item={linkItem} />);
 
-            const link = screen.getByRole("menuitem");
-            expect(link).toHaveAttribute("href", "/users/profile");
-            expect(screen.getByText("Profil")).toBeInTheDocument();
-        });
+      const link = screen.getByRole("menuitem");
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute("href", "/home");
+      expect(screen.getByText("Accueil")).toBeInTheDocument();
     });
 
-    describe("Type 'action'", () => {
-        it("devrait afficher un élément de menu cliquable sans icône", async () => {
-            const mockOnClick = vi.fn();
-            const actionItem: MenuItemConfig = {
-                type: "action",
-                label: "Déconnexion",
-                onClick: mockOnClick,
-            };
+    it("devrait fonctionner avec différents chemins href", () => {
+      const linkItem: MenuItemConfig = {
+        type: "link",
+        label: "Profil",
+        href: "/users/profile",
+      };
 
-            renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
+      renderWithRouter(<MultiTypeMenuItem item={linkItem} />);
 
-            const menuItem = screen.getByRole("menuitem");
-            expect(menuItem).toBeInTheDocument();
-            expect(screen.getByText("Déconnexion")).toBeInTheDocument();
+      const link = screen.getByRole("menuitem");
+      expect(link).toHaveAttribute("href", "/users/profile");
+      expect(screen.getByText("Profil")).toBeInTheDocument();
+    });
+  });
 
-            const user = userEvent.setup();
-            await user.click(menuItem);
+  describe("Type 'action'", () => {
+    it("devrait afficher un élément de menu cliquable sans icône", async () => {
+      const mockOnClick = vi.fn();
+      const actionItem: MenuItemConfig = {
+        type: "action",
+        label: "Déconnexion",
+        onClick: mockOnClick,
+      };
 
-            expect(mockOnClick).toHaveBeenCalledTimes(1);
-        });
+      renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
 
-        it("devrait afficher un élément de menu cliquable avec icône", async () => {
-            const mockOnClick = vi.fn();
-            const actionItem: MenuItemConfig = {
-                type: "action",
-                label: "Sauvegarder",
-                icon: Home,
-                onClick: mockOnClick,
-            };
+      const menuItem = screen.getByRole("menuitem");
+      expect(menuItem).toBeInTheDocument();
+      expect(screen.getByText("Déconnexion")).toBeInTheDocument();
 
-            renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
+      const user = userEvent.setup();
+      await user.click(menuItem);
 
-            const menuItem = screen.getByRole("menuitem");
-            expect(menuItem).toBeInTheDocument();
-            expect(screen.getByText("Sauvegarder")).toBeInTheDocument();
-
-            // Vérifier que l'icône est présente (elle devrait être rendue par MUI)
-            const iconElement = menuItem.querySelector("svg");
-            expect(iconElement).toBeInTheDocument();
-
-            const user = userEvent.setup();
-            await user.click(menuItem);
-
-            expect(mockOnClick).toHaveBeenCalledTimes(1);
-        });
-
-        it("devrait appeler onClick plusieurs fois si cliqué plusieurs fois", async () => {
-            const mockOnClick = vi.fn();
-            const actionItem: MenuItemConfig = {
-                type: "action",
-                label: "Action multiple",
-                onClick: mockOnClick,
-            };
-
-            renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
-
-            const menuItem = screen.getByRole("menuitem");
-            const user = userEvent.setup();
-
-            await user.click(menuItem);
-            await user.click(menuItem);
-            await user.click(menuItem);
-
-            expect(mockOnClick).toHaveBeenCalledTimes(3);
-        });
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    describe("Type inconnu ou invalide", () => {
-        it("devrait retourner null pour un type non défini", () => {
-            const invalidItem = {
-                type: "unknown" as const,
-                label: "Test",
-            };
+    it("devrait afficher un élément de menu cliquable avec icône", async () => {
+      const mockOnClick = vi.fn();
+      const actionItem: MenuItemConfig = {
+        type: "action",
+        label: "Sauvegarder",
+        icon: Home,
+        onClick: mockOnClick,
+      };
 
-            const { container } = renderWithRouter(
-                <MultiTypeMenuItem item={invalidItem as unknown as MenuItemConfig} />
-            );
+      renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
 
-            expect(container.firstChild).toBeNull();
-        });
+      const menuItem = screen.getByRole("menuitem");
+      expect(menuItem).toBeInTheDocument();
+      expect(screen.getByText("Sauvegarder")).toBeInTheDocument();
+
+      // Vérifier que l'icône est présente (elle devrait être rendue par MUI)
+      const iconElement = menuItem.querySelector("svg");
+      expect(iconElement).toBeInTheDocument();
+
+      const user = userEvent.setup();
+      await user.click(menuItem);
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    describe("Intégration", () => {
-        it("devrait rendre correctement différents types d'éléments dans une liste", () => {
-            const items: MenuItemConfig[] = [
-                { type: "label", label: "Paramètres" },
-                { type: "link", label: "Accueil", href: "/" },
-                {
-                    type: "action",
-                    label: "Action",
-                    onClick: vi.fn(),
-                },
-            ];
+    it("devrait appeler onClick plusieurs fois si cliqué plusieurs fois", async () => {
+      const mockOnClick = vi.fn();
+      const actionItem: MenuItemConfig = {
+        type: "action",
+        label: "Action multiple",
+        onClick: mockOnClick,
+      };
 
-            renderWithRouter(
-                <>
-                    {items.map((item, index) => (
-                        <MultiTypeMenuItem key={index} item={item} />
-                    ))}
-                </>
-            );
+      renderWithRouter(<MultiTypeMenuItem item={actionItem} />);
 
-            expect(screen.getByText("Paramètres")).toBeInTheDocument();
-            expect(screen.getByText("Accueil")).toBeInTheDocument();
-            expect(screen.getByText("Action")).toBeInTheDocument();
-        });
+      const menuItem = screen.getByRole("menuitem");
+      const user = userEvent.setup();
+
+      await user.click(menuItem);
+      await user.click(menuItem);
+      await user.click(menuItem);
+
+      expect(mockOnClick).toHaveBeenCalledTimes(3);
     });
+  });
+
+  describe("Type inconnu ou invalide", () => {
+    it("devrait retourner null pour un type non défini", () => {
+      const invalidItem = {
+        type: "unknown" as const,
+        label: "Test",
+      };
+
+      const { container } = renderWithRouter(
+        <MultiTypeMenuItem item={invalidItem as unknown as MenuItemConfig} />,
+      );
+
+      expect(container.firstChild).toBeNull();
+    });
+  });
+
+  describe("Intégration", () => {
+    it("devrait rendre correctement différents types d'éléments dans une liste", () => {
+      const items: MenuItemConfig[] = [
+        { type: "label", label: "Paramètres" },
+        { type: "link", label: "Accueil", href: "/" },
+        {
+          type: "action",
+          label: "Action",
+          onClick: vi.fn(),
+        },
+      ];
+
+      renderWithRouter(
+        <>
+          {items.map((item, index) => (
+            <MultiTypeMenuItem key={index} item={item} />
+          ))}
+        </>,
+      );
+
+      expect(screen.getByText("Paramètres")).toBeInTheDocument();
+      expect(screen.getByText("Accueil")).toBeInTheDocument();
+      expect(screen.getByText("Action")).toBeInTheDocument();
+    });
+  });
 });
-

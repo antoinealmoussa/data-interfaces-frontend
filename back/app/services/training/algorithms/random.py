@@ -1,6 +1,7 @@
 import random
 
-from app.schemas.training import DistributeInput, DistributeOutput, TrainingTeam, PlayerInfo
+from app.schemas.training import DistributeInput, DistributeOutput, PlayerInfo, TrainingTeam
+
 from .base import BaseDistributionAlgorithm
 
 

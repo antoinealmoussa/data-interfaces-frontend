@@ -1,5 +1,15 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import users, search_topic, teams, seasons, players, token, tournaments, training
+
+from app.api.v1.endpoints import (
+    players,
+    search_topic,
+    seasons,
+    teams,
+    token,
+    tournaments,
+    training,
+    users,
+)
 
 api_router = APIRouter()
 

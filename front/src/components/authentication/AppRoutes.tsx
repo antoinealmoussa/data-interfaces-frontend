@@ -1,12 +1,13 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import App from "../../App";
+import { App } from "../../App";
 import { PRIVATE_STANDARD_ROUTES, DYNAMIC_APP_ROUTES } from "../../routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicLayout } from "../../pages/authentication/PublicLayout";
 import { authRoutes } from "../../pages/authentication/routes";
 import { useAuth } from "../../hooks/useAuth";
 import type { AppName, RouteProps } from "../../types/routesTypes";
+import { ErrorBoundary } from "../common/ErrorBoundary";
 
 const renderRoute = (route: RouteProps): React.ReactNode => {
   if (route.children) {
@@ -33,7 +34,9 @@ export const AppRoutes: React.FC = () => {
       <Route
         element={
           <ProtectedRoute>
-            <App />
+            <ErrorBoundary>
+              <App />
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       >

@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.core.token import get_current_active_user
 from app.db.session import get_db
+from app.models.player import Player
+from app.models.user import User
 from app.schemas.training import (
+    AlgorithmInfo,
     DistributeInput,
     DistributeOutput,
-    AlgorithmInfo,
 )
 from app.services.training.registry import get_algorithm, get_all_algorithms
-from app.core.token import get_current_active_user
-from app.models.user import User
-from app.models.player import Player
 
 router = APIRouter(prefix="/teams/{team_name}/training")
 

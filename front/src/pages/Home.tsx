@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import axios from "axios";
 import { SearchInput } from "../components/ui/SearchInput";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
-import API_URLS from "../api/config";
+import apiClient from "../api/client";
 import type { HomeState } from "../types/uiTypes";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 
-export const Home = () => {
+const Home = () => {
   const { user } = useAuth();
   const [searchValue, setSearchValue] = useState("");
   const [state, setState] = useState<HomeState>("idle");
@@ -20,19 +19,14 @@ export const Home = () => {
     setState("loading");
 
     try {
-      const response = await axios.get<{ text: string }>(
-        `${API_URLS.backend}/search/topic`,
-        {
-          params: { query: searchValue },
-        },
-      );
+      const response = await apiClient.get<{ text: string }>("/search/topic", {
+        params: { query: searchValue },
+      });
       setResponseText(response.data.text);
       setState("success");
-    } catch (error) {
-      const message =
-        axios.isAxiosError(error) && error.response?.data
-          ? error.response.data.detail || "Une erreur est survenue"
-          : "Une erreur est survenue";
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } } };
+      const message = err.response?.data?.detail || "Une erreur est survenue";
       setResponseText(message);
       setState("error");
     }
@@ -103,3 +97,5 @@ export const Home = () => {
     </Box>
   );
 };
+
+export default Home;

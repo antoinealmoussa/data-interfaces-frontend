@@ -1,7 +1,9 @@
-from pydantic import BaseModel, ConfigDict, field_validator
 from typing import List
-from app.utils.validators import validate_season_format
+
+from pydantic import BaseModel, ConfigDict, field_validator
+
 from app.schemas.season import ApiReturnSeason
+from app.utils.validators import TEAM_CATEGORIES, validate_season_format
 
 
 class TeamBase(BaseModel):
@@ -23,9 +25,8 @@ class TeamBase(BaseModel):
     def validate_categories(cls, v):
         if not v or len(v) == 0:
             raise ValueError("Veuillez sélectionner au moins une catégorie.")
-        valid_categories = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
         for cat in v:
-            if cat not in valid_categories:
+            if cat not in TEAM_CATEGORIES:
                 raise ValueError(f"Catégorie invalide: {cat}")
         return v
 

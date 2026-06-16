@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import axios from "axios";
-import API_URLS from "../../api/config";
+import { Box, Typography } from "@mui/material";
+import apiClient from "../../api/client";
 import type { User } from "../../types/authTypes";
 import {
   UserInfoForm,
   type UserUpdateData,
 } from "../../components/ui/UserInfoForm";
+import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
+import { PageGuard } from "../../components/common/PageGuard";
 
-export const UserProfile = () => {
+const UserProfile = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,9 +26,7 @@ export const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get<{ user: User }>(
-          `${API_URLS.backend}/users/me`,
-        );
+        const response = await apiClient.get<{ user: User }>("/users/me");
         setUser(response.data.user);
       } catch {
         setSnackbar({
@@ -69,10 +62,7 @@ export const UserProfile = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.put<User>(
-        `${API_URLS.backend}/users/me`,
-        modifiedData,
-      );
+      const response = await apiClient.put<User>("/users/me", modifiedData);
       setUser(response.data);
       setSnackbar({
         open: true,
@@ -94,66 +84,42 @@ export const UserProfile = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  if (isLoading) {
-    return (
+  return (
+    <PageGuard loading={isLoading} error={null}>
       <Box
         sx={{
           p: 3,
           flex: 1,
           overflow: "auto",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: 3,
           height: "100%",
           width: "100%",
         }}
       >
-        <CircularProgress />
-      </Box>
-    );
-  }
+        <Typography variant="h5" component="h1">
+          Mon profil
+        </Typography>
 
-  return (
-    <Box
-      sx={{
-        p: 3,
-        flex: 1,
-        overflow: "auto",
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <Typography variant="h5" component="h1">
-        Mon profil
-      </Typography>
+        {user && (
+          <UserInfoForm
+            key={user.id}
+            initialData={user}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+          />
+        )}
 
-      {user && (
-        <UserInfoForm
-          key={user.id}
-          initialData={user}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
+        <NotificationSnackbar
+          open={snackbar.open}
           severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+          message={snackbar.message}
+          onClose={handleCloseSnackbar}
+        />
+      </Box>
+    </PageGuard>
   );
 };
+
+export default UserProfile;

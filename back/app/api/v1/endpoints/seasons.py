@@ -1,8 +1,13 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+
+from app.core.token import get_current_active_user
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.season import ApiReturnSeason
+from app.services.season_service import get_season_by_id, get_seasons
 
 router = APIRouter()
 
@@ -10,14 +15,17 @@ router = APIRouter()
 def read_seasons(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ) -> List[ApiReturnSeason]:
-    from app.services.season_service import get_seasons
     return get_seasons(db, skip=skip, limit=limit)
 
 @router.get("/{season_id}", response_model=ApiReturnSeason)
-def read_season(season_id: int, db: Session = Depends(get_db)) -> ApiReturnSeason:
-    from app.services.season_service import get_season_by_id
+def read_season(
+    season_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> ApiReturnSeason:
     season = get_season_by_id(db, season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Saison non trouvée")

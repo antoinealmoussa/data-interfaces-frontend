@@ -4,14 +4,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.token import create_access_token
 from app.db.session import Base, get_db
 from app.main import app
 from app.models.category import Category
-from app.services import user_service
 from app.schemas.user import ApiCreateUser
-from app.core.token import create_access_token
-
-TEAM_CATEGORIES = ["Mixte", "+35", "+50", "Open féminin", "Open masculin"]
+from app.services import user_service
+from app.utils.validators import TEAM_CATEGORIES
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

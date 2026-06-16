@@ -1,7 +1,8 @@
 import random
 from itertools import groupby
 
-from app.schemas.training import DistributeInput, DistributeOutput, TrainingTeam, PlayerInfo
+from app.schemas.training import DistributeInput, DistributeOutput, PlayerInfo, TrainingTeam
+
 from .base import BaseDistributionAlgorithm
 
 
@@ -27,7 +28,8 @@ class BalancedAlgorithm(BaseDistributionAlgorithm):
     def distribute(self, input: DistributeInput, players: list) -> DistributeOutput:
         team_count = input.team_count
 
-        level_key = lambda p: p.level if p.level is not None else 0
+        def level_key(p):
+            return p.level if p.level is not None else 0
 
         women = _shuffle_within_levels(
             [p for p in players if p.sex == "F"],

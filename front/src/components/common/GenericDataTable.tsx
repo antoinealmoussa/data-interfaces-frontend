@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type ReactNode } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -8,13 +8,13 @@ import {
   TableRow,
   TableSortLabel,
   IconButton,
-  CircularProgress,
   Alert,
   Box,
   Typography,
   TextField,
   TablePagination,
 } from "@mui/material";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 import SearchIcon from "@mui/icons-material/Search";
 
 export interface Column<T> {
@@ -44,6 +44,10 @@ interface GenericDataTableProps<T> {
   onSearchChange?: (value: string) => void;
   defaultOrderBy?: keyof T;
   defaultOrder?: "asc" | "desc";
+  /** Controlled sort props (optional). When `orderBy` is provided, sort is controlled by parent. */
+  orderBy?: keyof T | null;
+  order?: "asc" | "desc";
+  onSortChange?: (orderBy: keyof T | null, order: "asc" | "desc") => void;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -65,12 +69,18 @@ function getComparator<T>(
 
 const ROWS_PER_PAGE = 10;
 
-function matchesSearch<T>(row: T, columns: Column<T>[], search: string): boolean {
+function matchesSearch<T>(
+  row: T,
+  columns: Column<T>[],
+  search: string,
+): boolean {
   if (!search) return true;
   const lower = search.toLowerCase();
   return columns.some((col) => {
     const value = row[col.key as keyof T];
-    return String(value ?? "").toLowerCase().includes(lower);
+    return String(value ?? "")
+      .toLowerCase()
+      .includes(lower);
   });
 }
 
@@ -86,6 +96,9 @@ export const GenericDataTable = <T,>({
   onSearchChange,
   defaultOrderBy,
   defaultOrder,
+  orderBy: controlledOrderBy,
+  order: controlledOrder,
+  onSortChange,
 }: GenericDataTableProps<T>) => {
   const isControlled = controlledSearch !== undefined;
   const [internalSearch, setInternalSearch] = useState("");
@@ -93,22 +106,35 @@ export const GenericDataTable = <T,>({
   const setSearch = (value: string) => {
     if (onSearchChange) onSearchChange(value);
     if (!isControlled) setInternalSearch(value);
+    setPage(0);
   };
 
-  const [orderBy, setOrderBy] = useState<keyof T | null>(defaultOrderBy ?? null);
-  const [order, setOrder] = useState<"asc" | "desc">(defaultOrder ?? "asc");
+  const isSortControlled = controlledOrderBy !== undefined;
+  const [internalOrderBy, setInternalOrderBy] = useState<keyof T | null>(
+    defaultOrderBy ?? null,
+  );
+  const [internalOrder, setInternalOrder] = useState<"asc" | "desc">(
+    defaultOrder ?? "asc",
+  );
   const [page, setPage] = useState(0);
 
-  useEffect(() => {
-    setPage(0);
-  }, [search]);
+  const orderBy = isSortControlled ? controlledOrderBy : internalOrderBy;
+  const order = isSortControlled
+    ? (controlledOrder ?? "asc")
+    : internalOrder;
 
   const handleSort = (key: keyof T) => {
-    if (orderBy === key) {
-      setOrder(order === "asc" ? "desc" : "asc");
+    if (isSortControlled && onSortChange) {
+      const newOrder =
+        orderBy === key && order === "asc" ? "desc" : "asc";
+      onSortChange(key, newOrder);
     } else {
-      setOrderBy(key);
-      setOrder("asc");
+      if (internalOrderBy === key) {
+        setInternalOrder(internalOrder === "asc" ? "desc" : "asc");
+      } else {
+        setInternalOrderBy(key);
+        setInternalOrder("asc");
+      }
     }
   };
 
@@ -133,7 +159,7 @@ export const GenericDataTable = <T,>({
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress />
+        <LoadingSpinner />
       </Box>
     );
   }
@@ -157,7 +183,9 @@ export const GenericDataTable = <T,>({
           }}
           slotProps={{
             input: {
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
+              startAdornment: (
+                <SearchIcon sx={{ mr: 1, color: "action.active" }} />
+              ),
             },
           }}
           sx={{ mb: 2, maxWidth: 320 }}
@@ -236,7 +264,9 @@ export const GenericDataTable = <T,>({
         rowsPerPage={ROWS_PER_PAGE}
         rowsPerPageOptions={[ROWS_PER_PAGE]}
         labelRowsPerPage=""
-        labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} sur ${count}`
+        }
       />
     </Box>
   );

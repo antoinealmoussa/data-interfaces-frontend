@@ -1,7 +1,8 @@
 import httpx
 from fastapi import HTTPException, status
-from app.prompts.search_topic_prompt import SEARCH_TOPIC_PROMPT
+
 from app.core.config import settings
+from app.prompts.search_topic_prompt import SEARCH_TOPIC_PROMPT
 
 
 def format_prompt(query: str) -> str:

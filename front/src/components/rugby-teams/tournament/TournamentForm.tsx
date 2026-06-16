@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
   Box,
   TextField,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -12,16 +11,21 @@ import {
   Checkbox,
   FormGroup,
   FormLabel,
-  Typography,
 } from "@mui/material";
-import type { Tournament, CreateTournamentDto } from "../../../types/tournamentTypes";
+import { FormActions } from "../../common/FormActions";
+import { toggleArrayItem } from "../../../utils/array";
+import type {
+  Tournament,
+  CreateTournamentDto,
+} from "../../../types/tournamentTypes";
+import type { PlayerSimple } from "../../../types/playerTypes";
 
 interface TournamentFormProps {
   defaultValues?: Tournament;
   onSubmit: (data: CreateTournamentDto) => Promise<void>;
   onCancel: () => void;
   teamCategories: string[];
-  teamPlayers: { id: number; name: string; category_names: string[] }[];
+  teamPlayers: PlayerSimple[];
 }
 
 export const TournamentForm = ({
@@ -51,7 +55,7 @@ export const TournamentForm = ({
         },
   });
 
-  const selectedCategory = useWatch({ control, name: "category_name" });
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const filteredPlayers = useMemo(
     () =>
@@ -61,15 +65,6 @@ export const TournamentForm = ({
       ).sort((a, b) => a.name.localeCompare(b.name)),
     [selectedCategory, teamPlayers],
   );
-
-  const prevCategory = useRef(selectedCategory);
-
-  useEffect(() => {
-    if (prevCategory.current !== undefined && prevCategory.current !== selectedCategory) {
-      setValue("player_names", []);
-    }
-    prevCategory.current = selectedCategory;
-  }, [selectedCategory, setValue]);
 
   return (
     <Box
@@ -95,7 +90,15 @@ export const TournamentForm = ({
           control={control}
           rules={{ required: "La catégorie est obligatoire" }}
           render={({ field }) => (
-            <Select label="Catégorie" {...field}>
+            <Select
+              label="Catégorie"
+              {...field}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setValue("player_names", []);
+                field.onChange(e);
+              }}
+            >
               {teamCategories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
@@ -119,13 +122,11 @@ export const TournamentForm = ({
                   control={
                     <Checkbox
                       checked={field.value.includes(player.name)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          field.onChange([...field.value, player.name]);
-                        } else {
-                          field.onChange(field.value.filter((name) => name !== player.name));
-                        }
-                      }}
+                      onChange={() =>
+                        field.onChange(
+                          toggleArrayItem(field.value, player.name),
+                        )
+                      }
                     />
                   }
                   label={player.name}
@@ -136,14 +137,7 @@ export const TournamentForm = ({
         />
       </FormControl>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
-        <Button onClick={onCancel} disabled={isSubmitting}>
-          Annuler
-        </Button>
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-        </Button>
-      </Box>
+      <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
     </Box>
   );
 };

@@ -1,19 +1,17 @@
-import axios from "axios";
-import API_URLS from "../api/config";
-import type { Player, CreatePlayerDto, UpdatePlayerDto } from "../types/playerTypes";
-
-const BASE_URL = `${API_URLS.backend}/teams`;
+import apiClient, { teamPath } from "./client";
+import type { Player, CreatePlayerDto } from "../types/playerTypes";
 
 export const playerApi = {
   getByTeam: (teamName: string, skip = 0, limit = 100) =>
-    axios.get<Player[]>(`${BASE_URL}/${encodeURIComponent(teamName)}/players?skip=${skip}&limit=${limit}`),
-
+    apiClient.get<Player[]>(`${teamPath(teamName, "players")}?skip=${skip}&limit=${limit}`).then((r) => r.data),
+  getById: (teamName: string, playerId: number) =>
+    apiClient.get<Player>(teamPath(teamName, "players", String(playerId))).then((r) => r.data),
   create: (teamName: string, data: CreatePlayerDto) =>
-    axios.post<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players`, data),
-
-  update: (teamName: string, playerId: number, data: UpdatePlayerDto) =>
-    axios.put<Player>(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`, data),
-
+    apiClient.post<Player>(teamPath(teamName, "players"), data).then((r) => r.data),
+  update: (teamName: string, playerId: number, data: CreatePlayerDto) =>
+    apiClient.put<Player>(teamPath(teamName, "players", String(playerId)), data).then((r) => r.data),
   delete: (teamName: string, playerId: number) =>
-    axios.delete(`${BASE_URL}/${encodeURIComponent(teamName)}/players/${playerId}`),
+    apiClient.delete(teamPath(teamName, "players", String(playerId))),
 };
+
+export type PlayerApiType = typeof playerApi;

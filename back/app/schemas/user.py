@@ -1,6 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from app.models.user import User
 from typing import List
+
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from app.models.user import User
 from app.schemas.application import ApiReturnApplication
 
 
@@ -11,6 +13,15 @@ class UserBase(BaseModel):
     email: str
     first_name: str
     surname: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        import re
+        pattern = r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
+        if not re.match(pattern, v, re.IGNORECASE):
+            raise ValueError("Format d'email invalide")
+        return v.lower()
 
 
 class ApiCreateUser(UserBase):
@@ -54,3 +65,14 @@ class ApiUpdateUser(BaseModel):
     first_name: str | None = None
     surname: str | None = None
     email: str | None = None
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if v is None:
+            return v
+        import re
+        pattern = r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'
+        if not re.match(pattern, v, re.IGNORECASE):
+            raise ValueError("Format d'email invalide")
+        return v.lower()

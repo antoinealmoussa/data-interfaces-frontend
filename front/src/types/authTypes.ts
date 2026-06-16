@@ -20,12 +20,12 @@ export type User = {
 export type Application = {
   name: string;
   pretty_name: string;
-}
+};
 
 export type MeResponse = {
   user: User;
   applications: Application[];
-}
+};
 
 export type AuthContextType = {
   isAuthenticated: boolean;
@@ -35,4 +35,3 @@ export type AuthContextType = {
   login: () => Promise<void>;
   logout: () => Promise<void>;
 };
-

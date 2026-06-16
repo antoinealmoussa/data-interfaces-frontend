@@ -1,8 +1,10 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from httpx import HTTPStatusError, RequestError
 from fastapi import HTTPException
-from app.services.search_topic_service import get_search_result, format_prompt
+from httpx import HTTPStatusError, RequestError
+
+from app.services.search_topic_service import format_prompt, get_search_result
 
 
 def test_format_prompt():

@@ -1,8 +1,9 @@
+
 from pydantic import BaseModel, ConfigDict, field_validator
-from typing import Optional
 
+from app.utils.validators import TEAM_CATEGORIES
 
-VALID_CATEGORIES = {"Mixte", "+35", "+50", "Open masculin", "Open féminin"}
+VALID_CATEGORIES = set(TEAM_CATEGORIES)
 
 
 class PlayerBase(BaseModel):
@@ -54,10 +55,14 @@ class PlayerBase(BaseModel):
 
 
 class ApiCreatePlayer(PlayerBase):
+    """Données requises pour la création d'un joueur (identique à PlayerBase aujourd'hui,
+    mais séparé pour permettre une divergence future Create vs Update)."""
     pass
 
 
 class ApiUpdatePlayer(PlayerBase):
+    """Données requises pour la modification d'un joueur (identique à PlayerBase aujourd'hui,
+    mais séparé pour permettre une divergence future Create vs Update)."""
     pass
 
 

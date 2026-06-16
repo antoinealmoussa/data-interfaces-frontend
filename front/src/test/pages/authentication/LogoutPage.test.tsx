@@ -4,8 +4,6 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { LogoutPage } from "../../../pages/authentication/LogoutPage";
 import { AuthProvider } from "../../../contexts/AuthContext";
 import axios from "axios";
-
-vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
 
 vi.mock("../../../api/config", () => ({
@@ -18,13 +16,13 @@ describe("LogoutPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedAxios.get.mockResolvedValueOnce({
-        data: { user: null, applications: [] },
+      data: { user: null, applications: [] },
     });
   });
 
   it("devrait rediriger vers la page de login", async () => {
     mockedAxios.get.mockResolvedValueOnce({
-        data: { user: null, applications: [] },
+      data: { user: null, applications: [] },
     });
     mockedAxios.post.mockResolvedValueOnce({
       data: { message: "Logged out" },

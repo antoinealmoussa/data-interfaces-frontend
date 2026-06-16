@@ -1,13 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Request, Response, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
 
+from app.api.v1.helpers import delete_refresh_cookie, set_auth_cookie
 from app.core.config import settings
 from app.core.token import create_access_token
-from app.api.v1.helpers import set_auth_cookie, delete_refresh_cookie
-from app.services.user_service import get_user_by_email
 from app.db.session import get_db
-
+from app.services.user_service import get_user_by_email
 
 router = APIRouter()
 

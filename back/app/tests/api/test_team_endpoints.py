@@ -1,10 +1,11 @@
 from fastapi import status
+from fastapi.testclient import TestClient
+
+from app.core.token import create_access_token
+from app.main import app
 from app.models.season import Season
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
-from app.core.token import create_access_token
-from fastapi.testclient import TestClient
-from app.main import app
 
 
 def test_read_teams_empty(authenticated_client, test_user):

@@ -1,34 +1,34 @@
-import axios from "axios";
-import API_URLS from "../api/config";
-import type { Tournament, CreateTournamentDto, UpdateTournamentDto } from "../types/tournamentTypes";
-
-const BASE_URL = `${API_URLS.backend}/teams`;
+import apiClient, { teamPath } from "./client";
+import type { Tournament, CreateTournamentDto } from "../types/tournamentTypes";
 
 export const tournamentApi = {
   getByTeam: (teamName: string) =>
-    axios.get<Tournament[]>(
-      `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments`,
-    ),
-
-  getById: (teamName: string, tournamentId: number) =>
-    axios.get<Tournament>(
-      `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments/${tournamentId}`,
-    ),
+    apiClient
+      .get<
+        Tournament[]
+      >(teamPath(teamName, "tournaments"))
+      .then((r) => r.data),
 
   create: (teamName: string, data: CreateTournamentDto) =>
-    axios.post<Tournament>(
-      `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments`,
-      data,
-    ),
+    apiClient
+      .post<Tournament>(
+        teamPath(teamName, "tournaments"),
+        data,
+      )
+      .then((r) => r.data),
 
-  update: (teamName: string, tournamentId: number, data: UpdateTournamentDto) =>
-    axios.put<Tournament>(
-      `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments/${tournamentId}`,
-      data,
-    ),
+  update: (teamName: string, tournamentId: number, data: CreateTournamentDto) =>
+    apiClient
+      .put<Tournament>(
+        teamPath(teamName, "tournaments", String(tournamentId)),
+        data,
+      )
+      .then((r) => r.data),
 
   delete: (teamName: string, tournamentId: number) =>
-    axios.delete(
-      `${BASE_URL}/${encodeURIComponent(teamName)}/tournaments/${tournamentId}`,
+    apiClient.delete(
+      teamPath(teamName, "tournaments", String(tournamentId)),
     ),
 };
+
+export type TournamentApiType = typeof tournamentApi;

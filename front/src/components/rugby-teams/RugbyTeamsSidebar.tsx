@@ -1,11 +1,10 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
-import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { teamApi } from "../../api/teamApi";
-import type { Team } from "../../types/teamTypes";
+import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
 import type { Season } from "../../types/seasonTypes";
 import type { SidebarItem } from "../../types/uiTypes";
+import { useMemo } from "react";
 
 const menuItems: SidebarItem[] = [
   { label: "Gestion d'équipe", path: "team-management", icon: <Groups /> },
@@ -14,55 +13,27 @@ const menuItems: SidebarItem[] = [
 ];
 
 export const RugbyTeamsSidebar = () => {
-  const { teamName, seasonName } = useParams<{ teamName: string; seasonName: string }>();
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamName, setSelectedTeamName] = useState<string | null>(null);
-  const [selectedSeasonName, setSelectedSeasonName] = useState<string | null>(null);
+  const { teamName, seasonName } = useParams<{
+    teamName: string;
+    seasonName: string;
+  }>();
+  const { teams } = useTeamAndSeason();
   const navigate = useNavigate();
 
   const seasons = useMemo(() => {
     const seasonMap = new Map<number, Season>();
-    teams.forEach(team => team.seasons.forEach(s => seasonMap.set(s.id, s)));
+    for (const team of teams) {
+      for (const season of team.seasons) {
+        seasonMap.set(season.id, season);
+      }
+    }
     return Array.from(seasonMap.values());
   }, [teams]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const teamsRes = await teamApi.getAll();
-        setTeams(teamsRes.data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-      }
-    };
-    loadData();
-  }, []);
+  const selectedTeamName = teamName ? decodeURIComponent(teamName) : null;
+  const selectedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
 
-  useEffect(() => {
-    if (teams.length > 0 && !selectedTeamName) {
-      const decodedTeamName = teamName ? decodeURIComponent(teamName) : null;
-      const match = decodedTeamName
-        ? teams.find((t) => t.name === decodedTeamName)
-        : null;
-      setSelectedTeamName(match ? match.name : teams[0].name);
-    }
-  }, [teams, teamName, selectedTeamName]);
-
-  useEffect(() => {
-    const currentTeam = teams.find((t) => t.name === selectedTeamName);
-    const teamSeasons = currentTeam?.seasons ?? [];
-
-    if (teamSeasons.length > 0 && !selectedSeasonName) {
-      const decodedSeasonName = seasonName ? decodeURIComponent(seasonName) : null;
-      const match = decodedSeasonName
-        ? teamSeasons.find((s) => s.name === decodedSeasonName)
-        : null;
-      setSelectedSeasonName(match ? match.name : teamSeasons[0].name);
-    }
-  }, [selectedTeamName, teams, seasonName, selectedSeasonName]);
-
-  const visibleItems =
-    selectedTeamName && selectedSeasonName ? menuItems : [];
+  const visibleItems = selectedTeamName && selectedSeasonName ? menuItems : [];
 
   return (
     <GenericSidebar
@@ -71,19 +42,17 @@ export const RugbyTeamsSidebar = () => {
       seasons={seasons}
       selectedTeamName={selectedTeamName}
       selectedSeasonName={selectedSeasonName}
-      onTeamChange={(teamName) => {
-        setSelectedTeamName(teamName);
+      onTeamChange={(name) => {
         if (selectedSeasonName) {
           navigate(
-            `/rugby-teams/${encodeURIComponent(teamName)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
+            `/rugby-teams/${encodeURIComponent(name)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
           );
         }
       }}
-      onSeasonChange={(seasonName) => {
-        setSelectedSeasonName(seasonName);
+      onSeasonChange={(name) => {
         if (selectedTeamName) {
           navigate(
-            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(seasonName)}/team-management`,
+            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(name)}/team-management`,
           );
         }
       }}

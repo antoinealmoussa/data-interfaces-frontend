@@ -1,10 +1,10 @@
+from app.models.season import Season
 from app.services.season_service import (
-    get_seasons,
+    create_season_if_not_exists,
     get_season_by_id,
     get_season_by_name,
-    create_season_if_not_exists,
+    get_seasons,
 )
-from app.models.season import Season
 
 
 def test_get_seasons_empty(db_session):
