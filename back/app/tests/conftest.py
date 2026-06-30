@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from app.core.token import create_access_token
 from app.db.session import Base, get_db
 from app.main import app
+from app.models.application import Application
 from app.models.category import Category
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
@@ -30,6 +31,13 @@ def seed_categories(db):
     db.commit()
 
 
+def seed_applications(db):
+    app = Application(name="rugby-teams", pretty_name="Rugby Teams")
+    db.add(app)
+    db.commit()
+    return app
+
+
 @pytest.fixture(scope="function")
 def db_session():
     Base.metadata.create_all(bind=engine)
@@ -37,6 +45,7 @@ def db_session():
     db = TestingSessionLocal()
     try:
         seed_categories(db)
+        seed_applications(db)
         yield db
     finally:
         db.close()
@@ -64,7 +73,12 @@ def test_user(db_session):
         first_name="Test",
         surname="User"
     )
-    return user_service.create_user(db_session, user_in=user)
+    user = user_service.create_user(db_session, user_in=user)
+    app = db_session.query(Application).filter(Application.name == "rugby-teams").first()
+    if app and app not in user.applications:
+        user.applications.append(app)
+        db_session.commit()
+    return user
 
 
 @pytest.fixture(scope="function")

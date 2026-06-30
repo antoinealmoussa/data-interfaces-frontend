@@ -42,4 +42,12 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
 - **Ruff** : `select = ["E", "F", "W", "I"]`, line-length 100
 - **MyPy** : mode strict avec `ignore_missing_imports = true`
 
+## Nommage des tables
+
+- Les tables transverses (auth, applications, migrations) n'ont pas de préfixe
+- Les tables métier sont préfixées par l'abréviation de l'application :
+  - `rt_` pour rugby-teams (renommé via migration 011)
+  - `be_` pour bike-exploration
+  - `rp_` pour race-preparation
+
 Patterns détaillés (API, code conventions, architecture, tests) dans `.opencode/skills/`.
