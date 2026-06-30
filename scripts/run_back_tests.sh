@@ -5,7 +5,7 @@ set -e
 echo "=========================================="
 echo "Running Backend Tests"
 echo "=========================================="
-docker compose exec backend poetry run pytest app/tests
+docker compose exec backend poetry run pytest app/tests app/applications/rugby_teams/tests
 
 echo ""
 echo "=========================================="
