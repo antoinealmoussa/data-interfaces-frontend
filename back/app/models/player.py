@@ -5,16 +5,16 @@ from app.db.session import Base
 
 
 class Player(Base):
-    __tablename__ = "player"
+    __tablename__ = "rt_player"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     level = Column(Integer, nullable=False)
     sex = Column(String(1), nullable=False)
     position = Column(String(10), nullable=False)
-    team_id = Column(Integer, ForeignKey("team.id", ondelete="CASCADE"), nullable=False)
+    team_id = Column(Integer, ForeignKey("rt_team.id", ondelete="CASCADE"), nullable=False)
 
-    categories = relationship("Category", secondary="player_category", lazy="joined")
+    categories = relationship("Category", secondary="rt_player_category", lazy="joined")
     team = relationship("Team", back_populates="players")
 
     __table_args__ = (

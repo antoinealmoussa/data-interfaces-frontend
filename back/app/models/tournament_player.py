@@ -4,16 +4,16 @@ from app.db.session import Base
 
 
 class TournamentPlayer(Base):
-    __tablename__ = "tournament_player"
+    __tablename__ = "rt_tournament_player"
 
     tournament_id = Column(
         Integer,
-        ForeignKey("tournament.id", ondelete="CASCADE"),
+        ForeignKey("rt_tournament.id", ondelete="CASCADE"),
         nullable=False,
     )
     player_id = Column(
         Integer,
-        ForeignKey("player.id", ondelete="CASCADE"),
+        ForeignKey("rt_player.id", ondelete="CASCADE"),
         nullable=False,
     )
 

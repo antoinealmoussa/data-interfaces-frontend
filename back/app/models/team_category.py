@@ -4,10 +4,10 @@ from app.db.session import Base
 
 
 class TeamCategory(Base):
-    __tablename__ = "team_category"
+    __tablename__ = "rt_team_category"
 
-    team_id = Column(Integer, ForeignKey("team.id", ondelete="CASCADE"), nullable=False)
-    category_id = Column(Integer, ForeignKey("category.id", ondelete="CASCADE"), nullable=False)
+    team_id = Column(Integer, ForeignKey("rt_team.id", ondelete="CASCADE"), nullable=False)
+    category_id = Column(Integer, ForeignKey("rt_category.id", ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint("team_id", "category_id"),

@@ -4,10 +4,10 @@ from app.db.session import Base
 
 
 class TeamSeason(Base):
-    __tablename__ = "team_season"
+    __tablename__ = "rt_team_season"
 
-    team_id = Column(Integer, ForeignKey("team.id", ondelete="CASCADE"), nullable=False)
-    season_id = Column(Integer, ForeignKey("season.id", ondelete="CASCADE"), nullable=False)
+    team_id = Column(Integer, ForeignKey("rt_team.id", ondelete="CASCADE"), nullable=False)
+    season_id = Column(Integer, ForeignKey("rt_season.id", ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint("team_id", "season_id"),
