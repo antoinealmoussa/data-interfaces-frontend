@@ -51,7 +51,7 @@ AppThemeProvider (MUI)
         └── AuthProvider (contexte utilisateur)
             └── AppRoutes
                 ├── Routes publiques (/login, /register)
-                └── Routes privées (ProtecteRoute → App → Outlet)
+                └── Routes privées (ProtectedRoute → App → Outlet)
                     ├── Routes standards
                     └── Routes dynamiques (selon les permissions)
 ```
@@ -60,16 +60,18 @@ AppThemeProvider (MUI)
 
 **Stack :** Python 3.12, FastAPI, SQLAlchemy, PostgreSQL, Pydantic, pytest
 
-**Architecture en couches :**
+**Architecture modulaire :** le backend est découpé en applications autonomes dans `back/app/applications/` (ex. `rugby_teams/`). Chaque application contient ses propres couches (endpoints, services, repositories, modèles, schémas, tests). Les modules partagés (auth, users, token) restent à la racine de `app/`.
+
 ```
-endpoints/ (validation, routing)
-    ↓
-services/ (logique métier)
-    ↓
-models/ + schemas/ (ORM + validation)
+applications/
+├── registrar.py              # Enregistrement des modules
+└── rugby_teams/              # Gestion des équipes
+    ├── endpoints/ → services/ → repositories/
+    ├── models/ + schemas/
+    └── tests/
 ```
 
-Points d'entrée API sous `/api/v1` : utilisateurs, équipes, saisons, joueurs, tournois, entraînement, recherche.
+Points d'entrée API sous `/api/v1/{application}/...` (ex. `/api/v1/rugby-teams/teams`).
 
 ## Scripts
 
