@@ -24,8 +24,8 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
 - **Provider tree** : AppThemeProvider → QueryClientProvider → BrowserRouter → AuthProvider → AppRoutes
 - **Routes** : découpées en 3 groupes dans `routes.tsx` — publiques (`/login`, `/register`), privées standards (`/`, `/profile`), dynamiques (par application, chargées via `React.lazy()`)
 - **API calls** : modules avec pattern plain-object (`export const teamApi = { getAll, create }`), utilisent `apiClient` (Axios avec cookies) et sont consommés via React Query
-- **TypeScript** : `strict: true`, `verbatimModuleSyntax: true` → utiliser `import type` pour les types
-- **Tests** : Vitest + jsdom, axios mocké globalement dans `src/test/setupTests.ts`, tests miroirs de `src/` dans `src/test/`
+- **TypeScript** : `strict: true`, `verbatimModuleSyntax: true` → utiliser `import type` pour les types ; `erasableSyntaxOnly: true` → pas de `enum`, `namespace`, ou `parameter properties`
+- **Tests** : Vitest + jsdom, axios mocké globalement dans `src/test/setupTests.ts`, tests miroirs de `src/` dans `src/test/`. Le setup filtre les warnings `"not wrapped in act"` et `"No routes matched location"` pour éviter le bruit.
 
 ## Backend — Patterns
 
@@ -36,6 +36,8 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
 - **Migrations** : fichiers SQL numérotés dans `migrations/`, trackés via table `schema_migrations`
 - **Entraînement** : Strategy pattern dans `services/training/algorithms/`, enregistré via `registry.py`
 - **Mistral AI** : intégré via `services/search_topic_service.py`
+- **FastAPI** : `redirect_slashes=False` dans la création de l'app (comportement non défaut)
+- **Poetry** : `package-mode = false` (ne pas utiliser `pip install`, uniquement `poetry install`)
 - **pytest** : `asyncio_mode = "auto"` (pas besoin de `@pytest.mark.asyncio`)
 - **Ruff** : `select = ["E", "F", "W", "I"]`, line-length 100
 - **MyPy** : mode strict avec `ignore_missing_imports = true`
