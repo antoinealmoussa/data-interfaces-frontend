@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "test": {
+      "template": "Run the full test suite with coverage report and show any failures.\nFocus on the failing tests and suggest fixes.",
+      "description": "Run tests with coverage",
+      "agent": "build"
+    },
+    "lint": {
+      "template": "Run both frontend and backend linting. Fix any issues found.\nFrontend: cd front && npm run lint\nBackend: cd back && poetry run ruff check . && poetry run mypy app/",
+      "description": "Run lint on both frontend and backend",
+      "agent": "build"
+    }
+  },
+  "permission": {
+    "skill": {
+      "*": "allow"
+    }
+  }
+}
