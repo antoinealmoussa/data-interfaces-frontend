@@ -1,7 +1,7 @@
-import apiClient from "./client";
-import type { Team, CreateTeamDto } from "../types/teamTypes";
+import apiClient from "../client";
+import type { Team, CreateTeamDto } from "../../types/rugby-teams/teamTypes";
 
-const TEAM_URL = "/teams";
+const TEAM_URL = "/rugby-teams/teams";
 
 export const teamApi = {
   getAll: () => apiClient.get<Team[]>(TEAM_URL).then((r) => r.data),

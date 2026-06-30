@@ -7,10 +7,10 @@ const mockedClient = {
   delete: vi.fn(),
 };
 
-vi.mock("../../api/client", () => ({
+vi.mock("../../../api/client", () => ({
   default: mockedClient,
   teamPath: (teamName: string, ...segments: string[]) =>
-    `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
+    `/rugby-teams/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
 }));
 
 describe("tournamentApi", () => {
@@ -18,14 +18,14 @@ describe("tournamentApi", () => {
     vi.clearAllMocks();
   });
 
-  it("getByTeam devrait appeler GET /teams/:teamName/tournaments", async () => {
+  it("getByTeam devrait appeler GET /rugby-teams/teams/:teamName/tournaments", async () => {
     mockedClient.get.mockResolvedValue({ data: [{ id: 1, name: "Tournoi A" }] });
 
-    const { tournamentApi } = await import("../../api/tournamentApi");
+    const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
     const result = await tournamentApi.getByTeam("Mon equipe");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/tournaments",
+      "/rugby-teams/teams/Mon%20equipe/tournaments",
     );
     expect(result).toEqual([{ id: 1, name: "Tournoi A" }]);
   });
@@ -33,7 +33,7 @@ describe("tournamentApi", () => {
   it("getByTeam devrait encoder le nom de l'équipe", async () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
-    const { tournamentApi } = await import("../../api/tournamentApi");
+    const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
     await tournamentApi.getByTeam("Équipe spéciale");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
@@ -41,7 +41,7 @@ describe("tournamentApi", () => {
     );
   });
 
-  it("create devrait appeler POST /teams/:teamName/tournaments", async () => {
+  it("create devrait appeler POST /rugby-teams/teams/:teamName/tournaments", async () => {
     const newTournament = {
       name: "Tournoi Test",
       category_name: "Mixte",
@@ -51,17 +51,17 @@ describe("tournamentApi", () => {
       data: { id: 1, ...newTournament },
     });
 
-    const { tournamentApi } = await import("../../api/tournamentApi");
+    const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
     const result = await tournamentApi.create("Mon equipe", newTournament);
 
     expect(mockedClient.post).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/tournaments",
+      "/rugby-teams/teams/Mon%20equipe/tournaments",
       newTournament,
     );
     expect(result).toMatchObject({ name: "Tournoi Test" });
   });
 
-  it("update devrait appeler PUT /teams/:teamName/tournaments/:tournamentId", async () => {
+  it("update devrait appeler PUT /rugby-teams/teams/:teamName/tournaments/:tournamentId", async () => {
     const updateData = {
       name: "Tournoi Modifié",
       category_name: "+35",
@@ -71,24 +71,24 @@ describe("tournamentApi", () => {
       data: { id: 5, ...updateData },
     });
 
-    const { tournamentApi } = await import("../../api/tournamentApi");
+    const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
     const result = await tournamentApi.update("Mon equipe", 5, updateData);
 
     expect(mockedClient.put).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/tournaments/5",
+      "/rugby-teams/teams/Mon%20equipe/tournaments/5",
       updateData,
     );
     expect(result).toMatchObject({ name: "Tournoi Modifié" });
   });
 
-  it("delete devrait appeler DELETE /teams/:teamName/tournaments/:tournamentId", async () => {
+  it("delete devrait appeler DELETE /rugby-teams/teams/:teamName/tournaments/:tournamentId", async () => {
     mockedClient.delete.mockResolvedValue({});
 
-    const { tournamentApi } = await import("../../api/tournamentApi");
+    const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
     await tournamentApi.delete("Mon equipe", 3);
 
     expect(mockedClient.delete).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/tournaments/3",
+      "/rugby-teams/teams/Mon%20equipe/tournaments/3",
     );
   });
 });

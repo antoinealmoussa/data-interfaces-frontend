@@ -1,4 +1,4 @@
-import { type Season } from "./seasonTypes";
+import type { Season } from "./seasonTypes";
 
 export const TEAM_CATEGORIES = [
   "Mixte",

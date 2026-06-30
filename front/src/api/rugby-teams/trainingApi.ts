@@ -1,5 +1,5 @@
-import apiClient, { teamPath } from "./client";
-import type { Player } from "../types/playerTypes";
+import apiClient, { teamPath } from "../client";
+import type { Player } from "../../types/rugby-teams/playerTypes";
 
 export interface AlgorithmInfo {
   id: string;

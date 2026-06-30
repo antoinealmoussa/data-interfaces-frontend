@@ -1,5 +1,5 @@
-import apiClient, { teamPath } from "./client";
-import type { Player, CreatePlayerDto } from "../types/playerTypes";
+import apiClient, { teamPath } from "../client";
+import type { Player, CreatePlayerDto } from "../../types/rugby-teams/playerTypes";
 
 export const playerApi = {
   getByTeam: (teamName: string, skip = 0, limit = 100) =>

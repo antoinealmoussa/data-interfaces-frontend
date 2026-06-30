@@ -7,10 +7,10 @@ const mockedClient = {
   delete: vi.fn(),
 };
 
-vi.mock("../../api/client", () => ({
+vi.mock("../../../api/client", () => ({
   default: mockedClient,
   teamPath: (teamName: string, ...segments: string[]) =>
-    `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
+    `/rugby-teams/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
 }));
 
 describe("playerApi", () => {
@@ -18,14 +18,14 @@ describe("playerApi", () => {
     vi.clearAllMocks();
   });
 
-  it("getByTeam devrait appeler GET /teams/:teamName/players", async () => {
+  it("getByTeam devrait appeler GET /rugby-teams/teams/:teamName/players", async () => {
     mockedClient.get.mockResolvedValue({ data: [{ id: 1, name: "Jean" }] });
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     const result = await playerApi.getByTeam("Mon equipe");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/players?skip=0&limit=100",
+      "/rugby-teams/teams/Mon%20equipe/players?skip=0&limit=100",
     );
     expect(result).toEqual([{ id: 1, name: "Jean" }]);
   });
@@ -33,7 +33,7 @@ describe("playerApi", () => {
   it("getByTeam devrait encoder le nom de l'équipe", async () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     await playerApi.getByTeam("Équipe spéciale");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
@@ -44,15 +44,15 @@ describe("playerApi", () => {
   it("getByTeam devrait passer skip et limit", async () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     await playerApi.getByTeam("Equipe", 10, 25);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/teams/Equipe/players?skip=10&limit=25",
+      "/rugby-teams/teams/Equipe/players?skip=10&limit=25",
     );
   });
 
-  it("create devrait appeler POST /teams/:teamName/players", async () => {
+  it("create devrait appeler POST /rugby-teams/teams/:teamName/players", async () => {
     const newPlayer = {
       name: "Jean",
       level: 2,
@@ -62,17 +62,17 @@ describe("playerApi", () => {
     };
     mockedClient.post.mockResolvedValue({ data: { id: 1, ...newPlayer } });
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     const result = await playerApi.create("Mon equipe", newPlayer);
 
     expect(mockedClient.post).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/players",
+      "/rugby-teams/teams/Mon%20equipe/players",
       newPlayer,
     );
     expect(result).toMatchObject({ name: "Jean" });
   });
 
-  it("update devrait appeler PUT /teams/:teamName/players/:playerId", async () => {
+  it("update devrait appeler PUT /rugby-teams/teams/:teamName/players/:playerId", async () => {
     const updateData = {
       name: "Jean Modifié",
       level: 3,
@@ -82,24 +82,24 @@ describe("playerApi", () => {
     };
     mockedClient.put.mockResolvedValue({ data: { id: 5, ...updateData } });
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     const result = await playerApi.update("Mon equipe", 5, updateData);
 
     expect(mockedClient.put).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/players/5",
+      "/rugby-teams/teams/Mon%20equipe/players/5",
       updateData,
     );
     expect(result).toMatchObject({ name: "Jean Modifié" });
   });
 
-  it("delete devrait appeler DELETE /teams/:teamName/players/:playerId", async () => {
+  it("delete devrait appeler DELETE /rugby-teams/teams/:teamName/players/:playerId", async () => {
     mockedClient.delete.mockResolvedValue({});
 
-    const { playerApi } = await import("../../api/playerApi");
+    const { playerApi } = await import("../../../api/rugby-teams/playerApi");
     await playerApi.delete("Mon equipe", 3);
 
     expect(mockedClient.delete).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/players/3",
+      "/rugby-teams/teams/Mon%20equipe/players/3",
     );
   });
 });

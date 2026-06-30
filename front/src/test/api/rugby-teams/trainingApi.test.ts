@@ -5,10 +5,10 @@ const mockedClient = {
   post: vi.fn(),
 };
 
-vi.mock("../../api/client", () => ({
+vi.mock("../../../api/client", () => ({
   default: mockedClient,
   teamPath: (teamName: string, ...segments: string[]) =>
-    `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
+    `/rugby-teams/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`,
 }));
 
 describe("trainingApi", () => {
@@ -16,7 +16,7 @@ describe("trainingApi", () => {
     vi.clearAllMocks();
   });
 
-  it("getAlgorithms devrait appeler GET /teams/:teamName/training/algorithms", async () => {
+  it("getAlgorithms devrait appeler GET /rugby-teams/teams/:teamName/training/algorithms", async () => {
     mockedClient.get.mockResolvedValue({
       data: [
         { id: "balanced", label: "Équilibré" },
@@ -24,11 +24,11 @@ describe("trainingApi", () => {
       ],
     });
 
-    const { trainingApi } = await import("../../api/trainingApi");
+    const { trainingApi } = await import("../../../api/rugby-teams/trainingApi");
     const result = await trainingApi.getAlgorithms("Mon equipe");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/training/algorithms",
+      "/rugby-teams/teams/Mon%20equipe/training/algorithms",
     );
     expect(result).toEqual([
       { id: "balanced", label: "Équilibré" },
@@ -39,7 +39,7 @@ describe("trainingApi", () => {
   it("getAlgorithms devrait encoder le nom de l'équipe", async () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
-    const { trainingApi } = await import("../../api/trainingApi");
+    const { trainingApi } = await import("../../../api/rugby-teams/trainingApi");
     await trainingApi.getAlgorithms("Équipe spéciale");
 
     expect(mockedClient.get).toHaveBeenCalledWith(
@@ -47,7 +47,7 @@ describe("trainingApi", () => {
     );
   });
 
-  it("distribute devrait appeler POST /teams/:teamName/training/distribute", async () => {
+  it("distribute devrait appeler POST /rugby-teams/teams/:teamName/training/distribute", async () => {
     const request = {
       player_ids: [1, 2, 3],
       team_count: 2,
@@ -62,11 +62,11 @@ describe("trainingApi", () => {
       },
     });
 
-    const { trainingApi } = await import("../../api/trainingApi");
+    const { trainingApi } = await import("../../../api/rugby-teams/trainingApi");
     const result = await trainingApi.distribute("Mon equipe", request);
 
     expect(mockedClient.post).toHaveBeenCalledWith(
-      "/teams/Mon%20equipe/training/distribute",
+      "/rugby-teams/teams/Mon%20equipe/training/distribute",
       request,
     );
     expect(result.teams).toHaveLength(2);

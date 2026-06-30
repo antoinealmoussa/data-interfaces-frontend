@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
 import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
+import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
 import { RugbyTeamsSidebar } from "../../components/rugby-teams/RugbyTeamsSidebar";
 
 const RugbyTeams = () => {

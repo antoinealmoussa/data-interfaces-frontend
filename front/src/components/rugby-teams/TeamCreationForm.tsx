@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
-import { teamApi } from "../../api/teamApi";
-import { type CreateTeamDto, TEAM_CATEGORIES } from "../../types/teamTypes";
+import { teamApi } from "../../api/rugby-teams/teamApi";
+import { type CreateTeamDto, TEAM_CATEGORIES } from "../../types/rugby-teams/teamTypes";
 import { FormActions } from "../common/FormActions";
 import { useNavigate } from "react-router-dom";
 import { toggleArrayItem } from "../../utils/array";

@@ -1,8 +1,8 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
 import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
-import type { Season } from "../../types/seasonTypes";
+import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
+import type { Season } from "../../types/rugby-teams/seasonTypes";
 import type { SidebarItem } from "../../types/uiTypes";
 import { useMemo } from "react";
 

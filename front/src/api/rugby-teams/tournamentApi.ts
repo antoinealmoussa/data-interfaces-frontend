@@ -1,5 +1,5 @@
-import apiClient, { teamPath } from "./client";
-import type { Tournament, CreateTournamentDto } from "../types/tournamentTypes";
+import apiClient, { teamPath } from "../client";
+import type { Tournament, CreateTournamentDto } from "../../types/rugby-teams/tournamentTypes";
 
 export const tournamentApi = {
   getByTeam: (teamName: string) =>

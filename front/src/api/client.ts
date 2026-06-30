@@ -66,4 +66,4 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 export const teamPath = (teamName: string, ...segments: string[]) =>
-  `/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`;
+  `/rugby-teams/teams/${encodeURIComponent(teamName)}/${segments.join("/")}`;

@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { teamApi } from "../api/teamApi";
-import type { Team } from "../types/teamTypes";
-import type { Season } from "../types/seasonTypes";
+import { teamApi } from "../../api/rugby-teams/teamApi";
+import type { Team } from "../../types/rugby-teams/teamTypes";
+import type { Season } from "../../types/rugby-teams/seasonTypes";
 
 interface UseTeamAndSeasonResult {
   team: Team | null;
