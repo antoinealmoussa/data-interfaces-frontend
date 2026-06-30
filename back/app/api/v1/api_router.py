@@ -1,23 +1,18 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
-    players,
     search_topic,
-    seasons,
-    teams,
     token,
-    tournaments,
-    training,
     users,
 )
+from app.applications.registrar import register_all_known, get_all_app_routers
 
 api_router = APIRouter()
 
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(search_topic.router, prefix="/search", tags=["Search"])
-api_router.include_router(teams.router, prefix="/teams", tags=["Teams"])
-api_router.include_router(seasons.router, prefix="/seasons", tags=["Seasons"])
-api_router.include_router(players.router, tags=["Players"])
 api_router.include_router(token.router, prefix="/token", tags=["Token"])
-api_router.include_router(tournaments.router, tags=["Tournaments"])
-api_router.include_router(training.router, tags=["Training"])
+
+register_all_known()
+for _app_name, app_router in get_all_app_routers():
+    api_router.include_router(app_router)
