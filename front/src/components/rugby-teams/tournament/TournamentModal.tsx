@@ -3,7 +3,7 @@ import { TournamentForm } from "./TournamentForm";
 import type {
   Tournament,
   CreateTournamentDto,
-} from "../../../types/tournamentTypes";
+} from "../../../types/rugby-teams/tournamentTypes";
 
 interface TournamentModalProps {
   open: boolean;

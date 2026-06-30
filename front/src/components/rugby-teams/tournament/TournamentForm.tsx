@@ -17,8 +17,8 @@ import { toggleArrayItem } from "../../../utils/array";
 import type {
   Tournament,
   CreateTournamentDto,
-} from "../../../types/tournamentTypes";
-import type { PlayerSimple } from "../../../types/playerTypes";
+} from "../../../types/rugby-teams/tournamentTypes";
+import type { PlayerSimple } from "../../../types/rugby-teams/playerTypes";
 
 interface TournamentFormProps {
   defaultValues?: Tournament;

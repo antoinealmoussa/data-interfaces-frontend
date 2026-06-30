@@ -9,9 +9,11 @@ Monorepo avec deux packages isolés dans `/front` (React 19 + Vite 7) et `/back`
 - **Lancer l'app** : `docker compose build && docker compose up`
 - **Tests (les deux)** : `./scripts/run_tests.sh` (exécute back puis front dans Docker)
 - **Tests front uniquement** : `./scripts/run_front_tests.sh` ou `docker compose exec frontend npm run test`
-- **Tests back uniquement** : `./scripts/run_back_tests.sh` ou `docker compose exec backend poetry run pytest app/tests`
+- **Tests back uniquement** : `./scripts/run_back_tests.sh` ou `docker compose exec backend poetry run pytest app/`
+- **Tests partagés uniquement** : `docker compose exec backend poetry run pytest app/tests/`
+- **Tests rugby-teams uniquement** : `docker compose exec backend poetry run pytest app/applications/rugby_teams/tests/`
 - **Frontend** : `npm run dev`, `npm run build` (lance `tsc -b` puis `vite build`), `npm run lint`
-- **Backend** : `poetry run pytest app/tests`, `poetry run ruff check .`, `poetry run mypy app/`
+- **Backend** : `poetry run pytest app/`, `poetry run ruff check .`, `poetry run mypy app/`
 - **Migrations** : `./scripts/migrate.sh` (applique les fichiers `migrations/*.sql` séquentiellement)
 - **DB** : `./scripts/connect_db.sh` (localhost:5000)
 
@@ -41,5 +43,13 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
 - **pytest** : `asyncio_mode = "auto"` (pas besoin de `@pytest.mark.asyncio`)
 - **Ruff** : `select = ["E", "F", "W", "I"]`, line-length 100
 - **MyPy** : mode strict avec `ignore_missing_imports = true`
+
+## Nommage des tables
+
+- Les tables transverses (auth, applications, migrations) n'ont pas de préfixe
+- Les tables métier sont préfixées par l'abréviation de l'application :
+  - `rt_` pour rugby-teams (renommé via migration 011)
+  - `be_` pour bike-exploration
+  - `rp_` pour race-preparation
 
 Patterns détaillés (API, code conventions, architecture, tests) dans `.opencode/skills/`.

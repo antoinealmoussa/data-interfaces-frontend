@@ -39,24 +39,32 @@ Défini dans `src/components/authentication/AppRoutes.tsx` :
 
 ```
 src/
-├── api/                     # Clients HTTP (client.ts, config.ts, *Api.ts)
+├── api/                     # Clients HTTP
+│   ├── client.ts            #   Axios, intercepteurs, helpers d'URL
+│   ├── config.ts            #   Configuration
+│   └── rugby-teams/         #   Modules API par application
 ├── components/
 │   ├── authentication/      # LoginForm, RegisterForm, ProtectedRoute, AppRoutes
 │   ├── common/              # FormModal, GenericDataTable, ConfirmDialog…
 │   ├── layout/              # Header, GenericSidebar, MarkdownRenderer
-│   ├── rugby-teams/         # Gestion équipes, players, tournaments
+│   ├── rugby-teams/         # Composants métier par application
 │   └── ui/                  # DropdownMenu, SearchInput, LoadingSpinner…
 ├── contexts/                # AuthContext
-├── hooks/                   # useAuth, useLogout, useTeamAndSeason
-├── pages/                   # Home, authentication/, management/, rugby-teams/…
+├── hooks/                   # Hooks partagés (useAuth, useLogout…)
+│   └── rugby-teams/         # Hooks par application
+├── pages/                   # Pages (Home, authentication/, management/)
+│   └── rugby-teams/         # Pages par application
 ├── test/                    # Tests (miroir de src/)
 ├── theme/                   # Thème MUI
-├── types/                   # Types TypeScript
+├── types/                   # Types partagés
+│   └── rugby-teams/         # Types par application
 ├── utils/                   # array.ts, error.ts, format.ts
 ├── App.tsx                  # Composant racine
 ├── main.tsx                 # Point d'entrée
 └── routes.tsx               # Déclaration des routes
 ```
+
+Chaque application (ex. `rugby-teams`) regroupe son propre code dans des sous-dossiers de `api/`, `hooks/`, `types/`, `components/` et `pages/`. Les modules d'infrastructure partagée (client Axios, AuthContext, hooks génériques) restent à la racine.
 
 ## Commandes (Docker)
 

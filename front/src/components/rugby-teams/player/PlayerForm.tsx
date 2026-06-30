@@ -12,7 +12,7 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
+import type { Player, CreatePlayerDto } from "../../../types/rugby-teams/playerTypes";
 import { FormActions } from "../../common/FormActions";
 import { toggleArrayItem } from "../../../utils/array";
 

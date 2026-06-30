@@ -21,46 +21,44 @@ API FastAPI modulaire pour l'application Stravoska.
 app/
 ├── main.py                   # Initialisation FastAPI, CORS, inclusion routeurs
 ├── api/v1/
-│   ├── api_router.py         # Hub central des routeurs
-│   ├── helpers.py            # Helpers HTTP
-│   └── endpoints/            # Routes par domaine
-│       ├── users.py
-│       ├── teams.py
-│       ├── seasons.py
-│       ├── players.py
-│       ├── tournaments.py
-│       ├── training.py
-│       ├── token.py
-│       └── search_topic.py
+│   └── api_router.py         # Montage des routeurs par application
 ├── core/                     # Config, logs, dépendances
 ├── db/                       # Session SQLAlchemy
-├── models/                   # Modèles ORM
-├── schemas/                  # Schémas Pydantic
-├── services/                 # Logique métier
-│   └── training/algorithms/  # Algorithmes d'entraînement (registry pattern)
+├── applications/             # Modules applicatifs autonomes
+│   ├── registrar.py          # Enregistrement des applications
+│   └── rugby_teams/          # Gestion d'équipes sportives
+│       ├── models/
+│       ├── schemas/
+│       ├── services/         #   + training/algorithms/ (registry pattern)
+│       ├── repositories/
+│       ├── endpoints/
+│       └── tests/
+├── models/                   # Modèles partagés (user…)
+├── schemas/                  # Schémas partagés
+├── services/                 # Services partagés (auth, token…)
 ├── prompts/                  # Prompts IA (Mistral)
-├── utils/                    # Validateurs
-└── tests/                    # Tests unitaires
-    ├── api/
-    ├── core/
-    ├── schemas/
-    ├── services/
-    └── utils/
+├── utils/                    # Validateurs, exceptions métier
+└── tests/                    # Tests partagés (auth, users…)
 ```
+
+Chaque application dans `applications/` est autonome : elle contient ses propres couches (endpoints → services → repositories), ses modèles ORM, ses schémas Pydantic et ses tests. Les modules partagés (auth, users, token) restent dans les dossiers racine.
 
 ## Architecture en couches
 
+Par application :
 ```
-endpoints/ (couche HTTP)
+endpoints/ (couche HTTP, validation)
     ↓
 services/ (logique métier)
     ↓
+repositories/ (accès base de données)
+    ↑
 models/ + schemas/ (ORM + validation)
 ```
 
 ## Points d'entrée API
 
-Tous sous `/api/v1`. Domaines couverts : utilisateurs, équipes, saisons, joueurs, tournois, distribution d'entraînement, recherche, rafraîchissement de token.
+Tous sous `/api/v1/{application}`. Domaines couverts : utilisateurs, authentification, token, et chaque application enregistrée (ex. `/api/v1/rugby-teams/teams`).
 
 ## Commandes (Docker)
 

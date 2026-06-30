@@ -5,9 +5,9 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PeopleIcon from "@mui/icons-material/People";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
-import { tournamentApi } from "../../api/tournamentApi";
-import { playerApi } from "../../api/playerApi";
+import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
+import { tournamentApi } from "../../api/rugby-teams/tournamentApi";
+import { playerApi } from "../../api/rugby-teams/playerApi";
 import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
@@ -16,9 +16,9 @@ import { PageGuard } from "../../components/common/PageGuard";
 import type {
   Tournament,
   CreateTournamentDto,
-} from "../../types/tournamentTypes";
+} from "../../types/rugby-teams/tournamentTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
-import type { PlayerSimple } from "../../types/playerTypes";
+import type { PlayerSimple } from "../../types/rugby-teams/playerTypes";
 import { useCrudManager } from "../../hooks/useCrudManager";
 
 interface PlayerStatsRow {

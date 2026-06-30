@@ -1,6 +1,6 @@
 import { FormModal } from "../../common/FormModal";
 import { PlayerForm } from "./PlayerForm";
-import type { Player, CreatePlayerDto } from "../../../types/playerTypes";
+import type { Player, CreatePlayerDto } from "../../../types/rugby-teams/playerTypes";
 
 interface PlayerModalProps {
   open: boolean;

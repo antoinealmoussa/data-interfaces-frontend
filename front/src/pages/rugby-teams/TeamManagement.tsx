@@ -2,14 +2,14 @@ import { Box, Button } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
-import { playerApi } from "../../api/playerApi";
+import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
+import { playerApi } from "../../api/rugby-teams/playerApi";
 import { GenericDataTable } from "../../components/common/GenericDataTable";
 import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { PlayerModal } from "../../components/rugby-teams/player/PlayerModal";
 import { PageGuard } from "../../components/common/PageGuard";
-import type { Player, CreatePlayerDto } from "../../types/playerTypes";
+import type { Player, CreatePlayerDto } from "../../types/rugby-teams/playerTypes";
 import type { Column, Action } from "../../components/common/GenericDataTable";
 import { useCrudManager } from "../../hooks/useCrudManager";
 

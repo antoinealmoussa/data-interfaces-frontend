@@ -21,10 +21,10 @@ import {
 } from "@mui/material";
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useTeamAndSeason } from "../../hooks/useTeamAndSeason";
-import { playerApi } from "../../api/playerApi";
-import { trainingApi } from "../../api/trainingApi";
-import type { Player } from "../../types/playerTypes";
+import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
+import { playerApi } from "../../api/rugby-teams/playerApi";
+import { trainingApi } from "../../api/rugby-teams/trainingApi";
+import type { Player } from "../../types/rugby-teams/playerTypes";
 import {
   DndContext,
   DragOverlay,
@@ -32,7 +32,7 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import type { TrainingTeam, DistributeRequest } from "../../api/trainingApi";
+import type { TrainingTeam, DistributeRequest } from "../../api/rugby-teams/trainingApi";
 import { PageGuard } from "../../components/common/PageGuard";
 
 const DraggablePlayer = ({ player }: { player: Player }) => {
