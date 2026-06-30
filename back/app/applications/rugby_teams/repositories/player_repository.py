@@ -1,6 +1,6 @@
+from app.applications.rugby_teams.models.player import Player
+from app.applications.rugby_teams.schemas.player import ApiReturnPlayer
 from app.db.repository import BaseRepository
-from app.models.player import Player
-from app.schemas.player import ApiReturnPlayer
 
 
 class PlayerRepository(BaseRepository[Player, ApiReturnPlayer]):

@@ -1,10 +1,14 @@
 from sqlalchemy.orm import Session
 
-from app.db.repositories import PlayerRepository
-from app.models.player import Player
-from app.schemas.player import ApiCreatePlayer, ApiReturnPlayer, ApiUpdatePlayer
-from app.services.category_service import resolve_categories
-from app.services.team_service import get_team_by_name
+from app.applications.rugby_teams.models.player import Player
+from app.applications.rugby_teams.repositories.player_repository import PlayerRepository
+from app.applications.rugby_teams.schemas.player import (
+    ApiCreatePlayer,
+    ApiReturnPlayer,
+    ApiUpdatePlayer,
+)
+from app.applications.rugby_teams.services.category_service import resolve_categories
+from app.applications.rugby_teams.services.team_service import get_team_by_name
 from app.utils.exceptions import ForbiddenError, PlayerNotFoundError
 
 

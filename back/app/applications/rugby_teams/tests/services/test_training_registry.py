@@ -1,6 +1,9 @@
-from app.services.training.algorithms.balanced import BalancedAlgorithm
-from app.services.training.algorithms.random import RandomAlgorithm
-from app.services.training.registry import get_algorithm, get_all_algorithms
+from app.applications.rugby_teams.services.training.algorithms.balanced import BalancedAlgorithm
+from app.applications.rugby_teams.services.training.algorithms.random import RandomAlgorithm
+from app.applications.rugby_teams.services.training.registry import (
+    get_algorithm,
+    get_all_algorithms,
+)
 
 
 def test_get_algorithm_random():

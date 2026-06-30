@@ -1,4 +1,3 @@
-from unittest.mock import patch
 
 from fastapi import status
 from jose import jwt

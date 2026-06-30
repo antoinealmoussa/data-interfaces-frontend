@@ -3,16 +3,19 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.token import get_current_active_user
-from app.db.session import get_db
-from app.models.player import Player
-from app.models.user import User
-from app.schemas.training import (
+from app.applications.rugby_teams.models.player import Player
+from app.applications.rugby_teams.schemas.training import (
     AlgorithmInfo,
     DistributeInput,
     DistributeOutput,
 )
-from app.services.training.registry import get_algorithm, get_all_algorithms
+from app.applications.rugby_teams.services.training.registry import (
+    get_algorithm,
+    get_all_algorithms,
+)
+from app.core.token import get_current_active_user
+from app.db.session import get_db
+from app.models.user import User
 
 router = APIRouter(prefix="/teams/{team_name}/training")
 

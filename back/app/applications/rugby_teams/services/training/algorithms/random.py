@@ -1,6 +1,11 @@
 import random
 
-from app.schemas.training import DistributeInput, DistributeOutput, PlayerInfo, TrainingTeam
+from app.applications.rugby_teams.schemas.training import (
+    DistributeInput,
+    DistributeOutput,
+    PlayerInfo,
+    TrainingTeam,
+)
 
 from .base import BaseDistributionAlgorithm
 

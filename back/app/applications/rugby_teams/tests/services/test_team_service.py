@@ -1,8 +1,8 @@
 import pytest
 
-from app.models.season import Season
-from app.schemas.team import ApiCreateTeam
-from app.services import season_service, team_service
+from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.schemas.team import ApiCreateTeam
+from app.applications.rugby_teams.services import season_service, team_service
 from app.utils.exceptions import ForbiddenError, TeamNotFoundError
 
 

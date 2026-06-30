@@ -3,11 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.applications.rugby_teams.schemas.season import ApiReturnSeason
+from app.applications.rugby_teams.services.season_service import get_season_by_id, get_seasons
 from app.core.token import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.season import ApiReturnSeason
-from app.services.season_service import get_season_by_id, get_seasons
 
 router = APIRouter()
 

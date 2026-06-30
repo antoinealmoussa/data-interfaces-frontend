@@ -3,7 +3,7 @@ from fastapi import status
 
 def test_list_algorithms(authenticated_client):
     response = authenticated_client.get(
-        "/api/v1/teams/Mon equipe/training/algorithms"
+        "/api/v1/rugby-teams/teams/Mon equipe/training/algorithms"
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -14,7 +14,7 @@ def test_list_algorithms(authenticated_client):
 
 
 def test_list_algorithms_unauthenticated(client):
-    response = client.get("/api/v1/teams/Mon equipe/training/algorithms")
+    response = client.get("/api/v1/rugby-teams/teams/Mon equipe/training/algorithms")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -25,7 +25,7 @@ def test_distribute_unknown_algorithm(authenticated_client):
         "algorithm": "unknown",
     }
     response = authenticated_client.post(
-        "/api/v1/teams/Mon equipe/training/distribute", json=payload
+        "/api/v1/rugby-teams/teams/Mon equipe/training/distribute", json=payload
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "inconnu" in response.json()["detail"].lower()
@@ -37,5 +37,5 @@ def test_distribute_unauthenticated(client):
         "team_count": 2,
         "algorithm": "random",
     }
-    response = client.post("/api/v1/teams/Mon equipe/training/distribute", json=payload)
+    response = client.post("/api/v1/rugby-teams/teams/Mon equipe/training/distribute", json=payload)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

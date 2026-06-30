@@ -1,9 +1,9 @@
 import pytest
 
-from app.models.season import Season
-from app.schemas.player import ApiCreatePlayer, ApiUpdatePlayer
-from app.schemas.team import ApiCreateTeam
-from app.services import player_service, team_service
+from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.schemas.player import ApiCreatePlayer, ApiUpdatePlayer
+from app.applications.rugby_teams.schemas.team import ApiCreateTeam
+from app.applications.rugby_teams.services import player_service, team_service
 from app.utils.exceptions import ForbiddenError, PlayerNotFoundError, TeamNotFoundError
 
 
@@ -247,7 +247,7 @@ class TestDeletePlayer:
             player_service.delete_player(db_session, created.id, team.name, 999)
 
     def test_delete_player_does_not_delete_category(self, db_session, team, test_user):
-        from app.models.category import Category
+        from app.applications.rugby_teams.models.category import Category
 
         player_in = ApiCreatePlayer(
             name="Jean",

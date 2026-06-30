@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.category import Category
+from app.applications.rugby_teams.models.category import Category
 
 
 def get_category_by_name(db: Session, name: str) -> Category | None:

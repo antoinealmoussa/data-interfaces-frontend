@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 
-from app.db.repositories import TeamRepository
-from app.models.category import Category
-from app.models.season import Season
-from app.models.team import Team
-from app.models.team_season import TeamSeason
-from app.schemas.team import ApiCreateTeam, ApiReturnTeam
-from app.services import season_service
+from app.applications.rugby_teams.models.category import Category
+from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.models.team import Team
+from app.applications.rugby_teams.models.team_season import TeamSeason
+from app.applications.rugby_teams.repositories.team_repository import TeamRepository
+from app.applications.rugby_teams.schemas.team import ApiCreateTeam, ApiReturnTeam
+from app.applications.rugby_teams.services import season_service
 from app.utils.exceptions import ForbiddenError, TeamNotFoundError
 
 

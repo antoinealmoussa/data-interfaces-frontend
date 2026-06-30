@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.season import Season
+from app.applications.rugby_teams.models.season import Season
 
 
 def get_seasons(db: Session, skip: int = 0, limit: int = 100) -> list[Season]:

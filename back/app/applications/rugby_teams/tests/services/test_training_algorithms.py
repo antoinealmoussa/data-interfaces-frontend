@@ -1,8 +1,7 @@
-import pytest
 
-from app.schemas.training import DistributeInput, PlayerInfo
-from app.services.training.algorithms.balanced import BalancedAlgorithm
-from app.services.training.algorithms.random import RandomAlgorithm
+from app.applications.rugby_teams.schemas.training import DistributeInput, PlayerInfo
+from app.applications.rugby_teams.services.training.algorithms.balanced import BalancedAlgorithm
+from app.applications.rugby_teams.services.training.algorithms.random import RandomAlgorithm
 
 PLAYERS = [
     PlayerInfo(id=1, name="Alice", level=4, sex="F", position="Ailier"),

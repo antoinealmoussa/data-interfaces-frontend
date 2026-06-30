@@ -6,7 +6,7 @@ from app.api.v1.endpoints import (
     token,
     users,
 )
-from app.applications.registrar import register_all_known, get_all_app_routers
+from app.applications.registrar import get_all_app_routers, register_all_known
 
 api_router = APIRouter()
 
@@ -17,4 +17,4 @@ api_router.include_router(token.router, prefix="/token", tags=["Token"])
 
 register_all_known()
 for _app_name, app_router in get_all_app_routers():
-    api_router.include_router(app_router)
+    api_router.include_router(app_router, prefix=f"/{_app_name}")

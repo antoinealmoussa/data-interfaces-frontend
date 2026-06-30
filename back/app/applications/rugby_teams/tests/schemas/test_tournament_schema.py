@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.tournament import (
+from app.applications.rugby_teams.schemas.tournament import (
     ApiCreateTournament,
     ApiReturnTournament,
     ApiUpdateTournament,

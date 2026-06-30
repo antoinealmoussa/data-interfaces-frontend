@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.player import ApiCreatePlayer
+from app.applications.rugby_teams.schemas.player import ApiCreatePlayer
 
 
 class TestPlayerNameValidator:

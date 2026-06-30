@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.season import ApiReturnSeason, SeasonBase
+from app.applications.rugby_teams.schemas.season import ApiReturnSeason, SeasonBase
 
 
 class TestSeasonBaseValidation:

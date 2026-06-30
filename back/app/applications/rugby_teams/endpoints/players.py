@@ -3,11 +3,15 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
+from app.applications.rugby_teams.schemas.player import (
+    ApiCreatePlayer,
+    ApiReturnPlayer,
+    ApiUpdatePlayer,
+)
+from app.applications.rugby_teams.services import player_service
 from app.core.token import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.player import ApiCreatePlayer, ApiReturnPlayer, ApiUpdatePlayer
-from app.services import player_service
 
 router = APIRouter(prefix="/teams/{team_name}/players")
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.schemas.training import DistributeInput, DistributeOutput
+from app.applications.rugby_teams.schemas.training import DistributeInput, DistributeOutput
 
 
 class BaseDistributionAlgorithm(ABC):

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.team import ApiCreateTeam
+from app.applications.rugby_teams.schemas.team import ApiCreateTeam
 
 
 class TestTeamBaseValidators:

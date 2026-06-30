@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.schemas.season import ApiReturnSeason
+from app.applications.rugby_teams.schemas.season import ApiReturnSeason
 from app.utils.validators import TEAM_CATEGORIES, validate_season_format
 
 

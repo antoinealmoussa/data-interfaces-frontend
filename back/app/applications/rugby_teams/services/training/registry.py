@@ -1,4 +1,4 @@
-from app.schemas.training import AlgorithmInfo
+from app.applications.rugby_teams.schemas.training import AlgorithmInfo
 
 from .algorithms.balanced import BalancedAlgorithm
 from .algorithms.base import BaseDistributionAlgorithm

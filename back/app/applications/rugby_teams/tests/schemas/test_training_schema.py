@@ -1,4 +1,10 @@
-from app.schemas.training import AlgorithmInfo, DistributeInput, DistributeOutput, PlayerInfo, TrainingTeam
+from app.applications.rugby_teams.schemas.training import (
+    AlgorithmInfo,
+    DistributeInput,
+    DistributeOutput,
+    PlayerInfo,
+    TrainingTeam,
+)
 
 
 class TestPlayerInfo:

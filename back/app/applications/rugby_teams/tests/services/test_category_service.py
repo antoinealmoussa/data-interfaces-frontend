@@ -1,7 +1,9 @@
 import pytest
 
-from app.models.category import Category
-from app.services.category_service import get_category_by_name, resolve_categories
+from app.applications.rugby_teams.services.category_service import (
+    get_category_by_name,
+    resolve_categories,
+)
 
 
 def test_get_category_by_name_found(db_session):

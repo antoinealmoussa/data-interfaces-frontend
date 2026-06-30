@@ -1,5 +1,5 @@
-from app.models.season import Season
-from app.services.season_service import (
+from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.services.season_service import (
     create_season_if_not_exists,
     get_season_by_id,
     get_season_by_name,

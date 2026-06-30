@@ -1,6 +1,6 @@
+from app.applications.rugby_teams.models.tournament import Tournament
+from app.applications.rugby_teams.schemas.tournament import ApiReturnTournament
 from app.db.repository import BaseRepository
-from app.models.tournament import Tournament
-from app.schemas.tournament import ApiReturnTournament
 
 
 class TournamentRepository(BaseRepository[Tournament, ApiReturnTournament]):

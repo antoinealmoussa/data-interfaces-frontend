@@ -1,9 +1,9 @@
 import pytest
 
-from app.models.season import Season
-from app.schemas.player import ApiCreatePlayer
-from app.schemas.tournament import ApiCreateTournament, ApiUpdateTournament
-from app.services import player_service, tournament_service
+from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.schemas.player import ApiCreatePlayer
+from app.applications.rugby_teams.schemas.tournament import ApiCreateTournament, ApiUpdateTournament
+from app.applications.rugby_teams.services import player_service, tournament_service
 from app.utils.exceptions import (
     CategoryNotFoundError,
     ForbiddenError,
@@ -14,8 +14,8 @@ from app.utils.exceptions import (
 
 @pytest.fixture
 def team(db_session, test_user):
-    from app.schemas.team import ApiCreateTeam
-    from app.services import team_service
+    from app.applications.rugby_teams.schemas.team import ApiCreateTeam
+    from app.applications.rugby_teams.services import team_service
 
     season = Season(name="2025-2026")
     db_session.add(season)

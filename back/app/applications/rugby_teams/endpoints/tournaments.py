@@ -3,15 +3,15 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.token import get_current_active_user
-from app.db.session import get_db
-from app.models.user import User
-from app.schemas.tournament import (
+from app.applications.rugby_teams.schemas.tournament import (
     ApiCreateTournament,
     ApiReturnTournament,
     ApiUpdateTournament,
 )
-from app.services import tournament_service
+from app.applications.rugby_teams.services import tournament_service
+from app.core.token import get_current_active_user
+from app.db.session import get_db
+from app.models.user import User
 
 router = APIRouter(prefix="/teams/{team_name}/tournaments")
 

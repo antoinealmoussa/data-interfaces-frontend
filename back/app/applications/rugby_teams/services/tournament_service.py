@@ -1,15 +1,15 @@
 from sqlalchemy.orm import Session
 
-from app.db.repositories import TournamentRepository
-from app.models.player import Player
-from app.models.tournament import Tournament
-from app.schemas.tournament import (
+from app.applications.rugby_teams.models.player import Player
+from app.applications.rugby_teams.models.tournament import Tournament
+from app.applications.rugby_teams.repositories.tournament_repository import TournamentRepository
+from app.applications.rugby_teams.schemas.tournament import (
     ApiCreateTournament,
     ApiReturnTournament,
     ApiUpdateTournament,
 )
-from app.services.category_service import get_category_by_name
-from app.services.team_service import get_team_by_name
+from app.applications.rugby_teams.services.category_service import get_category_by_name
+from app.applications.rugby_teams.services.team_service import get_team_by_name
 from app.utils.exceptions import (
     CategoryNotFoundError,
     ForbiddenError,
