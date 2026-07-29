@@ -101,12 +101,10 @@ def _parse_zip(
                 break
 
             if cancel_event and cancel_event.is_set():
-                logger.debug("Parsing annulé après %d activités", imported)
                 return
 
             fit_path = entry.fit_path
             if fit_path not in names:
-                logger.debug("Fichier FIT introuvable: %s", fit_path)
                 continue
 
             try:
@@ -194,12 +192,10 @@ def _parse_activities_csv(csv_bytes: bytes) -> list[CsvEntry]:
         try:
             strava_id = int(raw_id)
         except ValueError:
-            logger.debug("ID invalide: %s", raw_id)
             continue
 
         fit_path = row.get(file_col, "").strip().strip('"')
         if not fit_path:
-            logger.debug("Chemin FIT manquant pour l'activité %d", strava_id)
             continue
 
         entries.append(CsvEntry(

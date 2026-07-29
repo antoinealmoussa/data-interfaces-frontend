@@ -29,17 +29,13 @@ def start_upload(db: Session, user_id: int, content: bytes, filename: str) -> st
                 background_db, user_id, content, filename, cancel_event=task.cancelled
             ):
                 task.events.put(event)
-                logger.debug("[%s] → queue: %s", task.id, event.get("type"))
             task.events.put(None)
-            logger.debug("[%s] → queue: sentinel (normal)", task.id)
         except Exception as e:
             logger.error("Thread upload crashé: %s", e, exc_info=True)
             task.status = "error"
             task.error = str(e)
             task.events.put({"type": "error", "message": str(e)})
-            logger.debug("[%s] → queue: error", task.id)
             task.events.put(None)
-            logger.debug("[%s] → queue: sentinel (after error)", task.id)
         finally:
             background_db.close()
 
@@ -72,7 +68,6 @@ def process_upload_events(
             continue
 
         if cancel_event and cancel_event.is_set():
-            logger.debug("Annulation détectée après %d activités", created_count)
             yield {
                 "type": "cancelled",
                 "created": created_count,
@@ -93,7 +88,6 @@ def process_upload_events(
                 }
                 continue
 
-            logger.debug("Création activité: %s", act_data.name)
             activity = repo.create_from_act_data(user_id, act_data)
             match_activity_cols(db, activity, act_data.gps_points)
             db.refresh(activity)
@@ -104,7 +98,6 @@ def process_upload_events(
                     all_matched_cols.append(api_col)
 
             created_count += 1
-            logger.debug("Activité créée: %s", act_data.name)
             yield {
                 "type": "progress",
                 "current": created_count + skipped_count + failed_count,
@@ -121,10 +114,6 @@ def process_upload_events(
                 "name": act_data.name,
             }
 
-    logger.debug(
-        "Upload terminé: %d créées, %d ignorées, %d échouées",
-        created_count, skipped_count, failed_count,
-    )
     yield {
         "type": "complete",
         "created": created_count,
