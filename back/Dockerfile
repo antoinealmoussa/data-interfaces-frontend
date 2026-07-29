@@ -16,6 +16,7 @@ RUN poetry install --no-interaction --no-ansi --no-root
 
 # Étape 2 : Image finale légère
 FROM python:3.12-slim
+ENV POETRY_VIRTUALENVS_CREATE=false
 WORKDIR /app
 
 # Copie les dépendances installées depuis le builder

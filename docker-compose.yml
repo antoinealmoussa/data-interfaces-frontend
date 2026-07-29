@@ -38,6 +38,10 @@ services:
       - DB_URL=postgresql://postgres:postgres@db:5432/localdb
       - DB_HOST=db
       - DB_PORT=5432
+      - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID}
+      - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET}
+      - STRAVA_REDIRECT_URI=http://localhost:8000/api/v1/bike-exploration/strava/callback
+      - FRONTEND_URL=http://localhost:5173
     depends_on: # Le service ne démarre pas tant que la db n'a pas été initialisée
       db:
         condition: service_healthy

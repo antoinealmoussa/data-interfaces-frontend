@@ -23,11 +23,13 @@ src/test/
 ├── api/
 │   ├── client.test.ts               ← tests du client partagé
 │   ├── config.test.ts               ← tests config
-│   └── rugby-teams/
-│       ├── teamApi.test.ts
-│       ├── playerApi.test.ts
-│       ├── tournamentApi.test.ts
-│       └── trainingApi.test.ts
+│   ├── rugby-teams/
+│   │   ├── teamApi.test.ts
+│   │   ├── playerApi.test.ts
+│   │   ├── tournamentApi.test.ts
+│   │   └── trainingApi.test.ts
+│   └── bike-exploration/
+│       └── bikeApi.test.ts
 ├── hooks/
 │   ├── useAuth.test.tsx             ← hooks partagés
 │   ├── useCrudManager.test.tsx
@@ -69,12 +71,46 @@ vi.mock("../../../api/rugby-teams/teamApi", () => ({ teamApi: mockedTeamApi }));
 
 Les tests backend sont organisés par module applicatif :
 - `back/app/applications/rugby_teams/tests/` — tests rugby-teams (endpoints, services, repositories)
+- `back/app/applications/bike_exploration/tests/` — tests bike-exploration
 - `back/app/tests/` — tests partagés (auth, users, token, config)
 
 Lancement :
 - `poetry run pytest app/` — tous les tests
 - `poetry run pytest app/applications/rugby_teams/tests/` — rugby-teams uniquement
+- `poetry run pytest app/applications/bike_exploration/tests/` — bike-exploration uniquement
 - `poetry run pytest app/tests/` — partagés uniquement
+
+### Tests pour un nouveau module
+
+Organisation :
+```
+back/app/applications/<module>/tests/
+├── conftest.py                  ← fixtures partagées (db session, samples)
+├── test_<entity>_endpoints.py   ← tests API (endpoint integration)
+├── test_<entity>_service.py     ← tests unitaires service
+└── test_<entity>_schema.py      ← tests validation schemas
+```
+
+Lancement :
+```bash
+docker compose exec backend poetry run pytest app/applications/<module>/tests/ -v
+```
+
+Pattern de test endpoint :
+```python
+def test_list_cols(client, db_session, sample_col):
+    response = client.get("/api/v1/<module>/cols")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+```
+
+Pattern de test service :
+```python
+def test_create_activity(db_session):
+    from app.applications.<module>.services import <entity>_service
+    result = <entity>_service.create(db_session, sample_data)
+    assert result.id is not None
+```
 
 ## Les deux ensemble
 

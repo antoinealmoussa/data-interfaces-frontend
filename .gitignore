@@ -39,4 +39,10 @@ htmlcov/
 
 plans/
 
+# Generated data from Overpass API harvesting
+back/app/applications/bike_exploration/data/raw/
+
+# Temp scripts
+back/app/applications/bike_exploration/scripts/
+
 

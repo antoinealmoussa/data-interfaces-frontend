@@ -52,4 +52,6 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
   - `be_` pour bike-exploration
   - `rp_` pour race-preparation
 
+- **Nouveau module** : voir `.opencode/skills/new-module-checklist/SKILL.md` pour la checklist step-by-step
+
 Patterns détaillés (API, code conventions, architecture, tests) dans `.opencode/skills/`.

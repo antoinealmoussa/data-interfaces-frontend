@@ -48,6 +48,32 @@ const { data: teams } = useQuery({
 });
 ```
 
+## Ajouter une API pour une nouvelle application
+
+1. Créer le dossier `src/api/<app-name>/`
+2. Créer un fichier `<entity>Api.ts` suivant le pattern :
+
+```ts
+import apiClient from "../../client";
+import type { <Entity> } from "../../types/<app-name>/<entity>Types";
+
+const BASE = "/<app-name>";
+
+export const <entity>Api = {
+  getAll: () =>
+    apiClient.get<<Entity>[]>(`${BASE}/<entities>`).then((r) => r.data),
+
+  create: (data: Create<Entity>Dto) =>
+    apiClient.post<<Entity>>(`${BASE}/<entities>`, data).then((r) => r.data),
+
+  delete: (id: number) =>
+    apiClient.delete(`${BASE}/<entities}/${id}`),
+};
+```
+
+3. Créer les types dans `src/types/<app-name>/<entity>Types.ts`
+4. Créer les hooks dans `src/hooks/<app-name>/use<Entity>.ts`
+
 ## Proxy Vite
 
 En dev, Vite proxy `/api` vers `http://localhost:8000` (configuré dans `vite.config.ts`, variable `VITE_PROXY_TARGET`).

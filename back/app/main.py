@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.api_router import api_router  # Import du hub central
 from app.core.config import settings
+from app.core.logging_config import setup_logging
 from app.utils.exceptions import (
     CategoryNotFoundError,
     ForbiddenError,
@@ -11,6 +12,8 @@ from app.utils.exceptions import (
     TeamNotFoundError,
     TournamentNotFoundError,
 )
+
+setup_logging()
 
 app = FastAPI(
     title="Stravoska API",

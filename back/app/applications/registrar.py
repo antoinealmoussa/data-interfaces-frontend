@@ -50,4 +50,15 @@ def register_all_known() -> None:
         "migration_dir": rugby_migration,
     })()
     register(module)
-    # Ajouter ici chaque nouveau module au fur et à mesure
+
+    from app.applications.bike_exploration import metadata as be_meta
+    from app.applications.bike_exploration import migration_dir as be_migration
+    from app.applications.bike_exploration import name as be_name
+    from app.applications.bike_exploration.router import router as be_router
+    module = type("AppModule", (), {
+        "name": be_name,
+        "router": be_router,
+        "metadata": be_meta,
+        "migration_dir": be_migration,
+    })()
+    register(module)
