@@ -66,11 +66,11 @@ def test_get_many_with_pagination(db_session):
         db_session.add(Application(name=f"app-{i}", pretty_name=f"App {i}"))
     db_session.commit()
 
+    all_apps = repo.get_many()
     results = repo.get_many(skip=1, limit=2)
 
     assert len(results) == 2
-    assert results[0].name == "app-1"
-    assert results[1].name == "app-2"
+    assert [a.name for a in results] == [a.name for a in all_apps[1:3]]
 
 
 def test_create_filters_unknown_fields(db_session):

@@ -140,7 +140,7 @@ const Training = () => {
   }, []);
 
   const handleGenerate = useCallback(() => {
-    if (!team || selectedPlayerIds.length < 2 || !selectedAlgorithm) return;
+    if (!team || selectedPlayerIds.length < 2 || !effectiveAlgorithm) return;
     distributeMutation.mutate({
       player_ids: selectedPlayerIds,
       team_count: teamCount,
@@ -149,7 +149,6 @@ const Training = () => {
   }, [
     team,
     selectedPlayerIds,
-    selectedAlgorithm,
     distributeMutation,
     effectiveAlgorithm,
     teamCount,

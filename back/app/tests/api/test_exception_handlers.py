@@ -1,3 +1,5 @@
+import json
+
 from fastapi import status
 
 from app.main import (
@@ -16,36 +18,40 @@ from app.utils.exceptions import (
 )
 
 
+def _detail(response) -> dict:
+    return json.loads(response.body)
+
+
 async def test_team_not_found_handler():
     response = await team_not_found_handler(None, TeamNotFoundError("test"))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Équipe 'test' introuvable"}
+    assert _detail(response) == {"detail": "Équipe 'test' introuvable"}
 
 
 async def test_player_not_found_handler():
     response = await player_not_found_handler(None, PlayerNotFoundError(42))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Joueur 42 introuvable"}
+    assert _detail(response) == {"detail": "Joueur 42 introuvable"}
 
 
 async def test_tournament_not_found_handler():
     response = await tournament_not_found_handler(None, TournamentNotFoundError(7))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Tournoi 7 introuvable"}
+    assert _detail(response) == {"detail": "Tournoi 7 introuvable"}
 
 
 async def test_category_not_found_handler():
     response = await category_not_found_handler(None, CategoryNotFoundError("Mixte"))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Catégorie 'Mixte' introuvable"}
+    assert _detail(response) == {"detail": "Catégorie 'Mixte' introuvable"}
 
 
 async def test_forbidden_handler():
     response = await forbidden_handler(None, ForbiddenError("Accès refusé"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json() == {"detail": "Accès refusé"}
+    assert _detail(response) == {"detail": "Accès refusé"}
