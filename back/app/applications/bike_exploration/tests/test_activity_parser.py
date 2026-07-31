@@ -38,7 +38,7 @@ class TestParseZipArchive:
 
     def test_not_a_zip_raises(self) -> None:
         with pytest.raises(ValueError, match="ZIP requis"):
-            list(parse_zip_archive(b"not a zip", "file.txt"))
+            parse_zip_archive(b"not a zip", "file.txt")
 
     def test_empty_zip_returns_empty(self) -> None:
         import io

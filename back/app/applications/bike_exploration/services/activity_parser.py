@@ -74,7 +74,7 @@ def parse_zip_archive(
     if not filename.lower().endswith(".zip"):
         raise ValueError(f"Format non supporté : {filename}. ZIP requis.")
     logger.info("Fichier ZIP reçu: %s", filename)
-    yield from _parse_zip(content, limit, cancel_event)
+    return _parse_zip(content, limit, cancel_event)
 
 
 def _parse_zip(
