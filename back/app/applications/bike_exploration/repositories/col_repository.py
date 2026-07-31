@@ -1,3 +1,5 @@
+from sqlalchemy import distinct, func
+
 from app.applications.bike_exploration.models.col import Col
 from app.applications.bike_exploration.schemas.col import ApiReturnCol
 from app.db.repository import BaseRepository
@@ -25,16 +27,20 @@ class ColRepository(BaseRepository[Col, ApiReturnCol]):
             .all()
         )
 
-    def get_conquered_by_user(self, user_id: int) -> list[Col]:
+    def get_conquered_by_user(self, user_id: int) -> list[tuple[Col, int, int]]:
         from app.applications.bike_exploration.models.activity import Activity
         from app.applications.bike_exploration.models.activity_col import ActivityCol
 
         return (
-            self.db.query(self.model_class)
+            self.db.query(
+                self.model_class,
+                func.count(distinct(ActivityCol.activity_id)).label("activity_count"),
+                func.sum(ActivityCol.crossings).label("total_crossings"),
+            )
             .join(ActivityCol, ActivityCol.col_id == self.model_class.id)
             .join(Activity, Activity.id == ActivityCol.activity_id)
             .where(Activity.user_id == user_id)
-            .distinct()
+            .group_by(self.model_class.id)
             .order_by(self.model_class.name)
             .all()
         )

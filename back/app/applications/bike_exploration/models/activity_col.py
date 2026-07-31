@@ -11,4 +11,5 @@ class ActivityCol(Base):
     id = Column(Integer, primary_key=True, index=True)
     activity_id = Column(Integer, ForeignKey("be_activity.id", ondelete="CASCADE"), nullable=False)
     col_id = Column(Integer, ForeignKey("be_col.id", ondelete="CASCADE"), nullable=False)
+    crossings = Column(Integer, nullable=False, default=1)
     matched_at = Column(DateTime, nullable=False, server_default=func.now())

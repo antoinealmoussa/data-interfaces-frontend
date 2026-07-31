@@ -22,4 +22,13 @@ def conquered_cols(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    return [ApiReturnCol.model_validate(c) for c in get_conquered_cols(db, current_user.id)]
+    results = get_conquered_cols(db, current_user.id)
+    return [
+        ApiReturnCol
+        .model_validate(col)
+        .model_copy(update={
+            "activity_count": activity_count,
+            "total_crossings": total_crossings,
+        })
+        for col, activity_count, total_crossings in results
+    ]

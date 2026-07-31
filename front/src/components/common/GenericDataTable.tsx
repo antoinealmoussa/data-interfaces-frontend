@@ -21,6 +21,7 @@ export interface Column<T> {
   key: keyof T | string;
   label: string;
   sortable?: boolean;
+  defaultOrder?: "asc" | "desc";
   render?: (value: unknown, row: T) => ReactNode;
 }
 
@@ -48,6 +49,7 @@ interface GenericDataTableProps<T> {
   orderBy?: keyof T | null;
   order?: "asc" | "desc";
   onSortChange?: (orderBy: keyof T | null, order: "asc" | "desc") => void;
+  onRowClick?: (row: T) => void;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -99,6 +101,7 @@ export const GenericDataTable = <T,>({
   orderBy: controlledOrderBy,
   order: controlledOrder,
   onSortChange,
+  onRowClick,
 }: GenericDataTableProps<T>) => {
   const isControlled = controlledSearch !== undefined;
   const [internalSearch, setInternalSearch] = useState("");
@@ -133,7 +136,8 @@ export const GenericDataTable = <T,>({
         setInternalOrder(internalOrder === "asc" ? "desc" : "asc");
       } else {
         setInternalOrderBy(key);
-        setInternalOrder("asc");
+        const col = columns.find((c) => c.key === key);
+        setInternalOrder(col?.defaultOrder ?? "asc");
       }
     }
   };
@@ -227,7 +231,12 @@ export const GenericDataTable = <T,>({
               </TableRow>
             ) : (
               pageRows.map((row) => (
-                <TableRow key={getRowId(row)}>
+                <TableRow
+                  key={getRowId(row)}
+                  hover={onRowClick != null}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  sx={onRowClick ? { cursor: "pointer" } : undefined}
+                >
                   {columns.map((col) => (
                     <TableCell key={String(col.key)}>
                       {col.render

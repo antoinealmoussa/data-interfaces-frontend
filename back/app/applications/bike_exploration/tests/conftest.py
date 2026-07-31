@@ -2,6 +2,7 @@ import gzip
 import io
 import sys
 import zipfile
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -14,12 +15,13 @@ if str(_root) not in sys.path:
 from app.applications.bike_exploration.models.activity import Activity  # noqa: E402,F401
 from app.applications.bike_exploration.models.activity_col import ActivityCol  # noqa: E402,F401
 from app.applications.bike_exploration.models.col import Col  # noqa: E402,F401
+from app.applications.bike_exploration.services.fit_service import GpsPoint  # noqa: E402
 from app.tests.conftest import *  # noqa: F401,F403,E402
 
 
 def _make_fitparse_mock(
     sport: str = "cycling",
-    records: list[tuple[float, float]] | None = None,
+    records: list[GpsPoint] | None = None,
 ) -> MagicMock:
     """Create a mock fitparse.FitFile returning the given sport and records."""
     mock_fit = MagicMock()
@@ -29,19 +31,23 @@ def _make_fitparse_mock(
 
     record_msgs = []
     if records:
-        for lat, lon in records:
+        for point in records:
             msg = MagicMock()
 
-            def make_get_value(lat: float, lon: float) -> object:
+            def make_get_value(point: GpsPoint) -> object:
                 def get_value(field: str) -> float | str | None:
                     if field == "position_lat":
-                        return lat
+                        return point.lat
                     elif field == "position_long":
-                        return lon
+                        return point.lon
+                    elif field == "altitude":
+                        return point.elevation
+                    elif field == "timestamp":
+                        return point.timestamp
                     return None
                 return get_value
 
-            msg.get_value.side_effect = make_get_value(lat, lon)
+            msg.get_value.side_effect = make_get_value(point)
             record_msgs.append(msg)
 
     def get_messages(name: str, **kwargs: object) -> list[MagicMock]:
@@ -86,17 +92,17 @@ def _make_zip(csv_bytes: bytes, fit_files: dict[str, bytes]) -> bytes:
     return buf.getvalue()
 
 
-# Coordonnées proches du Col de la Bonette (44.326, 6.807)
-NEAR_COL_RECORDS: list[tuple[float, float]] = [
-    (44.3265, 6.8075),
-    (44.3268, 6.8078),
-    (44.3270, 6.8080),
+# Coordonnées proches du Col de la Bonette (44.326, 6.807), altitude ~2000m
+NEAR_COL_RECORDS: list[GpsPoint] = [
+    GpsPoint(lat=44.3265, lon=6.8075, elevation=1980, timestamp=datetime(2026, 7, 1, 10, 0, 0)),
+    GpsPoint(lat=44.3268, lon=6.8078, elevation=2005, timestamp=datetime(2026, 7, 1, 10, 0, 30)),
+    GpsPoint(lat=44.3270, lon=6.8080, elevation=2002, timestamp=datetime(2026, 7, 1, 10, 1, 0)),
 ]
 
 # Points éloignés de tous les cols (~50km)
-FAR_FROM_COL_RECORDS: list[tuple[float, float]] = [
-    (44.800, 7.500),
-    (44.801, 7.501),
+FAR_FROM_COL_RECORDS: list[GpsPoint] = [
+    GpsPoint(lat=44.800, lon=7.500, elevation=1000, timestamp=datetime(2026, 7, 1, 9, 0, 0)),
+    GpsPoint(lat=44.801, lon=7.501, elevation=1001, timestamp=datetime(2026, 7, 1, 9, 0, 30)),
 ]
 
 

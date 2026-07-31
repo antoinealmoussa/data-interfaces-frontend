@@ -1,9 +1,11 @@
 export interface Col {
   id: number;
-  osmId: number | null;
+  osm_id: number | null;
   name: string;
   latitude: number;
   longitude: number;
   elevation: number | null;
   country: string | null;
+  activity_count: number;
+  total_crossings: number;
 }

@@ -29,6 +29,7 @@ JWT stocké dans des cookies HttpOnly. Le backend utilise 2 cookies (`access_tok
 - **TypeScript** : `strict: true`, `verbatimModuleSyntax: true` → utiliser `import type` pour les types ; `erasableSyntaxOnly: true` → pas de `enum`, `namespace`, ou `parameter properties`
 - **Vite proxy** : en dev, `/api` est proxyfié vers `VITE_PROXY_TARGET` (défaut `http://localhost:8000`). L'`apiClient` Axios utilise `VITE_BACKEND_API` (défaut `/api/v1`).
 - **Tests** : Vitest + jsdom, axios mocké globalement dans `src/test/setupTests.ts`, tests miroirs de `src/` dans `src/test/`. Le setup filtre les warnings `"not wrapped in act"` et `"No routes matched location"` pour éviter le bruit.
+- **Composants** : Réutiliser au maximum les composants existants (`common/`, `ui/`). Toujours privilégier la création de composants génériques/réutilisables plutôt que du code spécifique dupliqué. Si un pattern UI apparaît plus d'une fois, il doit être mutualisé.
 
 ## Backend — Patterns
 

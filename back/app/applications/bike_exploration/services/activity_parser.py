@@ -9,7 +9,7 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.applications.bike_exploration.services.fit_service import parse_fit_text
+from app.applications.bike_exploration.services.fit_service import GpsPoint, parse_fit_text
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class ActivityData:
     strava_activity_id: int
     name: str
     start_date: datetime
-    gps_points: list[tuple[float, float]]
+    gps_points: list[GpsPoint]
 
 
 def count_cycling_activities(content: bytes, filename: str) -> int:

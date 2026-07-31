@@ -33,4 +33,6 @@ class ColBase(BaseModel):
 class ApiReturnCol(ColBase):
     id: int
     osm_id: int | None = None
+    activity_count: int = 0
+    total_crossings: int = 0
     model_config = ConfigDict(from_attributes=True)
