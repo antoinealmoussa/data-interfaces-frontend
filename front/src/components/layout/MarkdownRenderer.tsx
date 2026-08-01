@@ -1,7 +1,8 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Typography, Box } from "@mui/material";
-import rehypeRaw from "rehype-raw"; // Pour gérer le HTML dans le Markdown
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 
 interface MarkdownRendererProps {
   children: string;
@@ -49,7 +50,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       }}
     >
       <ReactMarkdown
-        rehypePlugins={[rehypeRaw]} // Pour autoriser le HTML dans le Markdown
+        rehypePlugins={[rehypeRaw, rehypeSanitize]}
         components={{
           h1: (props) => (
             <Typography variant="h4" gutterBottom {...props} />

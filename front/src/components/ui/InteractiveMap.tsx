@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+import { useTheme } from "@mui/material/styles";
 import "leaflet/dist/leaflet.css";
 
 export interface MarkerData {
@@ -16,13 +17,14 @@ interface InteractiveMapProps {
   selectedMarkerId?: string | number | null;
 }
 
-const defaultIcon = L.divIcon({
-  className: "",
-  html: '<div style="background: #2D5A27; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-  popupAnchor: [0, -10],
-});
+const defaultIcon = (color: string) =>
+  L.divIcon({
+    className: "",
+    html: `<div style="background: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10],
+  });
 
 function MapBounds({ markers }: { markers: MarkerData[] }) {
   const map = useMap();
@@ -39,6 +41,8 @@ function MapBounds({ markers }: { markers: MarkerData[] }) {
 }
 
 export const InteractiveMap = ({ markers, height = 400, selectedMarkerId }: InteractiveMapProps) => {
+  const theme = useTheme();
+  const icon = defaultIcon(theme.palette.primary.main);
   const defaultCenter: [number, number] = [46.6, 2.0];
   const markerRefs = useRef(new Map<string | number, L.Marker>());
 
@@ -72,7 +76,7 @@ export const InteractiveMap = ({ markers, height = 400, selectedMarkerId }: Inte
         <Marker
           key={m.id}
           position={[m.latitude, m.longitude]}
-          icon={defaultIcon}
+          icon={icon}
           ref={(ref) => setMarkerRef(m.id, ref)}
         >
           {m.popup && <Popup>{m.popup}</Popup>}

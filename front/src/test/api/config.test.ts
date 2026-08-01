@@ -51,30 +51,30 @@ describe("API Client", () => {
     );
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /login", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/login", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/login" },
+      config: { url: "/users/login" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /register", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/register", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/register" },
+      config: { url: "/users/register" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /logout", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/logout", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/logout" },
+      config: { url: "/users/logout" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);

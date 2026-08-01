@@ -1,11 +1,13 @@
 import { createTheme } from "@mui/material/styles";
 
+const FOREST_DARK = "#1B3618";
+
 const theme = createTheme({
   palette: {
     primary: {
       main: "#2D5A27", // Vert forêt profond (rassurant et naturel)
       light: "#558B4F",
-      dark: "#1B3618",
+      dark: FOREST_DARK,
       contrastText: "#ffffff",
     },
     secondary: {
@@ -24,13 +26,12 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: { fontWeight: 700, color: "#1B3618" },
-    h2: { fontWeight: 600, color: "#1B3618" },
+    h1: { fontWeight: 700, color: FOREST_DARK },
+    h2: { fontWeight: 600, color: FOREST_DARK },
     body1: { lineHeight: 1.7 },
     fontWeightBold: 700,
     fontWeightLight: 300,
     fontWeightMedium: 500,
-    fontWeightRegular: 600,
     button: {
       textTransform: "none",
     },

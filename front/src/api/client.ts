@@ -1,5 +1,12 @@
 import axios, { type AxiosResponse } from "axios";
 import API_URLS from "./config";
+import { AUTH_EVENTS, API_PATHS } from "./endpoints";
+
+declare module "axios" {
+  interface InternalAxiosRequestConfig {
+    _retry?: boolean;
+  }
+}
 
 const apiClient = axios.create({
   baseURL: API_URLS.backend,
@@ -27,7 +34,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const authEndpoints = ["/login", "/register", "/logout", "/token/refresh"];
+    const authEndpoints = [
+      API_PATHS.auth.login,
+      API_PATHS.auth.register,
+      API_PATHS.auth.logout,
+      API_PATHS.auth.refresh,
+    ];
     const isAuthEndpoint = authEndpoints.some((e) =>
       originalRequest?.url?.includes(e),
     );
@@ -47,12 +59,12 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await apiClient.post("/token/refresh");
+        await apiClient.post(API_PATHS.auth.refresh);
         processQueue(null);
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        window.dispatchEvent(new CustomEvent(AUTH_EVENTS.unauthorized));
         return Promise.reject(error);
       } finally {
         isRefreshing = false;

@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from "react";
+import { useState, useMemo, useDeferredValue, type ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -11,11 +11,10 @@ import {
   Alert,
   Box,
   Typography,
-  TextField,
   TablePagination,
 } from "@mui/material";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
-import SearchIcon from "@mui/icons-material/Search";
+import { SearchInput } from "../ui/SearchInput";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -142,9 +141,11 @@ export const GenericDataTable = <T,>({
     }
   };
 
+  const deferredSearch = useDeferredValue(search);
+
   const filteredRows = useMemo(
-    () => rows.filter((row) => matchesSearch(row, columns, search)),
-    [rows, columns, search],
+    () => rows.filter((row) => matchesSearch(row, columns, deferredSearch)),
+    [rows, columns, deferredSearch],
   );
 
   const sortedRows = useMemo(
@@ -177,21 +178,10 @@ export const GenericDataTable = <T,>({
   return (
     <Box>
       {!isControlled && (
-        <TextField
-          size="small"
-          placeholder="Rechercher..."
+        <SearchInput
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <SearchIcon sx={{ mr: 1, color: "action.active" }} />
-              ),
-            },
-          }}
+          onChange={(value) => setSearch(value)}
+          placeholder="Rechercher..."
           sx={{ mb: 2, maxWidth: 320 }}
         />
       )}
@@ -253,6 +243,7 @@ export const GenericDataTable = <T,>({
                           size="small"
                           onClick={() => action.onClick(row)}
                           title={action.label}
+                          aria-label={action.label}
                         >
                           {action.icon}
                         </IconButton>

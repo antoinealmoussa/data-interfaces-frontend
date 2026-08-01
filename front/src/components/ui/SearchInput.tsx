@@ -8,9 +8,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   onSearch,
   isLoading = false,
   placeholder = "Rechercher...",
+  sx,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && !isLoading && value.trim()) {
+    if (event.key === "Enter" && !isLoading && value.trim() && onSearch) {
       onSearch();
     }
   };
@@ -31,7 +32,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           ),
         },
       }}
-      sx={{ width: "75%" }}
+      sx={sx ?? { width: "75%" }}
     />
   );
 };

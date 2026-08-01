@@ -1,8 +1,9 @@
 import API_URLS from "../config";
 import apiClient from "../client";
+import { API_PATHS, API_SEGMENTS } from "../endpoints";
 import type { Col } from "../../types/bike-exploration/colTypes";
 
-const BASE = "/bike-exploration";
+const BASE = API_PATHS.bikeExploration.base;
 
 export interface UploadProgress {
   type: "start";
@@ -89,11 +90,11 @@ export const bikeApi = {
   },
 
   getCols: () =>
-    apiClient.get<Col[]>(`${BASE}/cols`).then((r) => r.data),
+    apiClient.get<Col[]>(`${BASE}/${API_SEGMENTS.cols}`).then((r) => r.data),
 
   getConqueredCols: () =>
     apiClient
-      .get<Col[]>(`${BASE}/cols/conquered`)
+      .get<Col[]>(`${BASE}/${API_SEGMENTS.cols}/${API_SEGMENTS.conquered}`)
       .then((r) => r.data),
 
   resetActivities: () =>
