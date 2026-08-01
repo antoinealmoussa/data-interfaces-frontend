@@ -7,11 +7,24 @@ from app.applications.bike_exploration.services.activity_service import (
     start_upload,
 )
 from app.applications.bike_exploration.services.upload_task import cancel_task, stream_events
-from app.core.token import get_current_active_user
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 
 router = APIRouter()
+
+MAX_UPLOAD_SIZE = 100 * 1024 * 1024
+
+
+def _read_upload_with_limit(file: UploadFile) -> bytes:
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := file.file.read(1024 * 1024):
+        total += len(chunk)
+        if total > MAX_UPLOAD_SIZE:
+            raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 100 Mo)")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 @router.post("/upload")
@@ -21,7 +34,7 @@ def upload_activities(
     current_user: User = Depends(get_current_active_user),
 ):
     """Reçoit le fichier, lance le traitement en background, retourne le task ID."""
-    content = file.file.read()
+    content = _read_upload_with_limit(file)
     filename = file.filename or "unknown"
     task_id = start_upload(db, current_user.id, content, filename)
     return {"task_id": task_id}

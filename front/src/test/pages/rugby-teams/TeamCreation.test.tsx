@@ -1,13 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import TeamCreation from "../../../pages/rugby-teams/TeamCreation";
-
-const mockedUseAuth = vi.fn();
-
-vi.mock("../../../hooks/useAuth", () => ({
-  useAuth: (...args: unknown[]) => mockedUseAuth(...args),
-}));
 
 const renderPage = (state?: { message?: string }) =>
   render(
@@ -21,22 +15,10 @@ const renderPage = (state?: { message?: string }) =>
   );
 
 describe("TeamCreation", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({ user: { id: 42 } });
-  });
-
-  it("devrait afficher le formulaire quand un utilisateur est connecté", () => {
+  it("devrait afficher le formulaire de création d'équipe", () => {
     renderPage();
 
     expect(screen.getByLabelText("Nom de l'équipe")).toBeInTheDocument();
-  });
-
-  it("ne devrait pas afficher le formulaire sans utilisateur", () => {
-    mockedUseAuth.mockReturnValue({ user: null });
-    renderPage();
-
-    expect(screen.queryByLabelText("Nom de l'équipe")).not.toBeInTheDocument();
   });
 
   it("devrait afficher le message de succès passé via la navigation", () => {

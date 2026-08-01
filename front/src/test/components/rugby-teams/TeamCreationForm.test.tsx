@@ -31,7 +31,7 @@ const renderForm = () =>
           path="/rugby-teams/team-creation"
           element={
             <>
-              <TeamCreationForm userId={1} />
+              <TeamCreationForm />
               <LocationProbe />
             </>
           }
@@ -101,7 +101,6 @@ describe("TeamCreationForm", () => {
       expect(mockedTeamApi.create).toHaveBeenCalledWith({
         name: "Mon equipe",
         categories: ["Mixte"],
-        user_id: 1,
         season_name: "2025-2026",
       });
     });

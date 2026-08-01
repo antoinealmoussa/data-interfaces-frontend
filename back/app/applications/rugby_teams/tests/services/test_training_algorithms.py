@@ -48,16 +48,16 @@ class TestRandomAlgorithm:
             assert team.name.startswith("Équipe")
             assert isinstance(team.players, list)
 
-    def test_distribute_single_team(self):
+    def test_distribute_team_count_at_least_two(self):
         algo = RandomAlgorithm()
         input_data = DistributeInput(
-            player_ids=[1, 2, 3],
-            team_count=1,
+            player_ids=[1, 2, 3, 4],
+            team_count=2,
             algorithm="random",
         )
-        result = algo.distribute(input_data, PLAYERS[:3])
-        assert len(result.teams) == 1
-        assert len(result.teams[0].players) == 3
+        result = algo.distribute(input_data, PLAYERS[:4])
+        assert len(result.teams) == 2
+        assert sum(len(t.players) for t in result.teams) == 4
 
 
 class TestBalancedAlgorithm:

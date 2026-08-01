@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { CreateTeamDto } from "../../../types/rugby-teams/teamTypes";
 
 const mockedClient = {
   get: vi.fn(),
@@ -54,10 +55,9 @@ describe("teamApi", () => {
   });
 
   it("create devrait appeler POST /rugby-teams/teams avec les données", async () => {
-    const newTeam = {
+    const newTeam: CreateTeamDto = {
       name: "New Team",
-      categories: ["Mixte"] as const,
-      user_id: 1,
+      categories: ["Mixte"],
       season_name: "2025-2026",
     };
     mockedClient.post.mockResolvedValue({ data: { id: 2, ...newTeam } });

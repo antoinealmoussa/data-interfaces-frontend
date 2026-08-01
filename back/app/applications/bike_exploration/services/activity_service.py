@@ -62,6 +62,7 @@ def process_upload_events(
     skipped_count = 0
     failed_count = 0
     all_matched_cols: list[ApiReturnCol] = []
+    seen_col_ids: set[int] = set()
 
     for act_data in parse_zip_archive(content, filename, cancel_event=cancel_event):
         if act_data is None:
@@ -94,7 +95,8 @@ def process_upload_events(
 
             for col in activity.cols:
                 api_col = ApiReturnCol.model_validate(col)
-                if api_col.id not in {c.id for c in all_matched_cols}:
+                if api_col.id not in seen_col_ids:
+                    seen_col_ids.add(api_col.id)
                     all_matched_cols.append(api_col)
 
             created_count += 1

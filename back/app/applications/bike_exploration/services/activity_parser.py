@@ -13,6 +13,8 @@ from app.applications.bike_exploration.services.fit_service import GpsPoint, par
 
 logger = logging.getLogger(__name__)
 
+MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024
+
 _FRENCH_MONTHS: dict[str, int] = {
     "janv.": 1, "févr.": 2, "mars": 3, "avr.": 4,
     "mai": 5, "juin": 6, "juil.": 7, "août": 8,
@@ -61,7 +63,7 @@ def count_cycling_activities(content: bytes, filename: str) -> int:
         csv_name = _find_csv(zf.namelist())
         if csv_name is None:
             return 0
-        csv_entries = _parse_activities_csv(zf.read(csv_name))
+        csv_entries = _parse_activities_csv(_read_zip_entry(zf, csv_name))
         return len(csv_entries)
 
 
@@ -92,7 +94,7 @@ def _parse_zip(
             return
 
         logger.info("CSV trouvé: %s", csv_name)
-        csv_entries = _parse_activities_csv(zf.read(csv_name))
+        csv_entries = _parse_activities_csv(_read_zip_entry(zf, csv_name))
         logger.info("Activités Vélo dans le CSV: %d", len(csv_entries))
 
         imported = 0
@@ -108,7 +110,7 @@ def _parse_zip(
                 continue
 
             try:
-                fit_bytes = gzip.decompress(zf.read(fit_path))
+                fit_bytes = gzip.decompress(_read_zip_entry(zf, fit_path))
                 gps_points = parse_fit_text(fit_bytes, fit_path)
                 if gps_points:
                     parsed_date = _parse_date(entry.start_date)
@@ -125,6 +127,15 @@ def _parse_zip(
             except Exception:
                 logger.exception("Erreur traitement %s", fit_path)
             imported += 1
+
+
+def _read_zip_entry(zf: zipfile.ZipFile, name: str) -> bytes:
+    info = zf.getinfo(name)
+    if info.file_size > MAX_DECOMPRESSED_SIZE:
+        raise ValueError(
+            f"Fichier décompressé trop volumineux dans le ZIP : {name} ({info.file_size} octets)"
+        )
+    return zf.read(name)
 
 
 def _find_csv(names: list[str]) -> str | None:

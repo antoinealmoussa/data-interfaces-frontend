@@ -17,11 +17,7 @@ import { FormActions } from "../common/FormActions";
 import { useNavigate } from "react-router-dom";
 import { toggleArrayItem } from "../../utils/array";
 
-interface TeamCreationFormProps {
-  userId: number;
-}
-
-export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
+export const TeamCreationForm = () => {
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -34,7 +30,6 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
     defaultValues: {
       name: "",
       categories: [],
-      user_id: userId,
       season_name: "",
     },
   });

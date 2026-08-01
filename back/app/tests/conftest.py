@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.applications.rugby_teams.models.category import Category
-from app.core.token import create_access_token
+from app.core.jwt import create_access_token
 from app.db.session import Base, get_db
 from app.main import app
 from app.models.application import Application
@@ -87,3 +87,15 @@ def authenticated_client(client, test_user):
     )
     client.cookies.set("access_token", token)
     return client
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_rate_limiters():
+    from app.api.v1.endpoints.search_topic import search_limiter
+    from app.api.v1.endpoints.users import rate_limiter, register_limiter
+
+    for limiter in (rate_limiter, register_limiter, search_limiter):
+        limiter.attempts.clear()
+    yield
+    for limiter in (rate_limiter, register_limiter, search_limiter):
+        limiter.attempts.clear()

@@ -3,52 +3,6 @@ from fastapi import status
 from app.services import user_service
 
 
-def test_read_users_empty(authenticated_client, test_user):
-    """Test GET /api/v1/users/ retourne au moins l'utilisateur courant."""
-    response = authenticated_client.get("/api/v1/users/")
-
-    assert response.status_code == status.HTTP_200_OK
-    users = response.json()
-    assert len(users) >= 1
-    emails = {u["email"] for u in users}
-    assert test_user.email in emails
-    assert "password" not in users[0]
-
-
-def test_read_users_with_data(authenticated_client, test_user):
-    """Test GET /api/v1/users/ avec des utilisateurs."""
-    user1_data = {
-        "email": "user1@test.com",
-        "password": "password1",
-        "first_name": "John",
-        "surname": "Doe",
-    }
-    user2_data = {
-        "email": "user2@test.com",
-        "password": "password2",
-        "first_name": "Jane",
-        "surname": "Smith",
-    }
-
-    authenticated_client.post("/api/v1/users/register", json=user1_data)
-    authenticated_client.post("/api/v1/users/register", json=user2_data)
-
-    response = authenticated_client.get("/api/v1/users/")
-
-    assert response.status_code == status.HTTP_200_OK
-    users = response.json()
-    assert len(users) == 3
-    emails = {u["email"] for u in users}
-    assert emails == {"user1@test.com", "user2@test.com", test_user.email}
-    assert "password" not in users[0]
-
-
-def test_read_users_response_structure(client):
-    """Test GET /api/v1/users/ nécessite une authentification."""
-    response = client.get("/api/v1/users/")
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
 def test_register_success(client):
     """Test POST /api/v1/users/register avec succès."""
     user_data = {
@@ -111,6 +65,60 @@ def test_register_invalid_email_format(client):
         status.HTTP_422_UNPROCESSABLE_CONTENT,
         status.HTTP_201_CREATED,
     ], f"Expected 422 or 201, got {response.status_code}: {response.text}"
+
+
+def test_register_short_password(client):
+    """Test POST /api/v1/users/register avec un mot de passe trop court."""
+    user_data = {
+        "email": "shortpw@test.com",
+        "password": "pass",
+        "first_name": "Short",
+        "surname": "Password",
+    }
+
+    response = client.post("/api/v1/users/register", json=user_data)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_register_overlong_password(client):
+    """Test POST /api/v1/users/register avec un mot de passe trop long."""
+    user_data = {
+        "email": "longpw@test.com",
+        "password": "a" * 129,
+        "first_name": "Long",
+        "surname": "Password",
+    }
+
+    response = client.post("/api/v1/users/register", json=user_data)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_register_rate_limited(client):
+    """Test POST /api/v1/users/register renvoie 429 après trop de requêtes."""
+    for i in range(10):
+        response = client.post(
+            "/api/v1/users/register",
+            json={
+                "email": f"ratelimit{i}@test.com",
+                "password": "password123",
+                "first_name": "Rate",
+                "surname": "Limit",
+            },
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+    response = client.post(
+        "/api/v1/users/register",
+        json={
+            "email": "ratelimit_overflow@test.com",
+            "password": "password123",
+            "first_name": "Rate",
+            "surname": "Limit",
+        },
+    )
+    assert response.status_code == 429
 
 
 def test_login_success(client):

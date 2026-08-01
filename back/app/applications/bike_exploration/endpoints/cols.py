@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.applications.bike_exploration.schemas.col import ApiReturnCol
 from app.applications.bike_exploration.services.col_service import get_cols, get_conquered_cols
-from app.core.token import get_current_active_user
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 

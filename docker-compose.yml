@@ -38,6 +38,8 @@ services:
       - DB_URL=postgresql://postgres:postgres@db:5432/localdb
       - DB_HOST=db
       - DB_PORT=5432
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-change-me}
+      - CORS_ORIGINS=["http://localhost:5173"]
       - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID}
       - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET}
       - STRAVA_REDIRECT_URI=http://localhost:8000/api/v1/bike-exploration/strava/callback

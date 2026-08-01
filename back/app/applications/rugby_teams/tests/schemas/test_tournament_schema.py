@@ -2,15 +2,14 @@ import pytest
 from pydantic import ValidationError
 
 from app.applications.rugby_teams.schemas.tournament import (
-    ApiCreateTournament,
     ApiReturnTournament,
-    ApiUpdateTournament,
+    TournamentBase,
 )
 
 
-class TestApiCreateTournament:
+class TestTournamentBase:
     def test_valid(self):
-        tournament = ApiCreateTournament(
+        tournament = TournamentBase(
             name="Tournoi test",
             category_name="Mixte",
             player_names=["Jean", "Marie"],
@@ -21,29 +20,27 @@ class TestApiCreateTournament:
 
     def test_missing_name(self):
         with pytest.raises(ValidationError):
-            ApiCreateTournament(
+            TournamentBase(
                 category_name="Mixte",
                 player_names=["Jean"],
             )
 
     def test_missing_category(self):
         with pytest.raises(ValidationError):
-            ApiCreateTournament(
+            TournamentBase(
                 name="Tournoi",
                 player_names=["Jean"],
             )
 
     def test_missing_player_names(self):
         with pytest.raises(ValidationError):
-            ApiCreateTournament(
+            TournamentBase(
                 name="Tournoi",
                 category_name="Mixte",
             )
 
-
-class TestApiUpdateTournament:
-    def test_valid(self):
-        tournament = ApiUpdateTournament(
+    def test_update_variant_valid(self):
+        tournament = TournamentBase(
             name="Tournoi modifié",
             category_name="+35",
             player_names=["Pierre"],

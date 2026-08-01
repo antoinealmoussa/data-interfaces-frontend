@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.user import ApiCreateUser, ApiReturnUser, ApiUpdateUser, Token
+from app.schemas.user import ApiCreateUser, ApiReturnUser, ApiUpdateUser
 
 
 class TestApiCreateUser:
@@ -20,7 +20,7 @@ class TestApiCreateUser:
     def test_email_lowercased(self):
         user = ApiCreateUser(
             email="Test@Example.COM",
-            password="pass",
+            password="password123",
             first_name="John",
             surname="Doe",
         )
@@ -30,7 +30,7 @@ class TestApiCreateUser:
         with pytest.raises(ValidationError):
             ApiCreateUser(
                 email="not-an-email",
-                password="pass",
+                password="password123",
                 first_name="John",
                 surname="Doe",
             )
@@ -39,6 +39,24 @@ class TestApiCreateUser:
         with pytest.raises(ValidationError):
             ApiCreateUser(
                 email="test@example.com",
+                first_name="John",
+                surname="Doe",
+            )
+
+    def test_short_password(self):
+        with pytest.raises(ValidationError):
+            ApiCreateUser(
+                email="test@example.com",
+                password="pass",
+                first_name="John",
+                surname="Doe",
+            )
+
+    def test_overlong_password(self):
+        with pytest.raises(ValidationError):
+            ApiCreateUser(
+                email="test@example.com",
+                password="a" * 129,
                 first_name="John",
                 surname="Doe",
             )
@@ -87,10 +105,3 @@ class TestApiUpdateUser:
         assert user.first_name is None
         assert user.surname is None
         assert user.email is None
-
-
-class TestToken:
-    def test_valid(self):
-        token = Token(access_token="abc123", token_type="bearer")
-        assert token.access_token == "abc123"
-        assert token.token_type == "bearer"

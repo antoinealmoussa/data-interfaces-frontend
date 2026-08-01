@@ -78,8 +78,7 @@ def test_assign_application_user_not_found(authenticated_client, db_session):
         f"/api/v1/applications/users/99999/applications/{app.id}"
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert "utilisateur" in response.json()["detail"].lower()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_assign_application_app_not_found(authenticated_client, test_user):
@@ -133,8 +132,7 @@ def test_remove_application_user_not_found(authenticated_client, db_session):
         f"/api/v1/applications/users/99999/applications/{app.id}"
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert "utilisateur" in response.json()["detail"].lower()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_remove_application_app_not_found(authenticated_client, test_user):

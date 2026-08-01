@@ -3,36 +3,11 @@ from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
-from jose import jwt
 
-from app.core.config import settings
-from app.core.token import create_access_token, get_current_active_user, get_current_user
+from app.core.dependencies import get_current_active_user, get_current_user
+from app.core.jwt import create_access_token
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
-
-
-def test_create_access_token():
-    """Test que create_access_token crée un JWT valide."""
-    data = {"sub": "test@example.com", "token_version": 1}
-
-    token = create_access_token(data)
-
-    assert token is not None
-    assert isinstance(token, str)
-    assert len(token) > 0
-
-
-def test_create_access_token_custom_expiry():
-    """Test que create_access_token fonctionne avec expiration personnalisée."""
-    data = {"sub": "test@example.com", "token_version": 1}
-    expires_delta = timedelta(minutes=5)
-
-    token = create_access_token(data, expires_delta=expires_delta)
-
-    assert token is not None
-    decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-    assert decoded["sub"] == "test@example.com"
-    assert decoded["token_version"] == 1
 
 
 def create_mock_request_with_cookie(cookie_name: str, cookie_value: str) -> MagicMock:
@@ -154,7 +129,7 @@ async def test_get_current_active_user(db_session):
     assert active_user.email == created_user.email
 
 
-@ pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_get_current_user_token_without_sub(db_session):
     """Test get_current_user avec un token sans 'sub'."""
     token = create_access_token(data={"token_version": 1})
@@ -166,7 +141,7 @@ async def test_get_current_user_token_without_sub(db_session):
     assert exc_info.value.status_code == 401
 
 
-@ pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_get_current_user_token_without_token_version(db_session):
     """Test get_current_user avec un token sans 'token_version'."""
     token = create_access_token(data={"sub": "no-version@test.com"})
@@ -178,7 +153,7 @@ async def test_get_current_user_token_without_token_version(db_session):
     assert exc_info.value.status_code == 401
 
 
-@ pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_get_current_user_user_not_found(db_session):
     """Test get_current_user quand l'utilisateur n'existe pas en base."""
     token = create_access_token(
@@ -192,11 +167,9 @@ async def test_get_current_user_user_not_found(db_session):
     assert exc_info.value.status_code == 401
 
 
-@ pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_get_current_user_with_bearer_token(db_session):
     """Test get_current_user avec Authorization: Bearer header."""
-    from unittest.mock import MagicMock
-
     user = ApiCreateUser(
         email="bearer@test.com",
         password="password",
@@ -218,11 +191,9 @@ async def test_get_current_user_with_bearer_token(db_session):
     assert current_user.email == created_user.email
 
 
-@ pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_get_current_user_bearer_missing_token(db_session):
     """Test get_current_user avec Authorization: Bearer sans token."""
-    from unittest.mock import MagicMock
-
     mock_request = MagicMock()
     mock_request.cookies = {}
     mock_request.headers = {"Authorization": "Bearer "}

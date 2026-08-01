@@ -14,7 +14,7 @@ def test_settings_default_values():
     assert settings.REFRESH_TOKEN_COOKIE_NAME == "refresh_token"
     assert settings.MISTRAL_MODEL == "mistral-small"
     assert settings.LOG_LEVEL == "DEBUG"
-    assert settings.CORS_ORIGINS == "http://localhost:5173"
+    assert settings.CORS_ORIGINS == ["http://localhost:5173"]
 
 
 def test_settings_custom_values():
@@ -25,6 +25,7 @@ def test_settings_custom_values():
         DB_PASS="secret",
         DB_NAME="proddb",
         SECRET_KEY="my-secret-key",
+        CORS_ORIGINS=["https://front.example.com"],
     )
     assert settings.DB_HOST == "prod-db"
     assert settings.DB_PORT == 5433
@@ -32,6 +33,7 @@ def test_settings_custom_values():
     assert settings.DB_PASS == "secret"
     assert settings.DB_NAME == "proddb"
     assert settings.SECRET_KEY == "my-secret-key"
+    assert settings.CORS_ORIGINS == ["https://front.example.com"]
 
 
 def test_settings_cookie_max_age_computed():

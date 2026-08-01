@@ -151,7 +151,7 @@ describe("Home", () => {
 
   it("devrait afficher le détail de l'erreur quand response.data.detail est présent", async () => {
     const apiError = new Error("API error");
-    (apiError as Record<string, unknown>).response = { data: { detail: "Message personnalisé" } };
+    Object.assign(apiError, { response: { data: { detail: "Message personnalisé" } } });
     mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {
@@ -172,7 +172,7 @@ describe("Home", () => {
 
   it("devrait afficher le message générique quand response.data n'a pas de detail", async () => {
     const apiError = new Error("API error");
-    (apiError as Record<string, unknown>).response = { data: {} };
+    Object.assign(apiError, { response: { data: {} } });
     mockedClient.get.mockRejectedValue(apiError);
 
     await act(async () => {

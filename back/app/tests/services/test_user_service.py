@@ -2,36 +2,6 @@ from app.schemas.user import ApiCreateUser
 from app.services import user_service
 
 
-def test_get_all_users_empty(db_session):
-    """Test get_all_users avec une base vide."""
-    users = user_service.get_all_users(db_session)
-
-    assert users == []
-
-
-def test_get_all_users_with_data(db_session):
-    """Test get_all_users avec des utilisateurs."""
-    user1 = ApiCreateUser(
-        email="user1@test.com",
-        password="password1",
-        first_name="John",
-        surname="Doe"
-    )
-    user2 = ApiCreateUser(
-        email="user2@test.com",
-        password="password2",
-        first_name="Jane",
-        surname="Smith"
-    )
-
-    user_service.create_user(db_session, user_in=user1)
-    user_service.create_user(db_session, user_in=user2)
-
-    users = user_service.get_all_users(db_session)
-
-    assert len(users) == 2
-
-
 def test_get_user_by_email_exists(db_session):
     """Test get_user_by_email avec un email existant."""
     user = ApiCreateUser(

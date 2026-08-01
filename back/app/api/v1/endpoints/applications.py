@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.token import get_current_active_user
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
-from app.models.application import Application
 from app.models.user import User
 from app.schemas.application import ApiReturnApplication
+from app.services import application_service
+from app.utils.exceptions import ForbiddenError
 
 router = APIRouter()
 
@@ -16,7 +17,7 @@ def list_applications(
     current_user: User = Depends(get_current_active_user),
 ) -> list[ApiReturnApplication]:
     """Liste toutes les applications disponibles."""
-    return db.query(Application).all()
+    return application_service.list_applications(db)
 
 
 @router.get("/user", response_model=list[ApiReturnApplication])
@@ -37,22 +38,10 @@ def assign_application(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> None:
-    """Assigne une application à un utilisateur."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Utilisateur non trouvé",
-        )
-    app = db.query(Application).filter(Application.id == app_id).first()
-    if not app:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Application non trouvée",
-        )
-    if app not in user.applications:
-        user.applications.append(app)
-        db.commit()
+    """Assigne une application à un utilisateur (self-service uniquement)."""
+    if user_id != current_user.id:
+        raise ForbiddenError()
+    application_service.assign_application(db, user_id, app_id)
 
 
 @router.delete(
@@ -65,19 +54,7 @@ def remove_application(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> None:
-    """Retire l'accès d'un utilisateur à une application."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Utilisateur non trouvé",
-        )
-    app = db.query(Application).filter(Application.id == app_id).first()
-    if not app:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Application non trouvée",
-        )
-    if app in user.applications:
-        user.applications.remove(app)
-        db.commit()
+    """Retire l'accès d'un utilisateur à une application (self-service uniquement)."""
+    if user_id != current_user.id:
+        raise ForbiddenError()
+    application_service.remove_application(db, user_id, app_id)

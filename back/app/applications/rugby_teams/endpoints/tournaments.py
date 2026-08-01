@@ -4,12 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.applications.rugby_teams.schemas.tournament import (
-    ApiCreateTournament,
     ApiReturnTournament,
-    ApiUpdateTournament,
+    TournamentBase,
 )
-from app.applications.rugby_teams.services import tournament_service
-from app.core.token import get_current_active_user
+from app.applications.rugby_teams.services import team_service, tournament_service
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 
@@ -25,17 +24,19 @@ def read_tournaments(
     current_user: User = Depends(get_current_active_user),
 ) -> List[ApiReturnTournament]:
     tournaments = tournament_service.get_tournaments_by_team(
-        db, team_name, skip=skip, limit=limit
+        db, team_name, current_user.id, skip=skip, limit=limit
     )
     return [ApiReturnTournament.model_validate(t) for t in tournaments]
 
 
 @router.get("/{tournament_id}", response_model=ApiReturnTournament)
 def read_tournament(
+    team_name: str,
     tournament_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
+    team_service.get_owned_team(db, team_name, current_user.id)
     tournament = tournament_service.get_tournament_by_id(db, tournament_id)
     if not tournament:
         raise HTTPException(
@@ -52,7 +53,7 @@ def read_tournament(
 )
 def create_tournament(
     team_name: str,
-    tournament_in: ApiCreateTournament,
+    tournament_in: TournamentBase,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
@@ -63,7 +64,7 @@ def create_tournament(
 def update_tournament(
     team_name: str,
     tournament_id: int,
-    tournament_in: ApiUpdateTournament,
+    tournament_in: TournamentBase,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:

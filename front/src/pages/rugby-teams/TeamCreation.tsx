@@ -1,10 +1,8 @@
 import { Box, Alert } from "@mui/material";
 import { TeamCreationForm } from "../../components/rugby-teams/TeamCreationForm";
-import { useAuth } from "../../hooks/useAuth";
 import { useLocation } from "react-router-dom";
 
 const TeamCreation = () => {
-  const { user } = useAuth();
   const location = useLocation();
   const successMessage = location.state?.message;
 
@@ -15,7 +13,7 @@ const TeamCreation = () => {
           {successMessage}
         </Alert>
       )}
-      {user && <TeamCreationForm userId={user.id} />}
+      <TeamCreationForm />
     </Box>
   );
 };

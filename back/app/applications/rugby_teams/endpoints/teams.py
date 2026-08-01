@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.applications.rugby_teams.schemas.team import ApiCreateTeam, ApiReturnTeam
 from app.applications.rugby_teams.services import team_service
-from app.core.token import get_current_active_user
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 
@@ -32,7 +32,7 @@ def read_teams_by_season(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ) -> List[ApiReturnTeam]:
-    teams = team_service.get_teams_by_season(db, season_id=season_id)
+    teams = team_service.get_teams_by_season(db, season_id=season_id, user_id=current_user.id)
     return [ApiReturnTeam.model_validate(t) for t in teams]
 
 @router.post("", response_model=ApiReturnTeam, status_code=status.HTTP_201_CREATED)
@@ -41,7 +41,7 @@ def create_team(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTeam:
-    return team_service.create_team(db, team_in=team_in)
+    return team_service.create_team(db, team_in=team_in, user_id=current_user.id)
 
 
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)

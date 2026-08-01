@@ -54,18 +54,6 @@ class PlayerBase(BaseModel):
         return v
 
 
-class ApiCreatePlayer(PlayerBase):
-    """Données requises pour la création d'un joueur (identique à PlayerBase aujourd'hui,
-    mais séparé pour permettre une divergence future Create vs Update)."""
-    pass
-
-
-class ApiUpdatePlayer(PlayerBase):
-    """Données requises pour la modification d'un joueur (identique à PlayerBase aujourd'hui,
-    mais séparé pour permettre une divergence future Create vs Update)."""
-    pass
-
-
 class ApiReturnPlayer(BaseModel):
     id: int
     name: str
