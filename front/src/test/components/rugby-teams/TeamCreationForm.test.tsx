@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { TeamCreationForm } from "../../../components/rugby-teams/TeamCreationForm";
@@ -25,20 +26,22 @@ const LocationProbe = () => {
 
 const renderForm = () =>
   render(
-    <MemoryRouter initialEntries={["/rugby-teams/team-creation"]}>
-      <Routes>
-        <Route
-          path="/rugby-teams/team-creation"
-          element={
-            <>
-              <TeamCreationForm />
-              <LocationProbe />
-            </>
-          }
-        />
-        <Route path="*" element={<LocationProbe />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={["/rugby-teams/team-creation"]}>
+        <Routes>
+          <Route
+            path="/rugby-teams/team-creation"
+            element={
+              <>
+                <TeamCreationForm />
+                <LocationProbe />
+              </>
+            }
+          />
+          <Route path="*" element={<LocationProbe />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 
 describe("TeamCreationForm", () => {

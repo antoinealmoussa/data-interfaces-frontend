@@ -73,6 +73,7 @@ export interface GenericSidebarProps {
   selectedSeasonName: string | null;
   onTeamChange: (teamName: string) => void;
   onSeasonChange: (seasonName: string) => void;
+  basePath?: string;
 }
 
 export interface SnackbarState {

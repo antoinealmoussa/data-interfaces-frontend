@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import UserProfile from "../../../pages/management/UserProfile";
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
@@ -20,6 +21,17 @@ const mockUser = {
 
 const mockUserResponse = { user: mockUser };
 
+const renderProfile = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <UserProfile />
+    </QueryClientProvider>,
+  );
+};
+
 describe("UserProfile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -28,7 +40,7 @@ describe("UserProfile", () => {
   it("devrait afficher un chargement pendant le chargement des données", () => {
     mockedAxios.get.mockImplementation(() => new Promise(() => {}));
 
-    render(<UserProfile />);
+    renderProfile();
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 
@@ -37,7 +49,7 @@ describe("UserProfile", () => {
       data: mockUserResponse,
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByText("Mon profil")).toBeInTheDocument();
@@ -49,7 +61,7 @@ describe("UserProfile", () => {
       data: mockUserResponse,
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -69,7 +81,7 @@ describe("UserProfile", () => {
       data: { ...mockUser, first_name: "Jane" },
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -96,7 +108,7 @@ describe("UserProfile", () => {
     });
     mockedAxios.put.mockRejectedValue(new Error("Network Error"));
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -122,7 +134,7 @@ describe("UserProfile", () => {
       data: mockUserResponse,
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -142,7 +154,7 @@ describe("UserProfile", () => {
   it("devrait afficher un message d'erreur si le chargement échoue", async () => {
     mockedAxios.get.mockRejectedValue(new Error("Network Error"));
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(
@@ -160,7 +172,7 @@ describe("UserProfile", () => {
       () => new Promise((resolve) => setTimeout(() => resolve({ data: { ...mockUser, first_name: "Jane" } }), 200)),
     );
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -186,7 +198,7 @@ describe("UserProfile", () => {
       data: mockUserResponse,
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
@@ -220,7 +232,7 @@ describe("UserProfile", () => {
       data: { ...mockUser, first_name: "Jane" },
     });
 
-    render(<UserProfile />);
+    renderProfile();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();

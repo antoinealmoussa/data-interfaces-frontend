@@ -1,17 +1,20 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import TeamCreation from "../../../pages/rugby-teams/TeamCreation";
 
 const renderPage = (state?: { message?: string }) =>
   render(
-    <MemoryRouter
-      initialEntries={[
-        { pathname: "/rugby-teams/team-creation", state: state ?? null },
-      ]}
-    >
-      <TeamCreation />
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/rugby-teams/team-creation", state: state ?? null },
+        ]}
+      >
+        <TeamCreation />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 
 describe("TeamCreation", () => {

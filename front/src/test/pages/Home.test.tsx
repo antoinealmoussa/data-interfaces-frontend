@@ -10,6 +10,7 @@ vi.mock("../../api/client", () => ({
 
 import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext } from "../../contexts/AuthContextDefinition";
 import Home from "../../pages/Home";
 
@@ -28,12 +29,17 @@ const mockAuthContext = {
 };
 
 const renderHome = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
   return render(
-    <MemoryRouter>
-      <AuthContext.Provider value={mockAuthContext}>
-        <Home />
-      </AuthContext.Provider>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Home />
+        </AuthContext.Provider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 };
 

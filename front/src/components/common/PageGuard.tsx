@@ -1,5 +1,6 @@
-import { Alert, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { ErrorAlert } from "./ErrorAlert";
 import type { ReactNode } from "react";
 
 interface PageGuardProps {
@@ -19,7 +20,7 @@ export const PageGuard = ({ loading, error, children }: PageGuardProps) => {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
+        <ErrorAlert message={error} />
       </Box>
     );
   }

@@ -8,13 +8,13 @@ import {
   TableRow,
   TableSortLabel,
   IconButton,
-  Alert,
   Box,
   Typography,
   TablePagination,
 } from "@mui/material";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { SearchInput } from "../ui/SearchInput";
+import { ErrorAlert } from "./ErrorAlert";
 
 export interface Column<T> {
   key: keyof T | string;
@@ -170,7 +170,7 @@ export const GenericDataTable = <T,>({
   }
 
   if (error) {
-    return <Alert severity="error">{error}</Alert>;
+    return <ErrorAlert message={error} />;
   }
 
   const colSpan = columns.length + (actions && actions.length > 0 ? 1 : 0);
