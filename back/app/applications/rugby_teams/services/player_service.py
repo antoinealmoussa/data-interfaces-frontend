@@ -57,15 +57,9 @@ def update_player(
     except ValueError:
         raise PlayerNotFoundError(player_id)
 
-    player.name = player_in.name
-    player.level = player_in.level
-    player.sex = player_in.sex
-    player.position = player_in.position
-    player.categories = categories
-
-    db.commit()
-    db.refresh(player)
-    return ApiReturnPlayer.model_validate(player)
+    return ApiReturnPlayer.model_validate(
+        repo.update_player(player, player_in, categories)
+    )
 
 
 def delete_player(db: Session, player_id: int, team_name: str, user_id: int) -> None:
@@ -80,5 +74,4 @@ def delete_player(db: Session, player_id: int, team_name: str, user_id: int) -> 
     if team.user_id != user_id:
         raise ForbiddenError()
 
-    db.delete(player)
-    db.commit()
+    repo.delete_player(player)

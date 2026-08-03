@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
 from app.applications.rugby_teams.models.team import Team
-from app.applications.rugby_teams.models.team_season import TeamSeason
 from app.applications.rugby_teams.repositories.team_repository import TeamRepository
 from app.applications.rugby_teams.schemas.team import ApiCreateTeam, ApiReturnTeam
 from app.applications.rugby_teams.services import season_service
@@ -50,16 +49,12 @@ def create_team(db: Session, team_in: ApiCreateTeam, user_id: int) -> ApiReturnT
 
     category_objs = resolve_categories(db, team_in.categories)
 
-    db_team = Team(
+    db_team = TeamRepository(db).create_team(
         name=team_in.name,
         user_id=user_id,
         seasons=[season],
         categories=category_objs,
     )
-
-    db.add(db_team)
-    db.commit()
-    db.refresh(db_team)
     return ApiReturnTeam.model_validate(db_team)
 
 
@@ -70,18 +65,4 @@ def delete_team(db: Session, team_id: int, user_id: int) -> None:
     if team.user_id != user_id:
         raise ForbiddenError("Vous n'êtes pas autorisé à supprimer cette équipe")
 
-    seasons = list(team.seasons)
-
-    db.delete(team)
-    db.flush()
-
-    for season in seasons:
-        remaining = (
-            db.query(TeamSeason)
-            .filter(TeamSeason.season_id == season.id)
-            .count()
-        )
-        if remaining == 0:
-            db.delete(season)
-
-    db.commit()
+    TeamRepository(db).delete_team(team)

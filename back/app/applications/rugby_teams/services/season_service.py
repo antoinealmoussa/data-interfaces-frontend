@@ -22,8 +22,4 @@ def create_season_if_not_exists(db: Session, season_name: str) -> Season:
     if existing:
         return existing
 
-    db_season = Season(name=season_name)
-    db.add(db_season)
-    db.commit()
-    db.refresh(db_season)
-    return db_season
+    return SeasonRepository(db).create_season(season_name)
