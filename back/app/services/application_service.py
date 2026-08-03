@@ -19,9 +19,7 @@ def assign_application(db: Session, user_id: int, app_id: int) -> None:
     if not app:
         raise ApplicationNotFoundError(app_id)
 
-    if app not in user.applications:
-        user.applications.append(app)
-        db.commit()
+    UserRepository(db).add_application(user, app)
 
 
 def remove_application(db: Session, user_id: int, app_id: int) -> None:
@@ -33,6 +31,4 @@ def remove_application(db: Session, user_id: int, app_id: int) -> None:
     if not app:
         raise ApplicationNotFoundError(app_id)
 
-    if app in user.applications:
-        user.applications.remove(app)
-        db.commit()
+    UserRepository(db).remove_application(user, app)

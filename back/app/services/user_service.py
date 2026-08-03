@@ -20,11 +20,7 @@ def create_user(db: Session, user_in: ApiCreateUser) -> User:
         raise ValueError("Cet email est déjà utilisé.")
 
     hashed_pw = hash_password(user_in.password)
-    db_user = user_in.to_model(hashed_pw)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    return UserRepository(db).create_user(user_in, hashed_pw)
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | bool:
@@ -36,10 +32,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User | bool:
     return user
 
 def revoke_tokens(db: Session, user: User) -> User:
-    user.token_version += 1
-    db.commit()
-    db.refresh(user)
-    return user
+    return UserRepository(db).bump_token_version(user)
 
 
 def update_user(db: Session, user_id: int, user_in: ApiUpdateUser) -> User | None:
@@ -48,15 +41,9 @@ def update_user(db: Session, user_id: int, user_in: ApiUpdateUser) -> User | Non
         return None
 
     update_data = user_in.model_dump(exclude_unset=True)
-
     if "email" in update_data:
         existing_user = get_user_by_email(db, update_data["email"])
         if existing_user and existing_user.id != user_id:
             raise ValueError("Cet email est déjà utilisé par un autre utilisateur.")
 
-    for field, value in update_data.items():
-        setattr(user, field, value)
-
-    db.commit()
-    db.refresh(user)
-    return user
+    return UserRepository(db).update_user(user_id, user_in)
