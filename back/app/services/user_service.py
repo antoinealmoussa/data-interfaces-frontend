@@ -2,8 +2,11 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password, verify_password
 from app.models.user import User
+from app.repositories.role_repository import RoleRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import ApiCreateUser, ApiUpdateUser
+
+NORMAL_USER_ROLE = "normal_user"
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
@@ -19,8 +22,12 @@ def create_user(db: Session, user_in: ApiCreateUser) -> User:
     if existing_user:
         raise ValueError("Cet email est déjà utilisé.")
 
+    normal_role = RoleRepository(db).get_by_name(NORMAL_USER_ROLE)
+    if normal_role is None:
+        raise ValueError("Rôle 'normal_user' introuvable en base.")
+
     hashed_pw = hash_password(user_in.password)
-    return UserRepository(db).create_user(user_in, hashed_pw)
+    return UserRepository(db).create_user(user_in, hashed_pw, normal_role.id)
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | bool:

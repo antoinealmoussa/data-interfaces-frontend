@@ -9,6 +9,8 @@ from app.core.jwt import create_access_token
 from app.db.session import Base, get_db
 from app.main import app
 from app.models.application import Application
+from app.models.role import Role
+from app.repositories.role_repository import RoleRepository
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
 from app.utils.validators import TEAM_CATEGORIES
@@ -37,6 +39,12 @@ def seed_applications(db):
     return app
 
 
+def seed_roles(db):
+    db.add(Role(name="admin"))
+    db.add(Role(name="normal_user"))
+    db.commit()
+
+
 @pytest.fixture(scope="function")
 def db_session():
     Base.metadata.create_all(bind=engine)
@@ -45,6 +53,7 @@ def db_session():
     try:
         seed_categories(db)
         seed_applications(db)
+        seed_roles(db)
         yield db
     finally:
         db.close()
@@ -77,6 +86,21 @@ def test_user(db_session):
     if app and app not in user.applications:
         user.applications.append(app)
         db_session.commit()
+    return user
+
+
+@pytest.fixture(scope="function")
+def admin_user(db_session):
+    user = ApiCreateUser(
+        email="admin@test.com",
+        password="testpassword",
+        first_name="Admin",
+        surname="User",
+    )
+    user = user_service.create_user(db_session, user_in=user)
+    admin_role = RoleRepository(db_session).get_by_name("admin")
+    user.role_id = admin_role.id
+    db_session.commit()
     return user
 
 

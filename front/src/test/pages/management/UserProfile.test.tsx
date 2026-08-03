@@ -17,6 +17,7 @@ const mockUser = {
   email: "test@example.com",
   first_name: "John",
   surname: "Doe",
+  role: "normal_user",
 };
 
 const mockUserResponse = { user: mockUser };

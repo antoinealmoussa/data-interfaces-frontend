@@ -9,6 +9,7 @@ const mockUser: User = {
   email: "test@example.com",
   first_name: "John",
   surname: "Doe",
+  role: "normal_user",
 };
 
 describe("UserInfoForm", () => {

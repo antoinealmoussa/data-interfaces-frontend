@@ -40,12 +40,13 @@ class ApiCreateUser(UserBase):
             raise ValueError("Le mot de passe ne peut pas dépasser 128 caractères")
         return v
 
-    def to_model(self, hashed_pw: str):
+    def to_model(self, hashed_pw: str, role_id: int):
         return User(
             email=self.email,
             first_name=self.first_name,
             surname=self.surname,
-            password=hashed_pw
+            password=hashed_pw,
+            role_id=role_id,
         )
 
 
@@ -53,10 +54,21 @@ class ApiReturnUser(UserBase):
     """
     Données renvoyées par l'API au Frontend.
     On hérite de UserBase pour avoir email, first_name et surname.
-    On ajoute l'ID mais on ne renvoie JAMAIS le mot de passe.
+    On ajoute l'ID et le rôle mais on ne renvoie JAMAIS le mot de passe.
     """
     id: int
+    role: str
     model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        return cls(
+            id=obj.id,
+            email=obj.email,
+            first_name=obj.first_name,
+            surname=obj.surname,
+            role=obj.role.name,
+        )
 
 
 class ApiReturnUserWithApplications(BaseModel):

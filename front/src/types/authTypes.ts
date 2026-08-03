@@ -10,11 +10,14 @@ export type RegisterFormProps = {
   surname: string;
 };
 
+export type Role = "admin" | "normal_user";
+
 export type User = {
   id: number;
   email: string;
   first_name: string;
   surname: string;
+  role: Role;
 };
 
 export type Application = {
@@ -34,4 +37,6 @@ export type AuthContextType = {
   applications: Application[] | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  hasRole: (...roles: Role[]) => boolean;
+  isAdmin: boolean;
 };

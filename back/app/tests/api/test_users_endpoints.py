@@ -19,6 +19,7 @@ def test_register_success(client):
     assert data["email"] == "register@test.com"
     assert data["first_name"] == "Register"
     assert data["surname"] == "User"
+    assert data["role"] == "normal_user"
     assert "id" in data
     assert "password" not in data
 
@@ -255,6 +256,7 @@ def test_read_users_me(authenticated_client):
     assert "email" in data["user"]
     assert "first_name" in data["user"]
     assert "surname" in data["user"]
+    assert data["user"]["role"] == "normal_user"
     assert "password" not in data["user"]
 
 

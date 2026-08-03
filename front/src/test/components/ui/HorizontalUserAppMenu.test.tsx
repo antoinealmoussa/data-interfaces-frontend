@@ -19,11 +19,14 @@ describe("HorizontalUserAppMenu", () => {
         email: "test@test.com",
         first_name: "Test",
         surname: "User",
+        role: "normal_user" as const,
       },
       applications: null,
       token: "test-token",
       login: vi.fn(),
       logout: vi.fn(),
+      hasRole: vi.fn(),
+      isAdmin: false,
     };
 
     const { container } = render(
@@ -46,6 +49,7 @@ describe("HorizontalUserAppMenu", () => {
         email: "test@test.com",
         first_name: "Test",
         surname: "User",
+        role: "normal_user" as const,
       },
       applications: [
         { name: "bike-exploration", pretty_name: "Bike Exploration" },
@@ -53,6 +57,8 @@ describe("HorizontalUserAppMenu", () => {
       token: "test-token",
       login: vi.fn(),
       logout: vi.fn(),
+      hasRole: vi.fn(),
+      isAdmin: false,
     };
 
     await act(async () => {
@@ -79,6 +85,7 @@ describe("HorizontalUserAppMenu", () => {
         email: "test@test.com",
         first_name: "Test",
         surname: "User",
+        role: "normal_user" as const,
       },
       applications: [
         { name: "bike-exploration", pretty_name: "Bike Exploration" },
@@ -87,6 +94,8 @@ describe("HorizontalUserAppMenu", () => {
       token: "test-token",
       login: vi.fn(),
       logout: vi.fn(),
+      hasRole: vi.fn(),
+      isAdmin: false,
     };
 
     await act(async () => {

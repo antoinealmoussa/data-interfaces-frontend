@@ -23,6 +23,7 @@ describe("AppContainer", () => {
           email: "test@test.com",
           first_name: "Test",
           surname: "User",
+          role: "normal_user",
         },
         applications: [],
       },

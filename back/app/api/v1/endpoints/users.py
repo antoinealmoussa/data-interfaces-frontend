@@ -41,7 +41,7 @@ def register(
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-    return new_user
+    return ApiReturnUser.model_validate(new_user)
 
 
 @router.post("/login", status_code=status.HTTP_200_OK)
@@ -90,7 +90,10 @@ def logout(
 
 @router.get("/me", response_model=ApiReturnUserWithApplications)
 async def read_users_me(current_user: User = Depends(get_current_active_user)) -> dict:
-    return {"user": current_user, "applications": current_user.applications}
+    return {
+        "user": ApiReturnUser.model_validate(current_user),
+        "applications": current_user.applications,
+    }
 
 
 @router.put("/me", response_model=ApiReturnUser, status_code=status.HTTP_200_OK)
@@ -106,4 +109,4 @@ def update_user(
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-    return updated_user
+    return ApiReturnUser.model_validate(updated_user)

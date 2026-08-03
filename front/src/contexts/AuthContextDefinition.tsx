@@ -8,6 +8,8 @@ const defaultAuthContext: AuthContextType = {
   applications: null,
   login: async () => {},
   logout: async () => {},
+  hasRole: () => false,
+  isAdmin: false,
 };
 
 export const AuthContext = createContext<AuthContextType>(defaultAuthContext);

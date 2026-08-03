@@ -1,10 +1,11 @@
-import { useState, type ReactNode, useEffect } from "react";
+import { useState, type ReactNode, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
   MeResponse,
   AuthContextType,
+  Role,
 } from "../types/authTypes";
 import apiClient from "../api/client";
 import { AUTH_EVENTS, API_PATHS } from "../api/endpoints";
@@ -66,6 +67,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setUser(null);
   };
 
+  const hasRole = useCallback(
+    (...roles: Role[]) => (user ? roles.includes(user.role) : false),
+    [user],
+  );
+
   const ContextValue: AuthContextType = {
     isAuthenticated,
     isLoading,
@@ -73,6 +79,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     applications,
     login,
     logout,
+    hasRole,
+    isAdmin: hasRole("admin"),
   };
 
   return (

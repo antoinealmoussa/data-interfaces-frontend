@@ -11,8 +11,10 @@ class UserRepository(BaseRepository[User, ApiReturnUser]):
     def get_by_email(self, email: str) -> User | None:
         return self.db.query(User).filter(User.email == email).first()
 
-    def create_user(self, user_in: ApiCreateUser, hashed_password: str) -> User:
-        db_user = user_in.to_model(hashed_password)
+    def create_user(
+        self, user_in: ApiCreateUser, hashed_password: str, role_id: int
+    ) -> User:
+        db_user = user_in.to_model(hashed_password, role_id)
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
