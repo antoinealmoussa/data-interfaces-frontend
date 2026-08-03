@@ -1,12 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from app.applications.rugby_teams.schemas.player import ApiCreatePlayer
+from app.applications.rugby_teams.schemas.player import PlayerBase
 
 
 class TestPlayerNameValidator:
     def test_name_valid(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Jean Dupont",
             level=2,
             sex="H",
@@ -17,7 +17,7 @@ class TestPlayerNameValidator:
 
     def test_name_too_long(self):
         with pytest.raises(ValidationError) as exc:
-            ApiCreatePlayer(
+            PlayerBase(
                 name="A" * 101,
                 level=2,
                 sex="H",
@@ -28,7 +28,7 @@ class TestPlayerNameValidator:
 
     def test_name_empty(self):
         with pytest.raises(ValidationError) as exc:
-            ApiCreatePlayer(
+            PlayerBase(
                 name="",
                 level=2,
                 sex="H",
@@ -39,7 +39,7 @@ class TestPlayerNameValidator:
 
     def test_name_whitespace_only(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="   ",
                 level=2,
                 sex="H",
@@ -51,7 +51,7 @@ class TestPlayerNameValidator:
 class TestPlayerLevelValidator:
     def test_level_valid(self):
         for lvl in [1, 2, 3, 4]:
-            player = ApiCreatePlayer(
+            player = PlayerBase(
                 name="Joueur",
                 level=lvl,
                 sex="H",
@@ -62,7 +62,7 @@ class TestPlayerLevelValidator:
 
     def test_level_too_low(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=0,
                 sex="H",
@@ -72,7 +72,7 @@ class TestPlayerLevelValidator:
 
     def test_level_too_high(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=5,
                 sex="H",
@@ -83,7 +83,7 @@ class TestPlayerLevelValidator:
 
 class TestPlayerSexValidator:
     def test_sex_valid_h(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",
@@ -93,7 +93,7 @@ class TestPlayerSexValidator:
         assert player.sex == "H"
 
     def test_sex_valid_f(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueuse",
             level=2,
             sex="F",
@@ -104,7 +104,7 @@ class TestPlayerSexValidator:
 
     def test_sex_invalid(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="X",
@@ -115,7 +115,7 @@ class TestPlayerSexValidator:
 
 class TestPlayerPositionValidator:
     def test_position_ailier(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",
@@ -125,7 +125,7 @@ class TestPlayerPositionValidator:
         assert player.position == "Ailier"
 
     def test_position_meneur(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",
@@ -136,7 +136,7 @@ class TestPlayerPositionValidator:
 
     def test_position_invalid(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="H",
@@ -147,7 +147,7 @@ class TestPlayerPositionValidator:
 
 class TestPlayerCategoryNamesValidator:
     def test_category_names_valid(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",
@@ -157,7 +157,7 @@ class TestPlayerCategoryNamesValidator:
         assert player.category_names == ["Mixte", "+35"]
 
     def test_category_names_single(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",
@@ -168,7 +168,7 @@ class TestPlayerCategoryNamesValidator:
 
     def test_category_names_empty(self):
         with pytest.raises(ValidationError) as exc:
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="H",
@@ -179,7 +179,7 @@ class TestPlayerCategoryNamesValidator:
 
     def test_category_names_none(self):
         with pytest.raises(ValidationError):
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="H",
@@ -189,7 +189,7 @@ class TestPlayerCategoryNamesValidator:
 
     def test_category_names_invalid_value(self):
         with pytest.raises(ValidationError) as exc:
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="H",
@@ -200,7 +200,7 @@ class TestPlayerCategoryNamesValidator:
 
     def test_category_names_partial_invalid(self):
         with pytest.raises(ValidationError) as exc:
-            ApiCreatePlayer(
+            PlayerBase(
                 name="Joueur",
                 level=2,
                 sex="H",
@@ -210,7 +210,7 @@ class TestPlayerCategoryNamesValidator:
         assert "invalide" in str(exc.value).lower()
 
     def test_category_names_all_valid(self):
-        player = ApiCreatePlayer(
+        player = PlayerBase(
             name="Joueur",
             level=2,
             sex="H",

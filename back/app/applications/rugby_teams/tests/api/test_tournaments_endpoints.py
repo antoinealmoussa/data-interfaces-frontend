@@ -10,7 +10,6 @@ def test_read_tournaments_empty(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon equipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -34,7 +33,6 @@ def test_create_tournament_success(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon equipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -83,7 +81,6 @@ def test_read_tournament_by_id(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon equipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -128,7 +125,6 @@ def test_update_tournament_success(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon equipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -173,7 +169,6 @@ def test_delete_tournament_success(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon equipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)

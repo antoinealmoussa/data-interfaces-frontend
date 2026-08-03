@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from "react";
+import { useState, useMemo, useDeferredValue, type ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -8,19 +8,19 @@ import {
   TableRow,
   TableSortLabel,
   IconButton,
-  Alert,
   Box,
   Typography,
-  TextField,
   TablePagination,
 } from "@mui/material";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
-import SearchIcon from "@mui/icons-material/Search";
+import { SearchInput } from "../ui/SearchInput";
+import { ErrorAlert } from "./ErrorAlert";
 
 export interface Column<T> {
   key: keyof T | string;
   label: string;
   sortable?: boolean;
+  defaultOrder?: "asc" | "desc";
   render?: (value: unknown, row: T) => ReactNode;
 }
 
@@ -48,6 +48,7 @@ interface GenericDataTableProps<T> {
   orderBy?: keyof T | null;
   order?: "asc" | "desc";
   onSortChange?: (orderBy: keyof T | null, order: "asc" | "desc") => void;
+  onRowClick?: (row: T) => void;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -99,6 +100,7 @@ export const GenericDataTable = <T,>({
   orderBy: controlledOrderBy,
   order: controlledOrder,
   onSortChange,
+  onRowClick,
 }: GenericDataTableProps<T>) => {
   const isControlled = controlledSearch !== undefined;
   const [internalSearch, setInternalSearch] = useState("");
@@ -133,14 +135,17 @@ export const GenericDataTable = <T,>({
         setInternalOrder(internalOrder === "asc" ? "desc" : "asc");
       } else {
         setInternalOrderBy(key);
-        setInternalOrder("asc");
+        const col = columns.find((c) => c.key === key);
+        setInternalOrder(col?.defaultOrder ?? "asc");
       }
     }
   };
 
+  const deferredSearch = useDeferredValue(search);
+
   const filteredRows = useMemo(
-    () => rows.filter((row) => matchesSearch(row, columns, search)),
-    [rows, columns, search],
+    () => rows.filter((row) => matchesSearch(row, columns, deferredSearch)),
+    [rows, columns, deferredSearch],
   );
 
   const sortedRows = useMemo(
@@ -165,7 +170,7 @@ export const GenericDataTable = <T,>({
   }
 
   if (error) {
-    return <Alert severity="error">{error}</Alert>;
+    return <ErrorAlert message={error} />;
   }
 
   const colSpan = columns.length + (actions && actions.length > 0 ? 1 : 0);
@@ -173,21 +178,10 @@ export const GenericDataTable = <T,>({
   return (
     <Box>
       {!isControlled && (
-        <TextField
-          size="small"
-          placeholder="Rechercher..."
+        <SearchInput
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <SearchIcon sx={{ mr: 1, color: "action.active" }} />
-              ),
-            },
-          }}
+          onChange={(value) => setSearch(value)}
+          placeholder="Rechercher..."
           sx={{ mb: 2, maxWidth: 320 }}
         />
       )}
@@ -227,7 +221,12 @@ export const GenericDataTable = <T,>({
               </TableRow>
             ) : (
               pageRows.map((row) => (
-                <TableRow key={getRowId(row)}>
+                <TableRow
+                  key={getRowId(row)}
+                  hover={onRowClick != null}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  sx={onRowClick ? { cursor: "pointer" } : undefined}
+                >
                   {columns.map((col) => (
                     <TableCell key={String(col.key)}>
                       {col.render
@@ -244,6 +243,7 @@ export const GenericDataTable = <T,>({
                           size="small"
                           onClick={() => action.onClick(row)}
                           title={action.label}
+                          aria-label={action.label}
                         >
                           {action.icon}
                         </IconButton>

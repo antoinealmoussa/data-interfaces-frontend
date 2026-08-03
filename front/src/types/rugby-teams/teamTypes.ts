@@ -21,6 +21,5 @@ export interface Team {
 export interface CreateTeamDto {
   name: string;
   categories: TeamCategory[];
-  user_id: number;
   season_name: string; // Nom de la saison (ex: "2025-2026")
 }

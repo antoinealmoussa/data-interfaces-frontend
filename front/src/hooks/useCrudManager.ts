@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SnackbarState } from "../types/uiTypes";
+import { useSnackbar } from "./useSnackbar";
 
 interface CrudManagerConfig<TEntity, TCreateDto> {
   queryKey: (string | undefined)[];
@@ -21,9 +21,8 @@ export function useCrudManager<TEntity extends { id: number }, TCreateDto>(
   config: CrudManagerConfig<TEntity, TCreateDto>,
 ) {
   const queryClient = useQueryClient();
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false, severity: "success", message: "",
-  });
+  const { snackbar, setSnackbar, showSnackbar, handleCloseSnackbar } =
+    useSnackbar();
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editingEntity, setEditingEntity] = useState<TEntity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TEntity | null>(null);
@@ -41,10 +40,10 @@ export function useCrudManager<TEntity extends { id: number }, TCreateDto>(
     mutationFn: config.createFn,
     onSuccess: () => {
       invalidate();
-      setSnackbar({
-        open: true, severity: "success",
-        message: config.successCreateMsg ?? `${config.entityName} ajouté avec succès`,
-      });
+      showSnackbar(
+        "success",
+        config.successCreateMsg ?? `${config.entityName} ajouté avec succès`,
+      );
       setModalMode(null);
     },
   });
@@ -54,10 +53,10 @@ export function useCrudManager<TEntity extends { id: number }, TCreateDto>(
       config.updateFn(editingEntity!.id, data),
     onSuccess: () => {
       invalidate();
-      setSnackbar({
-        open: true, severity: "success",
-        message: config.successUpdateMsg ?? `${config.entityName} modifié avec succès`,
-      });
+      showSnackbar(
+        "success",
+        config.successUpdateMsg ?? `${config.entityName} modifié avec succès`,
+      );
       setModalMode(null);
       setEditingEntity(null);
     },
@@ -67,17 +66,17 @@ export function useCrudManager<TEntity extends { id: number }, TCreateDto>(
     mutationFn: () => config.deleteFn(deleteTarget!.id),
     onSuccess: () => {
       invalidate();
-      setSnackbar({
-        open: true, severity: "success",
-        message: config.successDeleteMsg ?? `${config.entityName} supprimé avec succès`,
-      });
+      showSnackbar(
+        "success",
+        config.successDeleteMsg ?? `${config.entityName} supprimé avec succès`,
+      );
       setDeleteTarget(null);
     },
     onError: () => {
-      setSnackbar({
-        open: true, severity: "error",
-        message: config.errorDeleteMsg ?? `Erreur lors de la suppression`,
-      });
+      showSnackbar(
+        "error",
+        config.errorDeleteMsg ?? `Erreur lors de la suppression`,
+      );
       setDeleteTarget(null);
     },
   });
@@ -96,6 +95,6 @@ export function useCrudManager<TEntity extends { id: number }, TCreateDto>(
     handleCreate: async (data: TCreateDto) => createMutation.mutate(data),
     handleUpdate: async (data: TCreateDto) => updateMutation.mutate(data),
     handleDelete: async () => deleteMutation.mutate(),
-    handleCloseSnackbar: () => setSnackbar((prev) => ({ ...prev, open: false })),
+    handleCloseSnackbar,
   };
 }

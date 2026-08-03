@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from jose import JWTError, jwt
+from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.api.v1.helpers import delete_refresh_cookie, set_auth_cookie
 from app.core.config import settings
-from app.core.token import create_access_token
+from app.core.jwt import create_access_token, decode_token
 from app.db.session import get_db
 from app.services.user_service import get_user_by_email
 
@@ -26,11 +26,7 @@ def refresh_token(
         )
 
     try:
-        payload = jwt.decode(
-            refresh_token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
+        payload = decode_token(refresh_token)
 
         if payload.get("type") != "refresh":
             raise HTTPException(

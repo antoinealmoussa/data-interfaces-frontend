@@ -1,6 +1,7 @@
 import type { RouteProps } from "./routesTypes";
 import type { Application } from "./authTypes";
 import type { JSX } from "react";
+import type { SxProps, Theme } from "@mui/material";
 
 export interface DropdownMenuProps {
   label?: string;
@@ -50,9 +51,10 @@ export interface LoadingSpinnerProps {
 export interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
-  onSearch: () => void;
+  onSearch?: () => void;
   isLoading?: boolean;
   placeholder?: string;
+  sx?: SxProps<Theme>;
 }
 
 export type HomeState = "idle" | "loading" | "success" | "error";
@@ -71,6 +73,7 @@ export interface GenericSidebarProps {
   selectedSeasonName: string | null;
   onTeamChange: (teamName: string) => void;
   onSeasonChange: (seasonName: string) => void;
+  basePath?: string;
 }
 
 export interface SnackbarState {

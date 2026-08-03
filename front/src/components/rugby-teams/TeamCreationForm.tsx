@@ -1,28 +1,16 @@
-import {
-  Box,
-  TextField,
-  FormControl,
-  FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Alert,
-  Typography,
-} from "@mui/material";
+import { Box, TextField, Alert, Typography } from "@mui/material";
 import { useState } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { teamApi } from "../../api/rugby-teams/teamApi";
-import { type CreateTeamDto, TEAM_CATEGORIES } from "../../types/rugby-teams/teamTypes";
+import { type CreateTeamDto, type Team, TEAM_CATEGORIES } from "../../types/rugby-teams/teamTypes";
 import { FormActions } from "../common/FormActions";
+import { CheckboxGroupField } from "../ui/CheckboxGroupField";
 import { useNavigate } from "react-router-dom";
-import { toggleArrayItem } from "../../utils/array";
 
-interface TeamCreationFormProps {
-  userId: number;
-}
-
-export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
+export const TeamCreationForm = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -34,7 +22,6 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
     defaultValues: {
       name: "",
       categories: [],
-      user_id: userId,
       season_name: "",
     },
   });
@@ -45,9 +32,12 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
     setSubmitError(null);
     try {
       const team = await teamApi.create(data);
+      queryClient.setQueryData<Team[]>(["teams"], (old = []) => [
+        ...old,
+        team,
+      ]);
       navigate(
         `/rugby-teams/${encodeURIComponent(team.name)}/${encodeURIComponent(team.seasons[0].name)}/team-management`,
-        { state: { teamCreated: true } },
       );
     } catch {
       setSubmitError("Une erreur est survenue. Veuillez réessayer.");
@@ -104,40 +94,17 @@ export const TeamCreationForm = ({ userId }: TeamCreationFormProps) => {
           fullWidth
         />
 
-        <Controller
-          control={control}
+        <CheckboxGroupField
           name="categories"
+          control={control}
+          label="Catégories jouées"
+          options={[...TEAM_CATEGORIES]}
+          required
           rules={{
             validate: (value) =>
-              value.length > 0 ||
+              (value as string[]).length > 0 ||
               "Veuillez sélectionner au moins une catégorie.",
           }}
-          render={({ field, fieldState }) => (
-            <FormControl error={!!fieldState.error} required>
-              <FormLabel>Catégories jouées</FormLabel>
-              <FormGroup>
-                {TEAM_CATEGORIES.map((category) => (
-                  <FormControlLabel
-                    key={category}
-                    control={
-                      <Checkbox
-                        checked={field.value.includes(category)}
-                        onChange={() =>
-                          field.onChange(toggleArrayItem(field.value, category))
-                        }
-                      />
-                    }
-                    label={category}
-                  />
-                ))}
-              </FormGroup>
-              {fieldState.error && (
-                <Typography variant="caption" color="error">
-                  {fieldState.error.message}
-                </Typography>
-              )}
-            </FormControl>
-          )}
         />
 
         <FormActions

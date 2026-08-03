@@ -2,7 +2,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.applications.rugby_teams.models.season import Season
-from app.core.token import create_access_token
+from app.core.jwt import create_access_token
 from app.main import app
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
@@ -22,7 +22,6 @@ def test_read_teams_with_data(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon équipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -47,7 +46,6 @@ def test_has_teams_true(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon équipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -71,7 +69,6 @@ def test_read_teams_by_season(authenticated_client, test_user, db_session):
     team_data = {
         "name": "Mon équipe",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -97,7 +94,6 @@ def test_create_team_success(authenticated_client, test_user):
     team_data = {
         "name": "Nouvelle équipe",
         "categories": ["Mixte", "+35"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -114,7 +110,6 @@ def test_create_team_unauthenticated(client):
     team_data = {
         "name": "Nouvelle équipe",
         "categories": ["Mixte"],
-        "user_id": 1,
         "season_name": "2025-2026",
     }
     response = client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -125,7 +120,6 @@ def test_create_team_invalid_name_empty(authenticated_client, test_user):
     team_data = {
         "name": "",
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -136,7 +130,6 @@ def test_create_team_invalid_name_too_long(authenticated_client, test_user):
     team_data = {
         "name": "A" * 51,
         "categories": ["Mixte"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -147,7 +140,6 @@ def test_create_team_invalid_categories_empty(authenticated_client, test_user):
     team_data = {
         "name": "Mon équipe",
         "categories": [],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -158,7 +150,6 @@ def test_create_team_invalid_category_value(authenticated_client, test_user):
     team_data = {
         "name": "Mon équipe",
         "categories": ["InvalidCategory"],
-        "user_id": test_user.id,
         "season_name": "2025-2026",
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
@@ -172,7 +163,7 @@ def test_delete_team_success(authenticated_client, test_user, db_session):
 
     team_data = {
         "name": "Mon équipe", "categories": ["Mixte"],
-        "user_id": test_user.id, "season_name": "2025-2026",
+        "season_name": "2025-2026",
     }
     create_resp = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
     team_id = create_resp.json()["id"]
@@ -196,7 +187,7 @@ def test_delete_team_forbidden(authenticated_client, test_user, db_session):
 
     team_data = {
         "name": "Mon équipe", "categories": ["Mixte"],
-        "user_id": test_user.id, "season_name": "2025-2026",
+        "season_name": "2025-2026",
     }
     create_resp = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
     team_id = create_resp.json()["id"]
@@ -204,7 +195,7 @@ def test_delete_team_forbidden(authenticated_client, test_user, db_session):
     other_user = user_service.create_user(
         db_session,
         ApiCreateUser(
-            email="other@test.com", password="pass",
+            email="other@test.com", password="password123",
             first_name="Other", surname="User",
         ),
     )
@@ -230,7 +221,7 @@ def test_delete_team_removes_orphan_season(authenticated_client, test_user, db_s
 
     team_data = {
         "name": "Mon équipe", "categories": ["Mixte"],
-        "user_id": test_user.id, "season_name": "2025-2026",
+        "season_name": "2025-2026",
     }
     create_resp = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
     team_id = create_resp.json()["id"]

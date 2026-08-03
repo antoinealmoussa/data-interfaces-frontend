@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "../../api/client";
 import type { User } from "../../types/authTypes";
 import {
@@ -8,39 +9,41 @@ import {
 } from "../../components/ui/UserInfoForm";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { PageGuard } from "../../components/common/PageGuard";
+import { useSnackbar } from "../../hooks/useSnackbar";
 
 const UserProfile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    severity: "success" | "error";
-    message: string;
-  }>({
-    open: false,
-    severity: "success",
-    message: "",
+  const queryClient = useQueryClient();
+  const { snackbar, showSnackbar, handleCloseSnackbar } = useSnackbar();
+
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const response = await apiClient.get<{ user: User }>("/users/me");
+      return response.data.user;
+    },
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await apiClient.get<{ user: User }>("/users/me");
-        setUser(response.data.user);
-      } catch {
-        setSnackbar({
-          open: true,
-          severity: "error",
-          message: "Erreur lors du chargement du profil",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (isError) {
+      showSnackbar("error", "Erreur lors du chargement du profil");
+    }
+  }, [isError, showSnackbar]);
 
-    fetchUser();
-  }, []);
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<UserUpdateData>) =>
+      apiClient.put<User>("/users/me", data),
+    onSuccess: (response) => {
+      queryClient.setQueryData<User>(["me"], response.data);
+      showSnackbar("success", "Profil mis à jour avec succès");
+    },
+    onError: () => {
+      showSnackbar("error", "Erreur lors de la mise à jour du profil");
+    },
+  });
 
   const handleSubmit = async (data: UserUpdateData) => {
     if (!user) return;
@@ -52,36 +55,11 @@ const UserProfile = () => {
     if (data.email !== user.email) modifiedData.email = data.email;
 
     if (Object.keys(modifiedData).length === 0) {
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Aucune modification détectée",
-      });
+      showSnackbar("success", "Aucune modification détectée");
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const response = await apiClient.put<User>("/users/me", modifiedData);
-      setUser(response.data);
-      setSnackbar({
-        open: true,
-        severity: "success",
-        message: "Profil mis à jour avec succès",
-      });
-    } catch {
-      setSnackbar({
-        open: true,
-        severity: "error",
-        message: "Erreur lors de la mise à jour du profil",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    updateMutation.mutate(modifiedData);
   };
 
   return (
@@ -107,7 +85,7 @@ const UserProfile = () => {
             key={user.id}
             initialData={user}
             onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={updateMutation.isPending}
           />
         )}
 

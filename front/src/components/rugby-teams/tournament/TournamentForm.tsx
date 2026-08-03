@@ -1,19 +1,10 @@
 import { useMemo, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
-  FormGroup,
-  FormLabel,
-} from "@mui/material";
+import { useForm } from "react-hook-form";
+import { Box, TextField } from "@mui/material";
 import { FormActions } from "../../common/FormActions";
-import { toggleArrayItem } from "../../../utils/array";
+import { ControlledSelect } from "../../ui/ControlledSelect";
+import { CheckboxGroupField } from "../../ui/CheckboxGroupField";
+import { nameValidators } from "../../../utils/validators";
 import type {
   Tournament,
   CreateTournamentDto,
@@ -74,68 +65,30 @@ export const TournamentForm = ({
     >
       <TextField
         label="Nom"
-        {...register("name", {
-          required: "Le nom est obligatoire",
-          maxLength: { value: 100, message: "Max 100 caractères" },
-        })}
+        {...register("name", nameValidators)}
         error={!!errors.name}
         helperText={errors.name?.message}
         fullWidth
       />
 
-      <FormControl fullWidth error={!!errors.category_name}>
-        <InputLabel>Catégorie</InputLabel>
-        <Controller
-          name="category_name"
-          control={control}
-          rules={{ required: "La catégorie est obligatoire" }}
-          render={({ field }) => (
-            <Select
-              label="Catégorie"
-              {...field}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setValue("player_names", []);
-                field.onChange(e);
-              }}
-            >
-              {teamCategories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
-        />
-      </FormControl>
+      <ControlledSelect
+        name="category_name"
+        control={control}
+        label="Catégorie"
+        options={teamCategories.map((cat) => ({ value: cat, label: cat }))}
+        rules={{ required: "La catégorie est obligatoire" }}
+        onChange={(value) => {
+          setSelectedCategory(value);
+          setValue("player_names", []);
+        }}
+      />
 
-      <FormControl>
-        <FormLabel>Joueurs</FormLabel>
-        <Controller
-          name="player_names"
-          control={control}
-          render={({ field }) => (
-            <FormGroup>
-              {filteredPlayers.map((player) => (
-                <FormControlLabel
-                  key={player.id}
-                  control={
-                    <Checkbox
-                      checked={field.value.includes(player.name)}
-                      onChange={() =>
-                        field.onChange(
-                          toggleArrayItem(field.value, player.name),
-                        )
-                      }
-                    />
-                  }
-                  label={player.name}
-                />
-              ))}
-            </FormGroup>
-          )}
-        />
-      </FormControl>
+      <CheckboxGroupField
+        name="player_names"
+        control={control}
+        label="Joueurs"
+        options={filteredPlayers.map((player) => player.name)}
+      />
 
       <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
     </Box>

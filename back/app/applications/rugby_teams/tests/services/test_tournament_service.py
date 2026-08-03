@@ -1,8 +1,8 @@
 import pytest
 
 from app.applications.rugby_teams.models.season import Season
-from app.applications.rugby_teams.schemas.player import ApiCreatePlayer
-from app.applications.rugby_teams.schemas.tournament import ApiCreateTournament, ApiUpdateTournament
+from app.applications.rugby_teams.schemas.player import PlayerBase
+from app.applications.rugby_teams.schemas.tournament import TournamentBase
 from app.applications.rugby_teams.services import player_service, tournament_service
 from app.utils.exceptions import (
     CategoryNotFoundError,
@@ -24,15 +24,14 @@ def team(db_session, test_user):
     team_in = ApiCreateTeam(
         name="Mon equipe",
         categories=["Mixte", "+35"],
-        user_id=test_user.id,
         season_name="2025-2026",
     )
-    return team_service.create_team(db_session, team_in)
+    return team_service.create_team(db_session, team_in, user_id=test_user.id)
 
 
 @pytest.fixture
 def player(db_session, team, test_user):
-    player_in = ApiCreatePlayer(
+    player_in = PlayerBase(
         name="Jean",
         level=2,
         sex="H",
@@ -43,25 +42,29 @@ def player(db_session, team, test_user):
 
 
 class TestGetTournamentsByTeam:
-    def test_empty(self, db_session, team):
-        tournaments = tournament_service.get_tournaments_by_team(db_session, team.name)
+    def test_empty(self, db_session, team, test_user):
+        tournaments = tournament_service.get_tournaments_by_team(
+            db_session, team.name, test_user.id
+        )
         assert tournaments == []
 
     def test_with_data(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi test",
             category_name="Mixte",
             player_names=["Jean"],
         )
         tournament_service.create_tournament(db_session, team.name, tournament_in, test_user.id)
 
-        tournaments = tournament_service.get_tournaments_by_team(db_session, team.name)
+        tournaments = tournament_service.get_tournaments_by_team(
+            db_session, team.name, test_user.id
+        )
         assert len(tournaments) == 1
 
 
 class TestCreateTournament:
     def test_success(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi test",
             category_name="Mixte",
             player_names=["Jean"],
@@ -74,7 +77,7 @@ class TestCreateTournament:
         assert result.player_names == ["Jean"]
 
     def test_forbidden(self, db_session, team, player):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -83,7 +86,7 @@ class TestCreateTournament:
             tournament_service.create_tournament(db_session, team.name, tournament_in, 999)
 
     def test_category_not_found(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Inexistante",
             player_names=["Jean"],
@@ -94,7 +97,7 @@ class TestCreateTournament:
             )
 
     def test_team_not_found(self, db_session, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -107,7 +110,7 @@ class TestCreateTournament:
 
 class TestGetTournamentById:
     def test_found(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -126,7 +129,7 @@ class TestGetTournamentById:
 
 class TestUpdateTournament:
     def test_success(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -135,7 +138,7 @@ class TestUpdateTournament:
             db_session, team.name, tournament_in, test_user.id
         )
 
-        update_in = ApiUpdateTournament(
+        update_in = TournamentBase(
             name="Tournoi modifié",
             category_name="Mixte",
             player_names=["Jean"],
@@ -146,7 +149,7 @@ class TestUpdateTournament:
         assert result.name == "Tournoi modifié"
 
     def test_not_found(self, db_session, team, test_user):
-        update_in = ApiUpdateTournament(
+        update_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -157,7 +160,7 @@ class TestUpdateTournament:
             )
 
     def test_forbidden(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -166,7 +169,7 @@ class TestUpdateTournament:
             db_session, team.name, tournament_in, test_user.id
         )
 
-        update_in = ApiUpdateTournament(
+        update_in = TournamentBase(
             name="Tournoi modifié",
             category_name="Mixte",
             player_names=["Jean"],
@@ -179,7 +182,7 @@ class TestUpdateTournament:
 
 class TestDeleteTournament:
     def test_success(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],
@@ -198,7 +201,7 @@ class TestDeleteTournament:
             tournament_service.delete_tournament(db_session, 999, team.name, test_user.id)
 
     def test_forbidden(self, db_session, team, player, test_user):
-        tournament_in = ApiCreateTournament(
+        tournament_in = TournamentBase(
             name="Tournoi",
             category_name="Mixte",
             player_names=["Jean"],

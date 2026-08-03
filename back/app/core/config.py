@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     MISTRAL_MODEL: str = "mistral-small"
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
     # Logging
     LOG_LEVEL: str = "DEBUG"

@@ -1,15 +1,14 @@
 from sqlalchemy.orm import Session
 
-from app.applications.rugby_teams.models.player import Player
 from app.applications.rugby_teams.models.tournament import Tournament
+from app.applications.rugby_teams.repositories.player_repository import PlayerRepository
 from app.applications.rugby_teams.repositories.tournament_repository import TournamentRepository
 from app.applications.rugby_teams.schemas.tournament import (
-    ApiCreateTournament,
     ApiReturnTournament,
-    ApiUpdateTournament,
+    TournamentBase,
 )
 from app.applications.rugby_teams.services.category_service import get_category_by_name
-from app.applications.rugby_teams.services.team_service import get_team_by_name
+from app.applications.rugby_teams.services.team_service import get_owned_team, get_team_by_name
 from app.utils.exceptions import (
     CategoryNotFoundError,
     ForbiddenError,
@@ -25,9 +24,9 @@ def get_tournament_by_id(
 
 
 def get_tournaments_by_team(
-    db: Session, team_name: str, skip: int = 0, limit: int = 100
+    db: Session, team_name: str, user_id: int, skip: int = 0, limit: int = 100
 ) -> list[Tournament]:
-    team = get_team_by_name(db, team_name)
+    team = get_owned_team(db, team_name, user_id)
     repo = TournamentRepository(db)
     return repo.get_by_team(team.id, skip, limit)
 
@@ -35,7 +34,7 @@ def get_tournaments_by_team(
 def create_tournament(
     db: Session,
     team_name: str,
-    tournament_in: ApiCreateTournament,
+    tournament_in: TournamentBase,
     user_id: int,
 ) -> ApiReturnTournament:
     team = get_team_by_name(db, team_name)
@@ -46,13 +45,8 @@ def create_tournament(
     if not category:
         raise CategoryNotFoundError(tournament_in.category_name)
 
-    players = (
-        db.query(Player)
-        .filter(
-            Player.name.in_(tournament_in.player_names),
-            Player.team_id == team.id,
-        )
-        .all()
+    players = PlayerRepository(db).get_by_names_in_team(
+        tournament_in.player_names, team.id
     )
     if len(players) != len(tournament_in.player_names):
         raise TournamentNotFoundError(0)
@@ -70,7 +64,7 @@ def update_tournament(
     db: Session,
     tournament_id: int,
     team_name: str,
-    tournament_in: ApiUpdateTournament,
+    tournament_in: TournamentBase,
     user_id: int,
 ) -> ApiReturnTournament:
     repo = TournamentRepository(db)
@@ -88,13 +82,8 @@ def update_tournament(
     if not category:
         raise CategoryNotFoundError(tournament_in.category_name)
 
-    players = (
-        db.query(Player)
-        .filter(
-            Player.name.in_(tournament_in.player_names),
-            Player.team_id == team.id,
-        )
-        .all()
+    players = PlayerRepository(db).get_by_names_in_team(
+        tournament_in.player_names, team.id
     )
     if len(players) != len(tournament_in.player_names):
         raise TournamentNotFoundError(0)

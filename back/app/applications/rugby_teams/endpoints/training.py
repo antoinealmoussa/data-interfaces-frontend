@@ -1,19 +1,15 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.applications.rugby_teams.models.player import Player
 from app.applications.rugby_teams.schemas.training import (
     AlgorithmInfo,
     DistributeInput,
     DistributeOutput,
 )
-from app.applications.rugby_teams.services.training.registry import (
-    get_algorithm,
-    get_all_algorithms,
-)
-from app.core.token import get_current_active_user
+from app.applications.rugby_teams.services import training_service
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 
@@ -23,9 +19,10 @@ router = APIRouter(prefix="/teams/{team_name}/training")
 @router.get("/algorithms", response_model=List[AlgorithmInfo])
 def list_algorithms(
     team_name: str,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> List[AlgorithmInfo]:
-    return get_all_algorithms()
+    return training_service.list_algorithms(db, team_name, current_user.id)
 
 
 @router.post("/distribute", response_model=DistributeOutput)
@@ -35,31 +32,4 @@ def distribute(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> DistributeOutput:
-    algorithm = get_algorithm(input.algorithm)
-    if not algorithm:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Algorithme '{input.algorithm}' inconnu",
-        )
-
-    players = (
-        db.query(Player)
-        .filter(Player.id.in_(input.player_ids), Player.team.has(name=team_name))
-        .all()
-    )
-
-    if len(players) != len(input.player_ids):
-        found_ids = {p.id for p in players}
-        missing = set(input.player_ids) - found_ids
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Joueurs non trouvés : {missing}",
-        )
-
-    if len(players) < 2:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Au moins 2 joueurs sont requis",
-        )
-
-    return algorithm.distribute(input, players)
+    return training_service.distribute(db, team_name, current_user.id, input)

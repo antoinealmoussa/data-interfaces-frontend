@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import axios from "axios";
+import type { AxiosInstance } from "axios";
 
 vi.mock("../../api/config", () => ({
   default: {
@@ -9,16 +10,19 @@ vi.mock("../../api/config", () => ({
 
 describe("API Client", () => {
   let errorHandler: (error: unknown) => Promise<unknown>;
-  let dispatchSpy: ReturnType<typeof vi.spyOn>;
-  let mockedApiClient: Record<string, unknown>;
+  let dispatchSpy: { mockRestore: () => void } | undefined;
+  let mockedApiClient: AxiosInstance;
 
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
     const mod = await import("../../api/client");
-    mockedApiClient = mod.default;
+    mockedApiClient = mod.default as AxiosInstance;
 
-    errorHandler = mockedApiClient.interceptors.response.use.mock.calls[0][1];
+    const responseUse = mockedApiClient.interceptors.response.use as unknown as {
+      mock: { calls: Array<[unknown, (error: unknown) => Promise<unknown>]> };
+    };
+    errorHandler = responseUse.mock.calls[0][1];
     dispatchSpy = vi.spyOn(window, "dispatchEvent");
   });
 
@@ -47,30 +51,30 @@ describe("API Client", () => {
     );
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /login", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/login", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/login" },
+      config: { url: "/users/login" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /register", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/register", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/register" },
+      config: { url: "/users/register" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /logout", async () => {
+  it("ne devrait PAS dispatcher auth:unauthorized pour une 401 sur /users/logout", async () => {
     const error = {
       response: { status: 401 },
-      config: { url: "/logout" },
+      config: { url: "/users/logout" },
     };
 
     await expect(errorHandler(error)).rejects.toEqual(error);

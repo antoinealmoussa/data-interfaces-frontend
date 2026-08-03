@@ -1,20 +1,10 @@
-import { useForm, Controller } from "react-hook-form";
-import {
-  Box,
-  TextField,
-  FormControl,
-  FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+import { useForm } from "react-hook-form";
+import { Box, TextField } from "@mui/material";
 import type { Player, CreatePlayerDto } from "../../../types/rugby-teams/playerTypes";
 import { FormActions } from "../../common/FormActions";
-import { toggleArrayItem } from "../../../utils/array";
+import { ControlledSelect } from "../../ui/ControlledSelect";
+import { CheckboxGroupField } from "../../ui/CheckboxGroupField";
+import { nameValidators } from "../../../utils/validators";
 
 interface PlayerFormProps {
   defaultValues?: Player;
@@ -22,6 +12,21 @@ interface PlayerFormProps {
   onCancel: () => void;
   teamCategories: string[];
 }
+
+const LEVEL_OPTIONS = [1, 2, 3, 4].map((n) => ({
+  value: n,
+  label: `Niveau ${n}`,
+}));
+
+const SEX_OPTIONS = [
+  { value: "H", label: "Homme" },
+  { value: "F", label: "Femme" },
+];
+
+const POSITION_OPTIONS = [
+  { value: "Ailier", label: "Ailier" },
+  { value: "Meneur", label: "Meneur" },
+];
 
 export const PlayerForm = ({
   defaultValues,
@@ -60,94 +65,44 @@ export const PlayerForm = ({
     >
       <TextField
         label="Nom"
-        {...register("name", {
-          required: "Le nom est obligatoire",
-          maxLength: { value: 100, message: "Max 100 caractères" },
-        })}
+        {...register("name", nameValidators)}
         error={!!errors.name}
         helperText={errors.name?.message}
         fullWidth
       />
 
-      <FormControl fullWidth error={!!errors.level}>
-        <InputLabel>Niveau</InputLabel>
-        <Controller
-          name="level"
-          control={control}
-          rules={{ required: true, min: 1, max: 4 }}
-          render={({ field }) => (
-            <Select label="Niveau" {...field}>
-              {[1, 2, 3, 4].map((n) => (
-                <MenuItem key={n} value={n}>
-                  Niveau {n}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
-        />
-      </FormControl>
+      <ControlledSelect
+        name="level"
+        control={control}
+        label="Niveau"
+        options={LEVEL_OPTIONS}
+        rules={{ required: true, min: 1, max: 4 }}
+      />
 
-      <FormControl fullWidth error={!!errors.sex}>
-        <InputLabel>Sexe</InputLabel>
-        <Controller
-          name="sex"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <Select label="Sexe" {...field}>
-              <MenuItem value="H">Homme</MenuItem>
-              <MenuItem value="F">Femme</MenuItem>
-            </Select>
-          )}
-        />
-      </FormControl>
+      <ControlledSelect
+        name="sex"
+        control={control}
+        label="Sexe"
+        options={SEX_OPTIONS}
+        rules={{ required: true }}
+      />
 
-      <FormControl fullWidth error={!!errors.position}>
-        <InputLabel>Poste</InputLabel>
-        <Controller
-          name="position"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <Select label="Poste" {...field}>
-              <MenuItem value="Ailier">Ailier</MenuItem>
-              <MenuItem value="Meneur">Meneur</MenuItem>
-            </Select>
-          )}
-        />
-      </FormControl>
+      <ControlledSelect
+        name="position"
+        control={control}
+        label="Poste"
+        options={POSITION_OPTIONS}
+        rules={{ required: true }}
+      />
 
-      <FormControl error={!!errors.category_names} required>
-        <FormLabel>Catégories</FormLabel>
-        <Controller
-          name="category_names"
-          control={control}
-          rules={{ required: "Au moins une catégorie est requise" }}
-          render={({ field }) => (
-            <FormGroup>
-              {teamCategories.map((cat) => (
-                <FormControlLabel
-                  key={cat}
-                  control={
-                    <Checkbox
-                      checked={field.value.includes(cat)}
-                      onChange={() =>
-                        field.onChange(toggleArrayItem(field.value, cat))
-                      }
-                    />
-                  }
-                  label={cat}
-                />
-              ))}
-            </FormGroup>
-          )}
-        />
-        {errors.category_names && (
-          <Typography variant="caption" color="error">
-            {errors.category_names.message}
-          </Typography>
-        )}
-      </FormControl>
+      <CheckboxGroupField
+        name="category_names"
+        control={control}
+        label="Catégories"
+        options={teamCategories}
+        required
+        rules={{ required: "Au moins une catégorie est requise" }}
+      />
 
       <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
     </Box>

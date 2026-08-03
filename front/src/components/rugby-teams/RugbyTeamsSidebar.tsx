@@ -35,6 +35,14 @@ export const RugbyTeamsSidebar = () => {
 
   const visibleItems = selectedTeamName && selectedSeasonName ? menuItems : [];
 
+  const basePath = "/rugby-teams";
+
+  const navigateTo = (team: string, season: string, subPath: string) => {
+    navigate(
+      `${basePath}/${encodeURIComponent(team)}/${encodeURIComponent(season)}/${subPath}`,
+    );
+  };
+
   return (
     <GenericSidebar
       items={visibleItems}
@@ -42,18 +50,15 @@ export const RugbyTeamsSidebar = () => {
       seasons={seasons}
       selectedTeamName={selectedTeamName}
       selectedSeasonName={selectedSeasonName}
+      basePath={basePath}
       onTeamChange={(name) => {
         if (selectedSeasonName) {
-          navigate(
-            `/rugby-teams/${encodeURIComponent(name)}/${encodeURIComponent(selectedSeasonName)}/team-management`,
-          );
+          navigateTo(name, selectedSeasonName, "team-management");
         }
       }}
       onSeasonChange={(name) => {
         if (selectedTeamName) {
-          navigate(
-            `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(name)}/team-management`,
-          );
+          navigateTo(selectedTeamName, name, "team-management");
         }
       }}
     />

@@ -5,32 +5,41 @@ import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
 import apiClient from "../api/client";
 import type { HomeState } from "../types/uiTypes";
+import { useMutation } from "@tanstack/react-query";
 import MarkdownRenderer from "../components/layout/MarkdownRenderer";
 
 const Home = () => {
   const { user } = useAuth();
   const [searchValue, setSearchValue] = useState("");
-  const [state, setState] = useState<HomeState>("idle");
   const [responseText, setResponseText] = useState("");
 
-  const handleSearch = async () => {
-    if (!searchValue.trim()) return;
-
-    setState("loading");
-
-    try {
-      const response = await apiClient.get<{ text: string }>("/search/topic", {
-        params: { query: searchValue },
-      });
+  const searchMutation = useMutation({
+    mutationFn: (query: string) =>
+      apiClient.get<{ text: string }>("/search/topic", {
+        params: { query },
+      }),
+    onSuccess: (response) => {
       setResponseText(response.data.text);
-      setState("success");
-    } catch (error: unknown) {
+    },
+    onError: (error: unknown) => {
       const err = error as { response?: { data?: { detail?: string } } };
       const message = err.response?.data?.detail || "Une erreur est survenue";
       setResponseText(message);
-      setState("error");
-    }
+    },
+  });
+
+  const handleSearch = () => {
+    if (!searchValue.trim()) return;
+    searchMutation.mutate(searchValue);
   };
+
+  const state: HomeState = searchMutation.isIdle
+    ? "idle"
+    : searchMutation.isPending
+      ? "loading"
+      : searchMutation.isError
+        ? "error"
+        : "success";
 
   const searchInput = (
     <SearchInput

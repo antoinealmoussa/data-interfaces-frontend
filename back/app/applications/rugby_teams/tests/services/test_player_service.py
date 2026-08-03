@@ -1,7 +1,7 @@
 import pytest
 
 from app.applications.rugby_teams.models.season import Season
-from app.applications.rugby_teams.schemas.player import ApiCreatePlayer, ApiUpdatePlayer
+from app.applications.rugby_teams.schemas.player import PlayerBase
 from app.applications.rugby_teams.schemas.team import ApiCreateTeam
 from app.applications.rugby_teams.services import player_service, team_service
 from app.utils.exceptions import ForbiddenError, PlayerNotFoundError, TeamNotFoundError
@@ -16,19 +16,18 @@ def team(db_session, test_user):
     team_in = ApiCreateTeam(
         name="Mon equipe",
         categories=["Mixte", "+35"],
-        user_id=test_user.id,
         season_name="2025-2026",
     )
-    return team_service.create_team(db_session, team_in)
+    return team_service.create_team(db_session, team_in, user_id=test_user.id)
 
 
 class TestGetPlayersByTeam:
-    def test_get_players_by_team_empty(self, db_session, team):
-        players = player_service.get_players_by_team(db_session, team.name)
+    def test_get_players_by_team_empty(self, db_session, team, test_user):
+        players = player_service.get_players_by_team(db_session, team.name, test_user.id)
         assert players == []
 
     def test_get_players_by_team_with_data(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -37,20 +36,20 @@ class TestGetPlayersByTeam:
         )
         created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        players = player_service.get_players_by_team(db_session, team.name)
+        players = player_service.get_players_by_team(db_session, team.name, test_user.id)
         assert len(players) == 1
         assert players[0].id == created.id
 
     def test_get_players_by_team_not_found(self, db_session):
         with pytest.raises(TeamNotFoundError):
-            player_service.get_players_by_team(db_session, "Equipe inexistante")
+            player_service.get_players_by_team(db_session, "Equipe inexistante", 999)
 
     def test_get_players_by_team_with_pagination(self, db_session, team, test_user):
         for name in ["Alice", "Bob", "Charlie"]:
             player_service.create_player(
                 db_session,
                 team.name,
-                ApiCreatePlayer(
+                PlayerBase(
                     name=name,
                     level=2,
                     sex="H",
@@ -61,7 +60,7 @@ class TestGetPlayersByTeam:
             )
 
         players = player_service.get_players_by_team(
-            db_session, team.name, skip=1, limit=1
+            db_session, team.name, test_user.id, skip=1, limit=1
         )
         assert len(players) == 1
         assert players[0].name == "Bob"
@@ -69,7 +68,7 @@ class TestGetPlayersByTeam:
 
 class TestCreatePlayer:
     def test_create_player_success(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean Dupont",
             level=3,
             sex="H",
@@ -87,7 +86,7 @@ class TestCreatePlayer:
         assert set(result.category_names) == {"Mixte", "+35"}
 
     def test_create_player_team_not_found(self, db_session):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -100,7 +99,7 @@ class TestCreatePlayer:
 
 class TestUpdatePlayer:
     def test_update_player_success(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -109,7 +108,7 @@ class TestUpdatePlayer:
         )
         created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        update_in = ApiUpdatePlayer(
+        update_in = PlayerBase(
             name="Jean Modifié",
             level=3,
             sex="F",
@@ -131,7 +130,7 @@ class TestUpdatePlayer:
         assert set(result.category_names) == {"+35", "+50"}
 
     def test_update_player_not_found(self, db_session, team, test_user):
-        update_in = ApiUpdatePlayer(
+        update_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -144,7 +143,7 @@ class TestUpdatePlayer:
             )
 
     def test_update_player_wrong_team(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -153,7 +152,7 @@ class TestUpdatePlayer:
         )
         created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        update_in = ApiUpdatePlayer(
+        update_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -166,7 +165,7 @@ class TestUpdatePlayer:
             )
 
     def test_update_player_forbidden(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -175,7 +174,7 @@ class TestUpdatePlayer:
         )
         created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        update_in = ApiUpdatePlayer(
+        update_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -188,7 +187,7 @@ class TestUpdatePlayer:
             )
 
     def test_update_player_categories_add_and_remove(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -197,7 +196,7 @@ class TestUpdatePlayer:
         )
         created = player_service.create_player(db_session, team.name, player_in, test_user.id)
 
-        update_in = ApiUpdatePlayer(
+        update_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -216,7 +215,7 @@ class TestUpdatePlayer:
 
 class TestDeletePlayer:
     def test_delete_player_success(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -234,7 +233,7 @@ class TestDeletePlayer:
             player_service.delete_player(db_session, 999, team.name, test_user.id)
 
     def test_delete_player_forbidden(self, db_session, team, test_user):
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",
@@ -249,7 +248,7 @@ class TestDeletePlayer:
     def test_delete_player_does_not_delete_category(self, db_session, team, test_user):
         from app.applications.rugby_teams.models.category import Category
 
-        player_in = ApiCreatePlayer(
+        player_in = PlayerBase(
             name="Jean",
             level=2,
             sex="H",

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PlayerInfo(BaseModel):
@@ -13,7 +13,7 @@ class PlayerInfo(BaseModel):
 
 class DistributeInput(BaseModel):
     player_ids: list[int]
-    team_count: int
+    team_count: int = Field(..., ge=2, le=50)
     algorithm: str
 
 

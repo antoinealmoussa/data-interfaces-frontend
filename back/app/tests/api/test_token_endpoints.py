@@ -20,7 +20,7 @@ def test_refresh_token_invalid(client):
 
 
 def test_refresh_token_wrong_type(client, test_user):
-    from app.core.token import create_access_token
+    from app.core.jwt import create_access_token
     token = create_access_token(
         data={"sub": test_user.email, "token_version": test_user.token_version}
     )
@@ -42,7 +42,7 @@ def test_refresh_token_missing_sub(client):
 
 
 def test_refresh_token_success(client, test_user):
-    from app.core.token import create_refresh_token
+    from app.core.jwt import create_refresh_token
     refresh_token = create_refresh_token(
         data={"sub": test_user.email, "token_version": test_user.token_version},
     )

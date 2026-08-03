@@ -3,13 +3,9 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app.applications.rugby_teams.schemas.player import (
-    ApiCreatePlayer,
-    ApiReturnPlayer,
-    ApiUpdatePlayer,
-)
+from app.applications.rugby_teams.schemas.player import ApiReturnPlayer, PlayerBase
 from app.applications.rugby_teams.services import player_service
-from app.core.token import get_current_active_user
+from app.core.dependencies import get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 
@@ -24,14 +20,16 @@ def read_players(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> List[ApiReturnPlayer]:
-    players = player_service.get_players_by_team(db, team_name, skip=skip, limit=limit)
+    players = player_service.get_players_by_team(
+        db, team_name, current_user.id, skip=skip, limit=limit
+    )
     return [ApiReturnPlayer.model_validate(p) for p in players]
 
 
 @router.post("", response_model=ApiReturnPlayer, status_code=status.HTTP_201_CREATED)
 def create_player(
     team_name: str,
-    player_in: ApiCreatePlayer,
+    player_in: PlayerBase,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnPlayer:
@@ -42,7 +40,7 @@ def create_player(
 def update_player(
     team_name: str,
     player_id: int,
-    player_in: ApiUpdatePlayer,
+    player_in: PlayerBase,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnPlayer:

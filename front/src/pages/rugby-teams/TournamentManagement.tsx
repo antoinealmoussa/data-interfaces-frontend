@@ -1,25 +1,21 @@
-import { Box, Button, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { Box, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PeopleIcon from "@mui/icons-material/People";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
 import { tournamentApi } from "../../api/rugby-teams/tournamentApi";
 import { playerApi } from "../../api/rugby-teams/playerApi";
 import { GenericDataTable } from "../../components/common/GenericDataTable";
-import { ConfirmDialog } from "../../components/common/ConfirmDialog";
-import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
-import { TournamentModal } from "../../components/rugby-teams/tournament/TournamentModal";
 import { PageGuard } from "../../components/common/PageGuard";
+import { EntityCrudPage } from "../../components/common/EntityCrudPage";
+import { TournamentModal } from "../../components/rugby-teams/tournament/TournamentModal";
 import type {
   Tournament,
   CreateTournamentDto,
 } from "../../types/rugby-teams/tournamentTypes";
-import type { Column, Action } from "../../components/common/GenericDataTable";
+import type { Column } from "../../components/common/GenericDataTable";
 import type { PlayerSimple } from "../../types/rugby-teams/playerTypes";
-import { useCrudManager } from "../../hooks/useCrudManager";
 
 interface PlayerStatsRow {
   id: number;
@@ -31,41 +27,7 @@ interface PlayerStatsRow {
 const TournamentManagement = () => {
   const { team, season, loading, error } = useTeamAndSeason();
   const [viewMode, setViewMode] = useState<"player" | "tournament">("player");
-
-  const tournamentManager = useCrudManager<Tournament, CreateTournamentDto>({
-    queryKey: ["tournaments", team?.name],
-    queryFn: () =>
-      tournamentApi.getByTeam(team!.name).then((data) =>
-        data
-          .map((t) => ({
-            ...t,
-            player_names: [...t.player_names].sort((a, b) =>
-              a.localeCompare(b),
-            ),
-          }))
-          .sort((a, b) => b.id - a.id),
-      ),
-    createFn: (data) => tournamentApi.create(team!.name, data),
-    updateFn: (id, data) => tournamentApi.update(team!.name, id, data),
-    deleteFn: (id) => tournamentApi.delete(team!.name, id),
-    entityName: "tournoi",
-    enabled: !!team,
-  });
-
-  const {
-    entities: tournaments,
-    isLoading: tournamentsLoading,
-    error: tournamentsError,
-    modalMode,
-    editingEntity: editingTournament,
-    deleteTarget,
-    snackbar,
-    handleCreate,
-    handleUpdate,
-    handleDelete,
-    handleCloseSnackbar,
-    deleteMutation,
-  } = tournamentManager;
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const { data: players = [] } = useQuery<PlayerSimple[]>({
     queryKey: ["tournament-players", team?.name],
@@ -107,34 +69,15 @@ const TournamentManagement = () => {
     });
   }, [players, tournaments]);
 
-  const playerColumns = useMemo((): Column<PlayerStatsRow>[] => {
-    const cats = team?.categories ?? [];
-    const categoryCols: Column<PlayerStatsRow>[] = cats.map((cat) => ({
-      key: cat,
-      label: cat,
-    }));
-    return [
-      { key: "name", label: "Nom" },
-      ...categoryCols,
-      { key: "total", label: "Total" },
-    ];
-  }, [team?.categories]);
-
-  const tournamentActions: Action<Tournament>[] = [
-    {
-      label: "Modifier",
-      icon: <EditIcon />,
-      onClick: (t) => {
-        tournamentManager.setEditingEntity(t);
-        tournamentManager.setModalMode("edit");
-      },
-    },
-    {
-      label: "Supprimer",
-      icon: <DeleteIcon />,
-      color: "error",
-      onClick: (t) => tournamentManager.setDeleteTarget(t),
-    },
+  const cats = team?.categories ?? [];
+  const categoryCols: Column<PlayerStatsRow>[] = cats.map((cat) => ({
+    key: cat,
+    label: cat,
+  }));
+  const playerColumns: Column<PlayerStatsRow>[] = [
+    { key: "name", label: "Nom" },
+    ...categoryCols,
+    { key: "total", label: "Total" },
   ];
 
   return (
@@ -163,40 +106,44 @@ const TournamentManagement = () => {
           </ToggleButtonGroup>
         </Box>
 
-        {viewMode === "tournament" && (
-          <>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 1,
-              }}
-            >
-              <Button
-                variant="contained"
-                startIcon={<EmojiEventsIcon />}
-                onClick={() => tournamentManager.setModalMode("create")}
-              >
-                Ajouter un tournoi
-              </Button>
-            </Box>
-
-            <GenericDataTable
-              columns={tournamentColumns}
-              rows={tournaments}
-              actions={tournamentActions}
-              loading={tournamentsLoading}
-              error={
-                tournamentsError
-                  ? "Erreur lors du chargement des tournois"
-                  : null
-              }
-              emptyMessage="Aucun tournoi dans cette équipe"
-              getRowId={(t) => t.id}
+        <EntityCrudPage<Tournament, CreateTournamentDto>
+          queryKey={["tournaments", team?.name]}
+          queryFn={() =>
+            tournamentApi.getByTeam(team!.name).then((data) =>
+              data
+                .map((t) => ({
+                  ...t,
+                  player_names: [...t.player_names].sort((a, b) =>
+                    a.localeCompare(b),
+                  ),
+                }))
+                .sort((a, b) => b.id - a.id),
+            )
+          }
+          createFn={(data) => tournamentApi.create(team!.name, data)}
+          updateFn={(id, data) => tournamentApi.update(team!.name, id, data)}
+          deleteFn={(id) => tournamentApi.delete(team!.name, id)}
+          entityName="tournoi"
+          enabled={!!team}
+          columns={tournamentColumns}
+          addButtonLabel="Ajouter un tournoi"
+          addButtonIcon={<EmojiEventsIcon />}
+          emptyMessage="Aucun tournoi dans cette équipe"
+          loadingErrorMsg="Erreur lors du chargement des tournois"
+          showContent={viewMode === "tournament"}
+          onEntitiesChange={setTournaments}
+          renderForm={({ open, mode, entity, onSave, onClose }) => (
+            <TournamentModal
+              open={open}
+              mode={mode}
+              tournament={entity}
+              onSave={onSave}
+              onClose={onClose}
+              teamCategories={team?.categories ?? []}
+              teamPlayers={players}
             />
-          </>
-        )}
+          )}
+        />
 
         {viewMode === "player" && (
           <GenericDataTable<PlayerStatsRow>
@@ -208,37 +155,6 @@ const TournamentManagement = () => {
             defaultOrder="desc"
           />
         )}
-
-        <TournamentModal
-          open={modalMode !== null}
-          mode={modalMode ?? "create"}
-          tournament={editingTournament}
-          onSave={modalMode === "create" ? handleCreate : handleUpdate}
-          onClose={() => {
-            tournamentManager.setModalMode(null);
-            tournamentManager.setEditingEntity(null);
-          }}
-          teamCategories={team?.categories ?? []}
-          teamPlayers={players}
-        />
-
-        <ConfirmDialog
-          open={deleteTarget !== null}
-          title="Supprimer le tournoi"
-          message={`Êtes-vous sûr de vouloir supprimer ${deleteTarget?.name} ? Cette action est irréversible.`}
-          confirmLabel="Supprimer"
-          confirmColor="error"
-          loading={deleteMutation.isPending}
-          onConfirm={handleDelete}
-          onCancel={() => tournamentManager.setDeleteTarget(null)}
-        />
-
-        <NotificationSnackbar
-          open={snackbar.open}
-          severity={snackbar.severity}
-          message={snackbar.message}
-          onClose={handleCloseSnackbar}
-        />
       </Box>
     </PageGuard>
   );

@@ -9,7 +9,6 @@ class TestTeamBaseValidators:
         team = ApiCreateTeam(
             name="Mon équipe",
             categories=["Mixte"],
-            user_id=1,
             season_name="2025-2026",
         )
         assert team.name == "Mon équipe"
@@ -19,8 +18,7 @@ class TestTeamBaseValidators:
             ApiCreateTeam(
                 name="A" * 51,
                 categories=["Mixte"],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
         assert "50 caractères" in str(exc.value)
 
@@ -29,8 +27,7 @@ class TestTeamBaseValidators:
             ApiCreateTeam(
                 name="",
                 categories=["Mixte"],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
         assert "obligatoire" in str(exc.value) or "nom" in str(exc.value).lower()
 
@@ -39,8 +36,7 @@ class TestTeamBaseValidators:
             ApiCreateTeam(
                 name="   ",
                 categories=["Mixte"],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
 
 
@@ -49,7 +45,6 @@ class TestCategoriesValidator:
         team = ApiCreateTeam(
             name="Mon équipe",
             categories=["Mixte", "+35", "Open masculin"],
-            user_id=1,
             season_name="2025-2026",
         )
         assert len(team.categories) == 3
@@ -59,8 +54,7 @@ class TestCategoriesValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=[],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
         assert "au moins une catégorie" in str(exc.value).lower()
 
@@ -69,8 +63,7 @@ class TestCategoriesValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=None,
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
 
     def test_categories_invalid_value(self):
@@ -78,8 +71,7 @@ class TestCategoriesValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=["InvalidCategory"],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
         assert "invalide" in str(exc.value).lower()
 
@@ -88,8 +80,7 @@ class TestCategoriesValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=["mixte"],
-                user_id=1,
-                season_name="2025-2026",
+                    season_name="2025-2026",
             )
 
 
@@ -98,7 +89,6 @@ class TestSeasonNameValidator:
         team = ApiCreateTeam(
             name="Mon équipe",
             categories=["Mixte"],
-            user_id=1,
             season_name="2025-2026",
         )
         assert team.season_name == "2025-2026"
@@ -108,8 +98,7 @@ class TestSeasonNameValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=["Mixte"],
-                user_id=1,
-                season_name="",
+                    season_name="",
             )
         assert "saison" in str(exc.value).lower()
 
@@ -118,8 +107,7 @@ class TestSeasonNameValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=["Mixte"],
-                user_id=1,
-                season_name="2025-2027",
+                    season_name="2025-2027",
             )
 
     def test_season_name_non_consecutive(self):
@@ -127,6 +115,5 @@ class TestSeasonNameValidator:
             ApiCreateTeam(
                 name="Mon équipe",
                 categories=["Mixte"],
-                user_id=1,
-                season_name="2025-2027",
+                    season_name="2025-2027",
             )

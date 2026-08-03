@@ -1,7 +1,8 @@
+from collections.abc import Iterable
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.db.session import Base
 
@@ -19,6 +20,7 @@ def _model_fields(model_class: type) -> set[str]:
 class BaseRepository(Generic[ModelType, ReturnSchemaType]):
     model_class: type[ModelType]
     return_schema: type[ReturnSchemaType]
+    _default_eager: tuple[str, ...] = ()
 
     def __init__(self, db: Session):
         self.db = db
@@ -29,9 +31,16 @@ class BaseRepository(Generic[ModelType, ReturnSchemaType]):
         ).first()
 
     def get_many(
-        self, skip: int = 0, limit: int = 100, **filters: Any
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        eager: Iterable[str] | None = None,
+        **filters: Any,
     ) -> list[ModelType]:
+        relations = self._default_eager if eager is None else tuple(eager)
         q = self.db.query(self.model_class)
+        for name in relations:
+            q = q.options(selectinload(getattr(self.model_class, name)))
         for attr, value in filters.items():
             q = q.filter(getattr(self.model_class, attr) == value)
         return q.offset(skip).limit(limit).all()

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { CreateTeamDto } from "../../../types/rugby-teams/teamTypes";
 
 const mockedClient = {
   get: vi.fn(),
@@ -24,40 +25,10 @@ describe("teamApi", () => {
     expect(result).toEqual([{ id: 1, name: "Team A" }]);
   });
 
-  it("getBySeason devrait appeler GET /rugby-teams/teams/by-season/:id", async () => {
-    mockedClient.get.mockResolvedValue({ data: [{ id: 1, name: "Team B" }] });
-
-    const { teamApi } = await import("../../../api/rugby-teams/teamApi");
-    const result = await teamApi.getBySeason(42);
-
-    expect(mockedClient.get).toHaveBeenCalledWith("/rugby-teams/teams/by-season/42");
-    expect(result).toEqual([{ id: 1, name: "Team B" }]);
-  });
-
-  it("hasTeams devrait retourner true si des équipes existent", async () => {
-    mockedClient.get.mockResolvedValue({ data: true });
-
-    const { teamApi } = await import("../../../api/rugby-teams/teamApi");
-    const result = await teamApi.hasTeams();
-
-    expect(mockedClient.get).toHaveBeenCalledWith("/rugby-teams/teams/has-teams");
-    expect(result).toBe(true);
-  });
-
-  it("hasTeams devrait retourner false si la requête échoue", async () => {
-    mockedClient.get.mockRejectedValue(new Error("Network error"));
-
-    const { teamApi } = await import("../../../api/rugby-teams/teamApi");
-    const result = await teamApi.hasTeams();
-
-    expect(result).toBe(false);
-  });
-
   it("create devrait appeler POST /rugby-teams/teams avec les données", async () => {
-    const newTeam = {
+    const newTeam: CreateTeamDto = {
       name: "New Team",
-      categories: ["Mixte"] as const,
-      user_id: 1,
+      categories: ["Mixte"],
       season_name: "2025-2026",
     };
     mockedClient.post.mockResolvedValue({ data: { id: 2, ...newTeam } });

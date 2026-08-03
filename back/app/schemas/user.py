@@ -30,6 +30,16 @@ class ApiCreateUser(UserBase):
     Le mot de passe n'est présent qu'ici.
     """
     password: str
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError("Le mot de passe doit contenir au moins 8 caractères")
+        if len(v) > 128:
+            raise ValueError("Le mot de passe ne peut pas dépasser 128 caractères")
+        return v
+
     def to_model(self, hashed_pw: str):
         return User(
             email=self.email,
@@ -53,12 +63,6 @@ class ApiReturnUserWithApplications(BaseModel):
     user: ApiReturnUser
     applications: List[ApiReturnApplication]
     model_config = ConfigDict(from_attributes=True)
-
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
 
 class ApiUpdateUser(BaseModel):

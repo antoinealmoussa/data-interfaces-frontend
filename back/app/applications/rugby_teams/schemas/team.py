@@ -9,7 +9,6 @@ from app.utils.validators import TEAM_CATEGORIES, validate_season_format
 class TeamBase(BaseModel):
     name: str
     categories: List[str]
-    user_id: int
 
     @field_validator("name")
     @classmethod
@@ -45,6 +44,7 @@ class ApiCreateTeam(TeamBase):
 
 class ApiReturnTeam(TeamBase):
     id: int
+    user_id: int
     seasons: List[ApiReturnSeason]
     model_config = ConfigDict(from_attributes=True)
 

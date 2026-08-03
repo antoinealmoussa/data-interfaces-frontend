@@ -6,17 +6,11 @@ import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
 import { RugbyTeamsSidebar } from "../../components/rugby-teams/RugbyTeamsSidebar";
 
 const RugbyTeams = () => {
-  const { teams, loading, refetch } = useTeamAndSeason();
+  const { teams, loading } = useTeamAndSeason();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.teamCreated) {
-      window.history.replaceState({}, "");
-      refetch();
-      return;
-    }
-
     if (loading) return;
 
     if (teams.length === 0 && !location.pathname.includes("team-creation")) {
@@ -37,7 +31,7 @@ const RugbyTeams = () => {
         }
       }
     }
-  }, [teams, loading, navigate, location.pathname, location.state, refetch]);
+  }, [teams, loading, navigate, location.pathname]);
 
   if (loading) {
     return (

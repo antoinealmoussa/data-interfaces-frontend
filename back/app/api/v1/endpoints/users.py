@@ -1,4 +1,3 @@
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,8 +9,9 @@ from app.api.v1.helpers import (
     set_auth_cookie,
     set_refresh_cookie,
 )
+from app.core.dependencies import get_current_active_user
+from app.core.jwt import create_access_token, create_refresh_token
 from app.core.rate_limit import RateLimiter
-from app.core.token import create_access_token, create_refresh_token, get_current_active_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import (
@@ -25,20 +25,17 @@ from app.services import user_service
 router = APIRouter()
 
 rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
-
-
-@router.get("/", response_model=List[ApiReturnUser], status_code=status.HTTP_200_OK)
-def read_users(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
-) -> List[ApiReturnUser]:
-    return user_service.get_all_users(db)
+register_limiter = RateLimiter(max_requests=10, window_seconds=60)
 
 
 @router.post(
     "/register", response_model=ApiReturnUser, status_code=status.HTTP_201_CREATED
 )
-def register(user_in: ApiCreateUser, db: Session = Depends(get_db)) -> ApiReturnUser:
+def register(
+    user_in: ApiCreateUser,
+    db: Session = Depends(get_db),
+    _: None = Depends(register_limiter),
+) -> ApiReturnUser:
     try:
         new_user = user_service.create_user(db, user_in=user_in)
     except ValueError as e:

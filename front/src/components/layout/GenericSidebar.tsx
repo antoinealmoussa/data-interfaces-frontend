@@ -22,6 +22,7 @@ export const GenericSidebar = ({
   selectedSeasonName,
   onTeamChange,
   onSeasonChange,
+  basePath = "/rugby-teams",
 }: GenericSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const GenericSidebar = ({
   const handleNavigation = (path: string) => {
     if (selectedTeamName && selectedSeasonName) {
       navigate(
-        `/rugby-teams/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(selectedSeasonName)}/${path}`,
+        `${basePath}/${encodeURIComponent(selectedTeamName)}/${encodeURIComponent(selectedSeasonName)}/${path}`,
       );
     }
   };

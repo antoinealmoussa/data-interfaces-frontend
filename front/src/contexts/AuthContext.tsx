@@ -7,6 +7,7 @@ import type {
   AuthContextType,
 } from "../types/authTypes";
 import apiClient from "../api/client";
+import { AUTH_EVENTS, API_PATHS } from "../api/endpoints";
 import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
@@ -26,7 +27,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     apiClient
-      .get<MeResponse>("/users/me")
+      .get<MeResponse>(API_PATHS.auth.me)
       .then((response) => {
         setUser(response.data.user);
         setApplications(response.data.applications);
@@ -47,19 +48,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [isAuthenticated, isLoading, navigate]);
 
   useEffect(() => {
-    window.addEventListener("auth:unauthorized", unauthorize);
-    return () => window.removeEventListener("auth:unauthorized", unauthorize);
+    window.addEventListener(AUTH_EVENTS.unauthorized, unauthorize);
+    return () => window.removeEventListener(AUTH_EVENTS.unauthorized, unauthorize);
   }, []);
 
   const login = async () => {
-    const response = await apiClient.get<MeResponse>("/users/me");
+    const response = await apiClient.get<MeResponse>(API_PATHS.auth.me);
     setUser(response.data.user);
     setApplications(response.data.applications);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    await apiClient.post("/users/logout");
+    await apiClient.post(API_PATHS.auth.logout);
     setIsAuthenticated(false);
     setApplications(null);
     setUser(null);

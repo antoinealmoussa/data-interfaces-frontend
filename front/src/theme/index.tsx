@@ -1,11 +1,8 @@
 import { ThemeProvider, CssBaseline } from "@mui/material";
+import type { ReactNode } from "react";
 import theme from "./theme";
 
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
-
-export const AppThemeProvider: React.FC<ThemeProviderProps> = ({
+export const AppThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   return (
