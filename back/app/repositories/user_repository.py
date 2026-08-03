@@ -40,8 +40,3 @@ class UserRepository(BaseRepository[User, ApiReturnUser]):
         if app not in user.applications:
             user.applications.append(app)
             self.db.commit()
-
-    def remove_application(self, user: User, app: Application) -> None:
-        if app in user.applications:
-            user.applications.remove(app)
-            self.db.commit()

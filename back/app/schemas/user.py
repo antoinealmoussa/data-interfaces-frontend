@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.user import User
 from app.schemas.application import ApiReturnApplication
@@ -30,6 +30,7 @@ class ApiCreateUser(UserBase):
     Le mot de passe n'est présent qu'ici.
     """
     password: str
+    applications: List[str] = Field(default_factory=list)
 
     @field_validator("password")
     @classmethod

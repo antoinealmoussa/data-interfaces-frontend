@@ -3,6 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import UserProfile from "../../../pages/management/UserProfile";
+import { AuthContext } from "../../../contexts/AuthContextDefinition";
+import type { AuthContextType, User } from "../../../types/authTypes";
 import axios from "axios";
 const mockedAxios = vi.mocked(axios, true);
 
@@ -30,6 +32,36 @@ const renderProfile = () => {
     <QueryClientProvider client={queryClient}>
       <UserProfile />
     </QueryClientProvider>,
+  );
+};
+
+const renderAdminProfile = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const adminUser: User = {
+    id: 1,
+    email: "admin@example.com",
+    first_name: "Admin",
+    surname: "Root",
+    role: "admin",
+  };
+  const authContext: AuthContextType = {
+    isAuthenticated: true,
+    isLoading: false,
+    user: adminUser,
+    applications: [],
+    login: async () => {},
+    logout: async () => {},
+    hasRole: (...roles) => roles.includes(adminUser.role),
+    isAdmin: true,
+  };
+  return render(
+    <AuthContext.Provider value={authContext}>
+      <QueryClientProvider client={queryClient}>
+        <UserProfile />
+      </QueryClientProvider>
+    </AuthContext.Provider>,
   );
 };
 
@@ -127,6 +159,64 @@ describe("UserProfile", () => {
         screen.getByText(/erreur lors de la mise à jour/i),
       ).toBeInTheDocument();
     });
+  });
+
+  it("ne devrait pas afficher la section demandes d'accès pour un utilisateur normal", async () => {
+    mockedAxios.get.mockResolvedValue({
+      data: mockUserResponse,
+    });
+
+    renderProfile();
+
+    await waitFor(() => {
+      expect(screen.getByText("Mon profil")).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByText("Demandes d'accès"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("devrait afficher la section demandes d'accès pour un admin", async () => {
+    mockedAxios.get.mockImplementation((url: string) => {
+      if (url.includes("/applications")) {
+        return Promise.resolve({
+          data: [{ name: "rugby-teams", pretty_name: "Rugby Teams" }],
+        });
+      }
+      if (url.includes("/application-access-requests")) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 1,
+              status: "pending",
+              created_at: "2026-01-01T00:00:00",
+              user: {
+                id: 2,
+                email: "john.doe@example.com",
+                first_name: "John",
+                surname: "Doe",
+              },
+              applications: [
+                { name: "rugby-teams", pretty_name: "Rugby Teams" },
+              ],
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ data: mockUserResponse });
+    });
+
+    renderAdminProfile();
+
+    await waitFor(() => {
+      expect(screen.getByText("Demandes d'accès")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/John Doe — john.doe@example.com/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /rugby teams/i }),
+    ).toBeChecked();
   });
 
   it("ne devrait pas envoyer de requête si aucune modification n'a été faite", async () => {

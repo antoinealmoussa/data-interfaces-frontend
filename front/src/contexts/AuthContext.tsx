@@ -1,5 +1,4 @@
 import { useState, type ReactNode, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import type {
   User,
   Application,
@@ -18,7 +17,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[] | null>(null);
-  const navigate = useNavigate();
 
   const unauthorize = () => {
     setIsAuthenticated(false);
@@ -41,12 +39,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         setIsLoading(false);
       });
   }, []);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate("/login", { replace: true });
-    }
-  }, [isAuthenticated, isLoading, navigate]);
 
   useEffect(() => {
     window.addEventListener(AUTH_EVENTS.unauthorized, unauthorize);

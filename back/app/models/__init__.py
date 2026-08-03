@@ -10,6 +10,12 @@ from app.applications.rugby_teams.models.tournament_player import (
     TournamentPlayer as TournamentPlayer,
 )
 from app.models.application import Application as Application
+from app.models.application_access_request import (
+    ApplicationAccessRequest as ApplicationAccessRequest,
+)
+from app.models.application_access_request_application import (
+    application_access_request_application as application_access_request_application,
+)
 from app.models.role import Role as Role
 from app.models.user import User as User
 from app.models.user_application import user_application as user_application

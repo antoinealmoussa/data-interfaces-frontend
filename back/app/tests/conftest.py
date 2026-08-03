@@ -33,10 +33,14 @@ def seed_categories(db):
 
 
 def seed_applications(db):
-    app = Application(name="rugby-teams", pretty_name="Rugby Teams")
-    db.add(app)
+    for name, pretty_name in (
+        ("bike-exploration", "Exploration vélo"),
+        ("rugby-teams", "Rugby Teams"),
+        ("race-preparation", "Préparation de course"),
+    ):
+        db.add(Application(name=name, pretty_name=pretty_name))
     db.commit()
-    return app
+    return db.query(Application).filter(Application.name == "rugby-teams").first()
 
 
 def seed_roles(db):
@@ -108,6 +112,15 @@ def admin_user(db_session):
 def authenticated_client(client, test_user):
     token = create_access_token(
         data={"sub": test_user.email, "token_version": test_user.token_version}
+    )
+    client.cookies.set("access_token", token)
+    return client
+
+
+@pytest.fixture(scope="function")
+def admin_client(client, admin_user):
+    token = create_access_token(
+        data={"sub": admin_user.email, "token_version": admin_user.token_version}
     )
     client.cookies.set("access_token", token)
     return client

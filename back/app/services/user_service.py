@@ -5,6 +5,10 @@ from app.models.user import User
 from app.repositories.role_repository import RoleRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import ApiCreateUser, ApiUpdateUser
+from app.services.application_access_request_service import (
+    create_request,
+    resolve_applications,
+)
 
 NORMAL_USER_ROLE = "normal_user"
 
@@ -17,7 +21,11 @@ def get_user_by_id(db: Session, user_id: int) -> User | None:
     return UserRepository(db).get_by_id(user_id)
 
 
-def create_user(db: Session, user_in: ApiCreateUser) -> User:
+def create_user(
+    db: Session,
+    user_in: ApiCreateUser,
+    applications: list[str] | None = None,
+) -> User:
     existing_user = get_user_by_email(db, user_in.email)
     if existing_user:
         raise ValueError("Cet email est déjà utilisé.")
@@ -26,8 +34,13 @@ def create_user(db: Session, user_in: ApiCreateUser) -> User:
     if normal_role is None:
         raise ValueError("Rôle 'normal_user' introuvable en base.")
 
+    resolved_apps = resolve_applications(db, applications or [])
+
     hashed_pw = hash_password(user_in.password)
-    return UserRepository(db).create_user(user_in, hashed_pw, normal_role.id)
+    user = UserRepository(db).create_user(user_in, hashed_pw, normal_role.id)
+
+    create_request(db, user, resolved_apps)
+    return user
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | bool:

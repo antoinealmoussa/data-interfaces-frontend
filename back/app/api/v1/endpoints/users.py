@@ -37,7 +37,9 @@ def register(
     _: None = Depends(register_limiter),
 ) -> ApiReturnUser:
     try:
-        new_user = user_service.create_user(db, user_in=user_in)
+        new_user = user_service.create_user(
+            db, user_in=user_in, applications=user_in.applications
+        )
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 

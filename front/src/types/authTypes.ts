@@ -8,6 +8,7 @@ export type RegisterFormProps = {
   password: string;
   first_name: string;
   surname: string;
+  applications: string[];
 };
 
 export type Role = "admin" | "normal_user";
@@ -23,6 +24,19 @@ export type User = {
 export type Application = {
   name: string;
   pretty_name: string;
+};
+
+export type ApplicationAccessRequest = {
+  id: number;
+  status: string;
+  created_at: string;
+  user: {
+    id: number;
+    email: string;
+    first_name: string;
+    surname: string;
+  };
+  applications: Application[];
 };
 
 export type MeResponse = {
