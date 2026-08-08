@@ -181,7 +181,9 @@ describe("UserProfile", () => {
     mockedAxios.get.mockImplementation((url: string) => {
       if (url.includes("/applications")) {
         return Promise.resolve({
-          data: [{ name: "rugby-teams", pretty_name: "Rugby Teams" }],
+          data: [
+            { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+          ],
         });
       }
       if (url.includes("/application-access-requests")) {
@@ -198,7 +200,7 @@ describe("UserProfile", () => {
                 surname: "Doe",
               },
               applications: [
-                { name: "rugby-teams", pretty_name: "Rugby Teams" },
+                { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
               ],
             },
           ],

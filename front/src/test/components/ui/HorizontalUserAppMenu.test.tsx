@@ -52,7 +52,7 @@ describe("HorizontalUserAppMenu", () => {
         role: "normal_user" as const,
       },
       applications: [
-        { name: "bike-exploration", pretty_name: "Bike Exploration" },
+        { name: "bike-exploration", pretty_name: "Bike Exploration", description: "Sorties et explorations vélo" },
       ],
       token: "test-token",
       login: vi.fn(),
@@ -88,8 +88,8 @@ describe("HorizontalUserAppMenu", () => {
         role: "normal_user" as const,
       },
       applications: [
-        { name: "bike-exploration", pretty_name: "Bike Exploration" },
-        { name: "rugby-teams", pretty_name: "Rugby Teams" },
+        { name: "bike-exploration", pretty_name: "Bike Exploration", description: "Sorties et explorations vélo" },
+        { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
       ],
       token: "test-token",
       login: vi.fn(),

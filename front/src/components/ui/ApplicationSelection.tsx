@@ -27,7 +27,7 @@ export const ApplicationSelection: React.FC<ApplicationSelectionProps> = ({
               onChange={() => onChange(toggleArrayItem(value, app.name))}
             />
           }
-          label={app.pretty_name}
+          label={app.description}
         />
       ))}
     </FormGroup>

@@ -208,7 +208,7 @@ describe("AuthContext", () => {
           surname: "User",
           role: "normal_user",
         },
-        applications: [{ name: "test-app", pretty_name: "Test App" }],
+        applications: [{ name: "test-app", pretty_name: "Test App", description: "Test description" }],
       },
     });
 

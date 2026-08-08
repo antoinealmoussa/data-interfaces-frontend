@@ -12,4 +12,4 @@ def test_list_applications_public(client):
     assert "bike-exploration" in names
     assert "race-preparation" in names
     for app in data:
-        assert set(app.keys()) == {"id", "name", "pretty_name"}
+        assert set(app.keys()) == {"id", "name", "pretty_name", "description"}

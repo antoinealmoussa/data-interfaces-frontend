@@ -13,8 +13,8 @@ vi.mock("../../../api/config", () => ({
 }));
 
 const mockApplications = [
-  { name: "rugby-teams", pretty_name: "Rugby Teams" },
-  { name: "bike-exploration", pretty_name: "Exploration vélo" },
+  { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+  { name: "bike-exploration", pretty_name: "Exploration vélo", description: "Sorties et explorations vélo" },
 ];
 
 const mockRequest = {
@@ -28,8 +28,8 @@ const mockRequest = {
     surname: "Doe",
   },
   applications: [
-    { name: "rugby-teams", pretty_name: "Rugby Teams" },
-    { name: "bike-exploration", pretty_name: "Exploration vélo" },
+    { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+    { name: "bike-exploration", pretty_name: "Exploration vélo", description: "Sorties et explorations vélo" },
   ],
 };
 
@@ -64,10 +64,10 @@ describe("AccessRequestsManager", () => {
     });
 
     expect(
-      screen.getByRole("checkbox", { name: /rugby teams/i }),
+      screen.getByRole("checkbox", { name: /gestion d'équipes de rugby/i }),
     ).toBeChecked();
     expect(
-      screen.getByRole("checkbox", { name: /exploration vélo/i }),
+      screen.getByRole("checkbox", { name: /sorties et explorations vélo/i }),
     ).toBeChecked();
     expect(
       screen.getByRole("button", { name: /approuver/i }),
@@ -115,12 +115,12 @@ describe("AccessRequestsManager", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("checkbox", { name: /rugby teams/i }),
+        screen.getByRole("checkbox", { name: /gestion d'équipes de rugby/i }),
       ).toBeInTheDocument();
     });
 
     await user.click(
-      screen.getByRole("checkbox", { name: /rugby teams/i }),
+      screen.getByRole("checkbox", { name: /gestion d'équipes de rugby/i }),
     );
     await user.click(screen.getByRole("button", { name: /approuver/i }));
 

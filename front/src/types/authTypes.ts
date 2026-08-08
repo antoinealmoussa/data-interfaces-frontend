@@ -24,6 +24,7 @@ export type User = {
 export type Application = {
   name: string;
   pretty_name: string;
+  description: string;
 };
 
 export type ApplicationAccessRequest = {

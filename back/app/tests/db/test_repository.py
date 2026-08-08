@@ -7,18 +7,21 @@ from app.models.application import Application
 class ApplicationCreate(BaseModel):
     name: str
     pretty_name: str
+    description: str
     unknown_field: str = "ignored"
 
 
 class ApplicationUpdate(BaseModel):
     name: str | None = None
     pretty_name: str | None = None
+    description: str | None = None
 
 
 class ApplicationRepoReturn(BaseModel):
     id: int
     name: str
     pretty_name: str
+    description: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -30,7 +33,7 @@ class ApplicationRepository(BaseRepository[Application, ApplicationRepoReturn]):
 
 def test_get_by_id_found(db_session):
     repo = ApplicationRepository(db_session)
-    app = Application(name="test-app", pretty_name="Test App")
+    app = Application(name="test-app", pretty_name="Test App", description="Test description")
     db_session.add(app)
     db_session.commit()
     db_session.refresh(app)
@@ -51,7 +54,7 @@ def test_get_by_id_not_found(db_session):
 def test_get_many_with_filters(db_session):
     repo = ApplicationRepository(db_session)
     for i in range(3):
-        db_session.add(Application(name=f"app-{i}", pretty_name=f"App {i}"))
+        db_session.add(Application(name=f"app-{i}", pretty_name=f"App {i}", description=f"Description {i}"))
     db_session.commit()
 
     results = repo.get_many(pretty_name="App 1")
@@ -63,7 +66,7 @@ def test_get_many_with_filters(db_session):
 def test_get_many_with_pagination(db_session):
     repo = ApplicationRepository(db_session)
     for i in range(3):
-        db_session.add(Application(name=f"app-{i}", pretty_name=f"App {i}"))
+        db_session.add(Application(name=f"app-{i}", pretty_name=f"App {i}", description=f"Description {i}"))
     db_session.commit()
 
     all_apps = repo.get_many()
@@ -77,12 +80,17 @@ def test_create_filters_unknown_fields(db_session):
     repo = ApplicationRepository(db_session)
 
     result = repo.create(
-        ApplicationCreate(name="created-app", pretty_name="Created App")
+        ApplicationCreate(
+            name="created-app",
+            pretty_name="Created App",
+            description="Created description",
+        )
     )
 
     assert isinstance(result, ApplicationRepoReturn)
     assert result.name == "created-app"
     assert result.pretty_name == "Created App"
+    assert result.description == "Created description"
 
     db_obj = (
         db_session.query(Application)
@@ -94,7 +102,7 @@ def test_create_filters_unknown_fields(db_session):
 
 def test_update_partial(db_session):
     repo = ApplicationRepository(db_session)
-    app = Application(name="orig", pretty_name="Original")
+    app = Application(name="orig", pretty_name="Original", description="Original description")
     db_session.add(app)
     db_session.commit()
     db_session.refresh(app)
@@ -114,7 +122,7 @@ def test_update_not_found(db_session):
 
 def test_delete_existing(db_session):
     repo = ApplicationRepository(db_session)
-    app = Application(name="del-me", pretty_name="Delete Me")
+    app = Application(name="del-me", pretty_name="Delete Me", description="Delete description")
     db_session.add(app)
     db_session.commit()
     db_session.refresh(app)

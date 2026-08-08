@@ -26,8 +26,8 @@ const renderWithRouter = (component: React.ReactElement) => {
 };
 
 const mockApplications = [
-  { name: "rugby-teams", pretty_name: "Rugby Teams" },
-  { name: "bike-exploration", pretty_name: "Exploration vélo" },
+  { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+  { name: "bike-exploration", pretty_name: "Exploration vélo", description: "Sorties et explorations vélo" },
 ];
 
 describe("RegisterForm", () => {
@@ -111,11 +111,11 @@ describe("RegisterForm", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("checkbox", { name: /rugby teams/i }),
+        screen.getByRole("checkbox", { name: /gestion d'équipes de rugby/i }),
       ).toBeInTheDocument();
     });
     expect(
-      screen.getByRole("checkbox", { name: /exploration vélo/i }),
+      screen.getByRole("checkbox", { name: /sorties et explorations vélo/i }),
     ).toBeInTheDocument();
   });
 
@@ -140,7 +140,7 @@ describe("RegisterForm", () => {
     await user.type(passwordInput, "password123");
 
     const rugbyCheckbox = await screen.findByRole("checkbox", {
-      name: /rugby teams/i,
+      name: /gestion d'équipes de rugby/i,
     });
     await user.click(rugbyCheckbox);
     await user.click(submitButton);

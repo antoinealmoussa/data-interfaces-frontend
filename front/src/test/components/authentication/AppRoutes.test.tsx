@@ -83,7 +83,9 @@ describe("AppRoutes", () => {
           surname: "Dupont",
           role: "normal_user",
         },
-        applications: [{ name: "rugby-teams", pretty_name: "Rugby Teams" }],
+        applications: [
+          { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+        ],
       },
     });
 

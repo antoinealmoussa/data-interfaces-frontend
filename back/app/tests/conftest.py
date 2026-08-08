@@ -33,12 +33,12 @@ def seed_categories(db):
 
 
 def seed_applications(db):
-    for name, pretty_name in (
-        ("bike-exploration", "Exploration vélo"),
-        ("rugby-teams", "Rugby Teams"),
-        ("race-preparation", "Préparation de course"),
+    for name, pretty_name, description in (
+        ("bike-exploration", "Exploration vélo", "Sorties et explorations vélo"),
+        ("rugby-teams", "Rugby Teams", "Gestion d'équipes de rugby"),
+        ("race-preparation", "Préparation de course", "Préparation aux courses"),
     ):
-        db.add(Application(name=name, pretty_name=pretty_name))
+        db.add(Application(name=name, pretty_name=pretty_name, description=description))
     db.commit()
     return db.query(Application).filter(Application.name == "rugby-teams").first()
 
