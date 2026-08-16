@@ -9,6 +9,8 @@ import {
 } from "../../components/ui/UserInfoForm";
 import { NotificationSnackbar } from "../../components/common/NotificationSnackbar";
 import { PageGuard } from "../../components/common/PageGuard";
+import { RoleGuard } from "../../components/common/RoleGuard";
+import { AccessRequestsManager } from "../../components/ui/AccessRequestsManager";
 import { useSnackbar } from "../../hooks/useSnackbar";
 
 const UserProfile = () => {
@@ -88,6 +90,10 @@ const UserProfile = () => {
             isSubmitting={updateMutation.isPending}
           />
         )}
+
+        <RoleGuard roles={["admin"]}>
+          <AccessRequestsManager />
+        </RoleGuard>
 
         <NotificationSnackbar
           open={snackbar.open}

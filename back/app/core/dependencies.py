@@ -7,6 +7,7 @@ from app.core.jwt import decode_token
 from app.db.session import get_db
 from app.models.user import User
 from app.services.user_service import get_user_by_email
+from app.utils.exceptions import ForbiddenError
 
 
 async def get_current_user(
@@ -62,4 +63,11 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
     Réservé pour extension future : bannissement, vérification email, etc.
     """
+    return current_user
+
+
+async def get_current_admin(current_user: User = Depends(get_current_active_user)) -> User:
+    """Réservé aux admins. 403 sinon."""
+    if current_user.role.name != "admin":
+        raise ForbiddenError("Accès réservé aux administrateurs")
     return current_user

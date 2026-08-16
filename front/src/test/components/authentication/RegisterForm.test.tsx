@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RegisterForm } from "../../../components/authentication/RegisterForm";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
@@ -14,12 +15,25 @@ vi.mock("../../../api/config", () => ({
 }));
 
 const renderWithRouter = (component: React.ReactElement) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>);
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>{component}</BrowserRouter>
+    </QueryClientProvider>,
+  );
 };
+
+const mockApplications = [
+  { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+  { name: "bike-exploration", pretty_name: "Exploration vélo", description: "Sorties et explorations vélo" },
+];
 
 describe("RegisterForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedAxios.get.mockResolvedValue({ data: [] });
   });
 
   it("devrait afficher tous les champs du formulaire", () => {
@@ -85,6 +99,59 @@ describe("RegisterForm", () => {
         surname: "Doe",
         email: "john.doe@example.com",
         password: "password123",
+        applications: [],
+      });
+    });
+  });
+
+  it("devrait afficher la liste des applications disponibles", async () => {
+    mockedAxios.get.mockResolvedValue({ data: mockApplications });
+
+    renderWithRouter(<RegisterForm />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("checkbox", { name: /gestion d'équipes de rugby/i }),
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("checkbox", { name: /sorties et explorations vélo/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("devrait soumettre les applications sélectionnées", async () => {
+    const user = userEvent.setup();
+    mockedAxios.get.mockResolvedValue({ data: mockApplications });
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { message: "Inscription réussie" },
+    });
+
+    renderWithRouter(<RegisterForm />);
+
+    const firstNameInput = screen.getByLabelText(/prénom/i);
+    const surnameInput = screen.getByLabelText(/nom de famille/i);
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/mot de passe/i);
+    const submitButton = screen.getByRole("button", { name: /s'inscrire/i });
+
+    await user.type(firstNameInput, "John");
+    await user.type(surnameInput, "Doe");
+    await user.type(emailInput, "john.doe@example.com");
+    await user.type(passwordInput, "password123");
+
+    const rugbyCheckbox = await screen.findByRole("checkbox", {
+      name: /gestion d'équipes de rugby/i,
+    });
+    await user.click(rugbyCheckbox);
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockedAxios.post).toHaveBeenCalledWith("/users/register", {
+        first_name: "John",
+        surname: "Doe",
+        email: "john.doe@example.com",
+        password: "password123",
+        applications: ["rugby-teams"],
       });
     });
   });

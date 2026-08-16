@@ -54,6 +54,7 @@ describe("AuthContext", () => {
             email: "test@mail.com",
             first_name: "Test",
             surname: "test",
+            role: "normal_user",
           },
           applications: [],
         },
@@ -65,6 +66,7 @@ describe("AuthContext", () => {
             email: "test@mail.com",
             first_name: "Test",
             surname: "test",
+            role: "normal_user",
           },
           applications: [],
         },
@@ -89,6 +91,56 @@ describe("AuthContext", () => {
     expect(result.current.user?.email).toBe("test@mail.com");
     expect(result.current.user?.first_name).toBe("Test");
     expect(result.current.user?.surname).toBe("test");
+    expect(result.current.user?.role).toBe("normal_user");
+    expect(result.current.isAdmin).toBe(false);
+    expect(result.current.hasRole("normal_user")).toBe(true);
+    expect(result.current.hasRole("admin")).toBe(false);
+  });
+
+  it("devrait exposer isAdmin pour un utilisateur admin", async () => {
+    mockedClient.get
+      .mockResolvedValueOnce({
+        data: {
+          user: {
+            id: 1,
+            email: "admin@mail.com",
+            first_name: "Admin",
+            surname: "User",
+            role: "admin",
+          },
+          applications: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          user: {
+            id: 1,
+            email: "admin@mail.com",
+            first_name: "Admin",
+            surname: "User",
+            role: "admin",
+          },
+          applications: [],
+        },
+      });
+
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    await act(async () => {
+      await result.current.login();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isAuthenticated).toBe(true);
+    });
+    expect(result.current.isAdmin).toBe(true);
+    expect(result.current.hasRole("admin")).toBe(true);
   });
 
   it("devrait réinitialiser l'état après un login puis un logout", async () => {
@@ -100,6 +152,7 @@ describe("AuthContext", () => {
             email: "test@mail.com",
             first_name: "Test",
             surname: "test",
+            role: "normal_user",
           },
           applications: [],
         },
@@ -111,6 +164,7 @@ describe("AuthContext", () => {
             email: "test@mail.com",
             first_name: "Test",
             surname: "test",
+            role: "normal_user",
           },
           applications: [],
         },
@@ -152,8 +206,9 @@ describe("AuthContext", () => {
           email: "cookie@mail.com",
           first_name: "Cookie",
           surname: "User",
+          role: "normal_user",
         },
-        applications: [{ name: "test-app", pretty_name: "Test App" }],
+        applications: [{ name: "test-app", pretty_name: "Test App", description: "Test description" }],
       },
     });
 

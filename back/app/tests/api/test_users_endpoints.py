@@ -1,5 +1,6 @@
 from fastapi import status
 
+from app.models.application_access_request import ApplicationAccessRequest
 from app.services import user_service
 
 
@@ -19,8 +20,75 @@ def test_register_success(client):
     assert data["email"] == "register@test.com"
     assert data["first_name"] == "Register"
     assert data["surname"] == "User"
+    assert data["role"] == "normal_user"
     assert "id" in data
     assert "password" not in data
+
+
+def test_register_with_applications_creates_pending_request(client, db_session):
+    """Test POST /api/v1/users/register avec applications crée une demande pending."""
+    user_data = {
+        "email": "apps@test.com",
+        "password": "password123",
+        "first_name": "App",
+        "surname": "User",
+        "applications": ["rugby-teams"],
+    }
+
+    response = client.post("/api/v1/users/register", json=user_data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    user = user_service.get_user_by_email(db_session, "apps@test.com")
+    assert user is not None
+    assert user.applications == []
+
+    request = (
+        db_session.query(ApplicationAccessRequest)
+        .filter(ApplicationAccessRequest.user_id == user.id)
+        .first()
+    )
+    assert request is not None
+    assert request.status == "pending"
+    assert {app.name for app in request.applications} == {"rugby-teams"}
+
+
+def test_register_without_applications_no_request(client, db_session):
+    """Test POST /api/v1/users/register sans applications ne crée pas de demande."""
+    user_data = {
+        "email": "noapps@test.com",
+        "password": "password123",
+        "first_name": "NoApp",
+        "surname": "User",
+    }
+
+    response = client.post("/api/v1/users/register", json=user_data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    user = user_service.get_user_by_email(db_session, "noapps@test.com")
+    assert user is not None
+    request = (
+        db_session.query(ApplicationAccessRequest)
+        .filter(ApplicationAccessRequest.user_id == user.id)
+        .first()
+    )
+    assert request is None
+
+
+def test_register_unknown_application(client):
+    """Test POST /api/v1/users/register avec une application inconnue."""
+    user_data = {
+        "email": "badapp@test.com",
+        "password": "password123",
+        "first_name": "Bad",
+        "surname": "App",
+        "applications": ["does-not-exist"],
+    }
+
+    response = client.post("/api/v1/users/register", json=user_data)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_register_duplicate_email(client):
@@ -255,6 +323,7 @@ def test_read_users_me(authenticated_client):
     assert "email" in data["user"]
     assert "first_name" in data["user"]
     assert "surname" in data["user"]
+    assert data["user"]["role"] == "normal_user"
     assert "password" not in data["user"]
 
 

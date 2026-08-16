@@ -7,3 +7,4 @@ class ApiReturnApplication(BaseModel):
     id: int
     name: str
     pretty_name: str
+    description: str

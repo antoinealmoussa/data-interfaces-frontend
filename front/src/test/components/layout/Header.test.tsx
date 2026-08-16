@@ -20,6 +20,7 @@ const renderWithProviders = (ui: React.ReactElement, userData: Partial<User> | n
     email: "test@test.com",
     first_name: "Test",
     surname: "User",
+    role: "normal_user",
   };
 
   mockedAxios.get.mockResolvedValueOnce({
@@ -63,7 +64,7 @@ describe("Header", () => {
         <Routes>
           <Route path="/" element={<Header height={60} />} />
         </Routes>,
-        { id: 1, email: "test@test.com", first_name: "John", surname: "Doe" },
+        { id: 1, email: "test@test.com", first_name: "John", surname: "Doe", role: "normal_user" },
       );
     });
 

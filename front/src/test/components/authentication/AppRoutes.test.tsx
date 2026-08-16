@@ -60,6 +60,7 @@ describe("AppRoutes", () => {
           email: "test@test.com",
           first_name: "Jean",
           surname: "Dupont",
+          role: "normal_user",
         },
         applications: [],
       },
@@ -80,8 +81,11 @@ describe("AppRoutes", () => {
           email: "test@test.com",
           first_name: "Jean",
           surname: "Dupont",
+          role: "normal_user",
         },
-        applications: [{ name: "rugby-teams", pretty_name: "Rugby Teams" }],
+        applications: [
+          { name: "rugby-teams", pretty_name: "Rugby Teams", description: "Gestion d'équipes de rugby" },
+        ],
       },
     });
 
@@ -100,6 +104,7 @@ describe("AppRoutes", () => {
           email: "test@test.com",
           first_name: "Jean",
           surname: "Dupont",
+          role: "normal_user",
         },
         applications: [],
       },

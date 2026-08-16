@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    application_access_requests,
     applications,
     search_topic,
     token,
@@ -11,7 +12,14 @@ from app.applications.registrar import get_all_app_routers, register_all_known
 api_router = APIRouter()
 
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
-api_router.include_router(applications.router, prefix="/applications", tags=["Applications"])
+api_router.include_router(
+    applications.router, prefix="/applications", tags=["Applications"]
+)
+api_router.include_router(
+    application_access_requests.router,
+    prefix="/application-access-requests",
+    tags=["Applications"],
+)
 api_router.include_router(search_topic.router, prefix="/search", tags=["Search"])
 api_router.include_router(token.router, prefix="/token", tags=["Token"])
 

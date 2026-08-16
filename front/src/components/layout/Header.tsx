@@ -11,14 +11,14 @@ import { PRIVATE_STANDARD_ROUTES } from "../../routes";
 import { useLogout } from "../../hooks/useLogout";
 
 export const Header: React.FC<HeaderProps> = ({ height }) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const logout = useLogout();
 
   const rightMenuItems: MultiTypeMenuItemProps[] = [
     {
       item: {
         type: "label",
-        label: `${user?.first_name} ${user?.surname}`,
+        label: `${user?.first_name} ${user?.surname}${isAdmin ? " (Admin)" : ""}`,
       },
     },
     {

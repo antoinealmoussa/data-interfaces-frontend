@@ -7,6 +7,7 @@ describe("mapUserApplicationToMenuItem", () => {
     const apiData = {
       name: "bike-exploration",
       pretty_name: "Bike Exploration",
+      description: "Sorties et explorations vélo",
     };
 
     const config: RouteProps = {
@@ -27,6 +28,7 @@ describe("mapUserApplicationToMenuItem", () => {
     const apiData = {
       name: "rugby-teams",
       pretty_name: "Rugby Teams",
+      description: "Gestion d'équipes de rugby",
     };
 
     const config: RouteProps = {

@@ -71,6 +71,7 @@ describe("LoginForm", () => {
           email: "test@example.com",
           first_name: "Test",
           surname: "User",
+          role: "normal_user",
         },
         applications: [],
       },

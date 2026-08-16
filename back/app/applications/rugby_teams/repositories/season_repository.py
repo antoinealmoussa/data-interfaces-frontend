@@ -9,3 +9,10 @@ class SeasonRepository(BaseRepository[Season, ApiReturnSeason]):
 
     def get_by_name(self, name: str) -> Season | None:
         return self.db.query(Season).filter(Season.name == name).first()
+
+    def create_season(self, name: str) -> Season:
+        db_season = Season(name=name)
+        self.db.add(db_season)
+        self.db.commit()
+        self.db.refresh(db_season)
+        return db_season

@@ -88,12 +88,9 @@ def update_tournament(
     if len(players) != len(tournament_in.player_names):
         raise TournamentNotFoundError(0)
 
-    tournament.name = tournament_in.name
-    tournament.category_id = category.id
-    tournament.players = players
-    db.commit()
-    db.refresh(tournament)
-    return ApiReturnTournament.model_validate(tournament)
+    return ApiReturnTournament.model_validate(
+        repo.update_tournament(tournament, tournament_in.name, category.id, players)
+    )
 
 
 def delete_tournament(
@@ -110,5 +107,4 @@ def delete_tournament(
     if team.user_id != user_id:
         raise ForbiddenError()
 
-    db.delete(tournament)
-    db.commit()
+    repo.delete_tournament(tournament)

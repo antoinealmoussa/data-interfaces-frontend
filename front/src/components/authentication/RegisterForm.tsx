@@ -1,11 +1,15 @@
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { TextField, Button, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../api/client";
 import { WVA_QUOTE_TEXT } from "../../utils/constants";
 import { NotificationSnackbar } from "../common/NotificationSnackbar";
 import { useSnackbar } from "../../hooks/useSnackbar";
 import { registerSchema } from "../../utils/validationSchemas";
+import { ApplicationSelection } from "../ui/ApplicationSelection";
+import type { Application } from "../../types/authTypes";
+import { API_PATHS } from "../../api/endpoints";
 
 interface RegisterFieldErrors {
   first_name?: string;
@@ -23,6 +27,15 @@ const initialRegisterState: RegisterActionState = { errors: {} };
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
   const { snackbar, showSnackbar, handleCloseSnackbar } = useSnackbar();
+  const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
+
+  const { data: applications = [] } = useQuery({
+    queryKey: ["applications"],
+    queryFn: async () => {
+      const response = await apiClient.get<Application[]>(API_PATHS.applications.base);
+      return response.data;
+    },
+  });
 
   const [state, formAction, isSubmitting] = useActionState(
     async (
@@ -49,7 +62,10 @@ export const RegisterForm: React.FC = () => {
       }
 
       try {
-        await apiClient.post("/users/register", result.data);
+        await apiClient.post("/users/register", {
+          ...result.data,
+          applications: selectedApplications,
+        });
         navigate("/login");
         return { errors: {} };
       } catch {
@@ -113,6 +129,12 @@ export const RegisterForm: React.FC = () => {
           name="password"
           error={!!state.errors.password}
           helperText={state.errors.password}
+        />
+
+        <ApplicationSelection
+          applications={applications}
+          value={selectedApplications}
+          onChange={setSelectedApplications}
         />
 
         <Button

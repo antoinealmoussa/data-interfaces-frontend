@@ -33,9 +33,16 @@ class UserNotFoundError(ResourceNotFoundError):
 
 
 class ApplicationNotFoundError(ResourceNotFoundError):
-    def __init__(self, app_id: int):
+    def __init__(self, app_id: int | None = None, app_name: str | None = None):
         self.app_id = app_id
+        self.app_name = app_name
         super().__init__("Application non trouvée")
+
+
+class AccessRequestNotFoundError(ResourceNotFoundError):
+    def __init__(self, request_id: int):
+        self.request_id = request_id
+        super().__init__(f"Demande d'accès {request_id} introuvable")
 
 
 class MissingPlayersError(ResourceNotFoundError):

@@ -4,10 +4,11 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi import HTTPException
 
-from app.core.dependencies import get_current_active_user, get_current_user
+from app.core.dependencies import get_current_active_user, get_current_admin, get_current_user
 from app.core.jwt import create_access_token
 from app.schemas.user import ApiCreateUser
 from app.services import user_service
+from app.utils.exceptions import ForbiddenError
 
 
 def create_mock_request_with_cookie(cookie_name: str, cookie_value: str) -> MagicMock:
@@ -202,3 +203,16 @@ async def test_get_current_user_bearer_missing_token(db_session):
         await get_current_user(mock_request, db_session)
 
     assert exc_info.value.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_get_current_admin_forbidden(test_user):
+    """Test get_current_admin avec un utilisateur normal → 403."""
+    with pytest.raises(ForbiddenError):
+        await get_current_admin(test_user)
+
+
+@pytest.mark.asyncio
+async def test_get_current_admin_success(admin_user):
+    """Test get_current_admin avec un admin → passe."""
+    assert (await get_current_admin(admin_user)).id == admin_user.id

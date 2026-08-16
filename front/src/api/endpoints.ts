@@ -9,6 +9,12 @@ export const API_PATHS = {
   search: {
     topic: "/search/topic",
   },
+  applications: {
+    base: "/applications",
+  },
+  applicationAccessRequests: {
+    base: "/application-access-requests",
+  },
   rugbyTeams: {
     teams: "/rugby-teams/teams",
   },

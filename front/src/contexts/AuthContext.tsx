@@ -1,10 +1,10 @@
-import { useState, type ReactNode, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, type ReactNode, useEffect, useCallback } from "react";
 import type {
   User,
   Application,
   MeResponse,
   AuthContextType,
+  Role,
 } from "../types/authTypes";
 import apiClient from "../api/client";
 import { AUTH_EVENTS, API_PATHS } from "../api/endpoints";
@@ -17,7 +17,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[] | null>(null);
-  const navigate = useNavigate();
 
   const unauthorize = () => {
     setIsAuthenticated(false);
@@ -42,12 +41,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate("/login", { replace: true });
-    }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  useEffect(() => {
     window.addEventListener(AUTH_EVENTS.unauthorized, unauthorize);
     return () => window.removeEventListener(AUTH_EVENTS.unauthorized, unauthorize);
   }, []);
@@ -66,6 +59,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setUser(null);
   };
 
+  const hasRole = useCallback(
+    (...roles: Role[]) => (user ? roles.includes(user.role) : false),
+    [user],
+  );
+
   const ContextValue: AuthContextType = {
     isAuthenticated,
     isLoading,
@@ -73,6 +71,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     applications,
     login,
     logout,
+    hasRole,
+    isAdmin: hasRole("admin"),
   };
 
   return (

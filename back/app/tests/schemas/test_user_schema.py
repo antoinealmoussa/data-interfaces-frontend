@@ -65,15 +65,26 @@ class TestApiCreateUser:
 class TestApiReturnUser:
     def test_valid(self):
         user = ApiReturnUser(
-            id=1, email="test@example.com", first_name="John", surname="Doe"
+            id=1,
+            email="test@example.com",
+            first_name="John",
+            surname="Doe",
+            role="normal_user",
         )
         assert user.id == 1
         assert user.email == "test@example.com"
         assert user.first_name == "John"
         assert user.surname == "Doe"
+        assert user.role == "normal_user"
 
     def test_password_not_included(self):
-        data = {"id": 1, "email": "test@example.com", "first_name": "John", "surname": "Doe"}
+        data = {
+            "id": 1,
+            "email": "test@example.com",
+            "first_name": "John",
+            "surname": "Doe",
+            "role": "normal_user",
+        }
         assert "password" not in data
 
 

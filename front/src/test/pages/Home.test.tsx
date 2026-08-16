@@ -22,10 +22,13 @@ const mockAuthContext = {
     email: "test@test.com",
     first_name: "Jean",
     surname: "Dupont",
+    role: "normal_user" as const,
   },
   applications: [],
   login: vi.fn(),
   logout: vi.fn(),
+  hasRole: vi.fn(),
+  isAdmin: false,
 };
 
 const renderHome = () => {

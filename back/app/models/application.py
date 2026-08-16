@@ -15,6 +15,7 @@ class Application(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     pretty_name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
 
     users: Mapped[List["User"]] = relationship("User", secondary=user_application,
                          back_populates="applications")
