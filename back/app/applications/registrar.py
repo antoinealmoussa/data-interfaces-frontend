@@ -75,3 +75,23 @@ def register_all_known() -> None:
             migration_dir=rugby_migration,
         )
     )
+
+    from app.applications.race_preparation import (
+        metadata as rp_meta,
+    )
+    from app.applications.race_preparation import (
+        migration_dir as rp_migration,
+    )
+    from app.applications.race_preparation import (
+        name as rp_name,
+    )
+    from app.applications.race_preparation.router import router as rp_router
+
+    register(
+        AppModule(
+            name=rp_name,
+            router=rp_router,
+            metadata=rp_meta,
+            migration_dir=rp_migration,
+        )
+    )
