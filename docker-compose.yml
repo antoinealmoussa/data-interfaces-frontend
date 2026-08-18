@@ -51,6 +51,7 @@ services:
         condition: service_completed_successfully
     volumes: # Conservation du code dans le conteneur
       - ./back:/app
+      - gpx_uploads:/app/uploads/gpx
     restart: no
 
   # Service pour la base de données PostgreSQL
@@ -73,3 +74,4 @@ services:
 # Volume pour persister les données de PostgreSQL
 volumes:
   postgres_data:
+  gpx_uploads:
