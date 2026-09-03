@@ -45,4 +45,8 @@ back/app/applications/bike_exploration/data/raw/
 # Temp scripts
 back/app/applications/bike_exploration/scripts/
 
+# Race preparation
+back/uploads/
+back/app/applications/race_preparation/data/
+
 

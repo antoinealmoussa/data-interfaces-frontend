@@ -1,3 +1,6 @@
+from app.applications.race_preparation.models.race import Race as Race
+from app.applications.race_preparation.models.section import Section as Section
+from app.applications.race_preparation.models.track_point import TrackPoint as TrackPoint
 from app.applications.rugby_teams.models.category import Category as Category
 from app.applications.rugby_teams.models.player import Player as Player
 from app.applications.rugby_teams.models.player_category import PlayerCategory as PlayerCategory

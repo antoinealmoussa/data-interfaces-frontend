@@ -8,6 +8,7 @@ const UserProfile = lazy(() => import("./pages/management/UserProfile"));
 const RacePreparation = lazy(
   () => import("./pages/race-preparation/RacePreparation"),
 );
+const RaceDetail = lazy(() => import("./pages/race-preparation/RaceDetail"));
 const RugbyTeams = lazy(() => import("./pages/rugby-teams/RugbyTeams"));
 const TeamCreation = lazy(() => import("./pages/rugby-teams/TeamCreation"));
 const TeamManagement = lazy(() => import("./pages/rugby-teams/TeamManagement"));
@@ -48,5 +49,6 @@ export const DYNAMIC_APP_ROUTES: Record<AppName, RouteProps> = {
   [AppNameMapper.RACE_PREPARATION]: {
     path: "/race-preparation",
     element: <RacePreparation />,
+    children: [{ path: ":raceId", element: <RaceDetail /> }],
   },
 };

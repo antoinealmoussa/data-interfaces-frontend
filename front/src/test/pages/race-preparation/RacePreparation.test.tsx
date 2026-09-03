@@ -1,11 +1,29 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
 import RacePreparation from "../../../pages/race-preparation/RacePreparation";
 
-describe("RacePreparation", () => {
-  it("devrait afficher le contenu de la page", () => {
-    render(<RacePreparation />);
+vi.mock("../../../api/client", () => ({
+  default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
+}));
 
-    expect(screen.getByText("Race preparation")).toBeInTheDocument();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+const renderPage = () =>
+  render(
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <RacePreparation />
+      </BrowserRouter>
+    </QueryClientProvider>,
+  );
+
+describe("RacePreparation", () => {
+  it("devrait afficher le titre de la page", () => {
+    renderPage();
+    expect(screen.getByText("Préparation de course")).toBeInTheDocument();
   });
 });

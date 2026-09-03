@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Alert,
   Box,
@@ -13,8 +13,8 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import { FileDropzone } from "../common/FileDropzone";
 import type {
   UploadPhase,
   UploadProgress,
@@ -40,24 +40,9 @@ export const GpxUploadCard = ({
   error,
 }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const dropped = Array.from(e.dataTransfer.files).filter((f) =>
-      f.name.endsWith(".zip"),
-    );
-    if (dropped.length) setFiles((prev) => [...prev, ...dropped]);
-  }, []);
-
-  const handleSelect = useCallback(() => {
-    inputRef.current?.click();
-  }, []);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
-    }
+  const handleFilesSelected = useCallback((newFiles: File[]) => {
+    setFiles((prev) => [...prev, ...newFiles]);
   }, []);
 
   const handleUpload = useCallback(() => {
@@ -105,36 +90,11 @@ export const GpxUploadCard = ({
           </Box>
         )}
 
-        <Box
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          sx={{
-            border: "2px dashed",
-            borderColor: "primary.main",
-            borderRadius: 1,
-            p: 4,
-            textAlign: "center",
-            cursor: "pointer",
-            mb: 2,
-            bgcolor: "action.hover",
-          }}
-          onClick={handleSelect}
-        >
-          <CloudUploadIcon
-            sx={{ fontSize: 48, color: "primary.main", mb: 1 }}
-          />
-          <Typography>
-            Glissez vos fichiers ici ou cliquez pour sélectionner
-          </Typography>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".zip"
-            multiple
-            hidden
-            onChange={handleChange}
-          />
-        </Box>
+        <FileDropzone
+          accept=".zip"
+          multiple
+          onFilesSelected={handleFilesSelected}
+        />
 
         {files.length > 0 && !isUploading && (
           <List dense>

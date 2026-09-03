@@ -22,6 +22,7 @@ python-jose = {extras = ["cryptography"], version = "^3.5.0"}
 python-multipart = "^0.0.22"
 shapely = "^2.0.7"
 fitparse = "^1.2.0"
+gpxpy = "^1.6.2"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -55,9 +55,7 @@ describe("GpxUploadCard", () => {
     const props = defaultProps();
     render(<GpxUploadCard {...props} />);
 
-    const dropzone = screen.getByText(
-      "Glissez vos fichiers ici ou cliquez pour sélectionner",
-    );
+    const dropzone = screen.getByText("Déposez vos fichiers ici");
     fireEvent.drop(dropzone, {
       dataTransfer: {
         files: [makeFile("valid.zip"), makeFile("notes.txt")],
