@@ -21,6 +21,9 @@ export const API_PATHS = {
   bikeExploration: {
     base: "/bike-exploration",
   },
+  racePreparation: {
+    base: "/race-preparation",
+  },
 } as const;
 
 export const API_SEGMENTS = {

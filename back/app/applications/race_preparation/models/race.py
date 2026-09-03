@@ -19,5 +19,10 @@ class Race(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    sections = relationship("Section", back_populates="race", cascade="all, delete-orphan")
+    sections = relationship(
+        "Section",
+        back_populates="race",
+        cascade="all, delete-orphan",
+        order_by="Section.order_index",
+    )
     track_points = relationship("TrackPoint", back_populates="race", cascade="all, delete-orphan")

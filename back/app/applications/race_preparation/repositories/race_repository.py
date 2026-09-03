@@ -33,3 +33,14 @@ class RaceRepository(BaseRepository[Race, ApiReturnRace]):
         self.db.delete(db_obj)
         self.db.commit()
         return True
+
+    def create_race(self, **fields) -> Race:
+        db_obj = self.model_class(**fields)
+        self.db.add(db_obj)
+        self.db.commit()
+        self.db.refresh(db_obj)
+        return db_obj
+
+    def next_id(self) -> int:
+        last = self.db.query(Race.id).order_by(Race.id.desc()).first()
+        return (last[0] + 1) if last else 1

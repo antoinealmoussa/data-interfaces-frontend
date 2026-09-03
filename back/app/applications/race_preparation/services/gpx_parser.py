@@ -176,11 +176,21 @@ def _interpolate_point(track_points: list[dict], target_distance: float) -> dict
 
     if target_distance <= track_points[0]["distance"]:
         tp = track_points[0]
-        return {"lat": tp["lat"], "lon": tp["lon"], "elevation": tp["elevation"], "distance": target_distance}
+        return {
+            "lat": tp["lat"],
+            "lon": tp["lon"],
+            "elevation": tp["elevation"],
+            "distance": target_distance,
+        }
 
     if target_distance >= track_points[-1]["distance"]:
         tp = track_points[-1]
-        return {"lat": tp["lat"], "lon": tp["lon"], "elevation": tp["elevation"], "distance": target_distance}
+        return {
+            "lat": tp["lat"],
+            "lon": tp["lon"],
+            "elevation": tp["elevation"],
+            "distance": target_distance,
+        }
 
     for i in range(1, len(track_points)):
         p1 = track_points[i - 1]
@@ -189,7 +199,12 @@ def _interpolate_point(track_points: list[dict], target_distance: float) -> dict
         if p1["distance"] <= target_distance <= p2["distance"]:
             seg_dist = p2["distance"] - p1["distance"]
             if seg_dist == 0:
-                return {"lat": p1["lat"], "lon": p1["lon"], "elevation": p1["elevation"], "distance": target_distance}
+                return {
+                    "lat": p1["lat"],
+                    "lon": p1["lon"],
+                    "elevation": p1["elevation"],
+                    "distance": target_distance,
+                }
 
             ratio = (target_distance - p1["distance"]) / seg_dist
             lat = p1["lat"] + ratio * (p2["lat"] - p1["lat"])
@@ -198,7 +213,12 @@ def _interpolate_point(track_points: list[dict], target_distance: float) -> dict
             return {"lat": lat, "lon": lon, "elevation": elevation, "distance": target_distance}
 
     tp = track_points[-1]
-    return {"lat": tp["lat"], "lon": tp["lon"], "elevation": tp["elevation"], "distance": target_distance}
+    return {
+        "lat": tp["lat"],
+        "lon": tp["lon"],
+        "elevation": tp["elevation"],
+        "distance": target_distance,
+    }
 
 
 def _interpolate_elevation(track_points: list[dict], target_distance: float) -> float:

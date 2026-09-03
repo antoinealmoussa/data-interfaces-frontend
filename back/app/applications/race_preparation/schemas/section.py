@@ -34,32 +34,11 @@ class ApiUpdateSectionsRequest(BaseModel):
     sections: list[ApiUpdateSection]
 
 
-class ApiAddSectionRequest(BaseModel):
-    name: str | None = None
-    section_type: str = "aid_station"
-    insert_after_index: int
-
-
-class ApiComputeSectionsBoundary(BaseModel):
-    start_distance: float
-    end_distance: float
-
-
-class ApiComputeSectionsRequest(BaseModel):
-    boundaries: list[ApiComputeSectionsBoundary]
-
-
-class ApiComputedSection(BaseModel):
-    section_type: str
-    start_distance: float
-    end_distance: float
+class ApiSectionMarker(BaseModel):
     distance: float
-    elevation_gain: float
-    elevation_loss: float
-    average_gradient: float
-    start_elevation: float
-    end_elevation: float
+    marker_type: str
+    wait_time: float | None = None
 
 
-class ApiComputeSectionsResponse(BaseModel):
-    sections: list[ApiComputedSection]
+class ApiCalculateSectionsRequest(BaseModel):
+    markers: list[ApiSectionMarker]

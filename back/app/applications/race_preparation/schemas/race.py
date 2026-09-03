@@ -24,11 +24,6 @@ class ApiReturnRace(RaceBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ApiReturnRaceWithTrackPoints(ApiReturnRace):
-    track_points: list["ApiReturnTrackPoint"] = []
-
-
 from app.applications.race_preparation.schemas.section import ApiReturnSection  # noqa: E402
-from app.applications.race_preparation.schemas.track_point import ApiReturnTrackPoint  # noqa: E402
 
 ApiReturnRace.model_rebuild()

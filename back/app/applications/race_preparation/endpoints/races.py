@@ -3,9 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.applications.race_preparation.schemas.race import ApiReturnRace
 from app.applications.race_preparation.schemas.section import (
-    ApiAddSectionRequest,
-    ApiComputeSectionsRequest,
-    ApiComputeSectionsResponse,
+    ApiCalculateSectionsRequest,
     ApiUpdateSectionsRequest,
 )
 from app.applications.race_preparation.services import race_service
@@ -53,15 +51,15 @@ def get_track_points(
     return {"track_points": points}
 
 
-@router.post("/{race_id}/sections/compute", response_model=ApiComputeSectionsResponse)
-def compute_sections(
+@router.post("/{race_id}/sections/calculate", response_model=ApiReturnRace)
+def calculate_sections(
     race_id: int,
-    request: ApiComputeSectionsRequest,
+    request: ApiCalculateSectionsRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    sections = race_service.compute_section_characteristics(db, current_user.id, race_id, request)
-    return ApiComputeSectionsResponse(sections=sections)
+    """Calcule et persiste les sections à partir des marqueurs (limites + ravitaillements)."""
+    return race_service.calculate_sections(db, current_user.id, race_id, request)
 
 
 @router.put("/{race_id}/sections")
@@ -72,20 +70,6 @@ def update_sections(
     current_user: User = Depends(get_current_active_user),
 ):
     race_service.update_sections(db, current_user.id, race_id, request)
-    return {"status": "ok"}
-
-
-@router.post("/{race_id}/sections", status_code=201)
-def add_section(
-    race_id: int,
-    request: ApiAddSectionRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
-):
-    race_service.add_section(
-        db, current_user.id, race_id,
-        request.name, request.section_type, request.insert_after_index,
-    )
     return {"status": "ok"}
 
 
