@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { GenericSidebar } from "../../../components/layout/GenericSidebar";
 import { Box } from "@mui/material";
@@ -43,6 +44,7 @@ const renderSidebar = (
         selectedSeasonName={props.selectedSeasonName ?? "2024-2025"}
         onTeamChange={props.onTeamChange ?? onTeamChange}
         onSeasonChange={props.onSeasonChange ?? onSeasonChange}
+        action={props.action}
       />
     </MemoryRouter>,
   );
@@ -90,5 +92,28 @@ describe("GenericSidebar", () => {
     const teamInput = selectInputs[0];
     expect(teamInput).toBeInTheDocument();
     expect(teamInput?.getAttribute("value")).toBe("Équipe A");
+  });
+
+  it("devrait afficher le bouton d'action et appeler onClick au clic", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    renderSidebar({
+      action: {
+        label: "Créer une équipe",
+        icon: <Box data-testid="icon-create" />,
+        onClick,
+      },
+    });
+
+    expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-create")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Créer une équipe"));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne devrait pas afficher le bouton d'action sans prop action", () => {
+    renderSidebar();
+    expect(screen.queryByText("Créer une équipe")).not.toBeInTheDocument();
   });
 });

@@ -83,6 +83,29 @@ describe("RugbyTeamsSidebar", () => {
     expect(screen.getAllByRole("combobox")).toHaveLength(2);
   });
 
+  it("devrait afficher le bouton Créer une équipe avec équipe et saison", () => {
+    renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");
+
+    expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
+  });
+
+  it("devrait afficher le bouton Créer une équipe sans équipe et saison", () => {
+    renderSidebar("/rugby-teams");
+
+    expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
+  });
+
+  it("devrait naviguer vers la création d'équipe au clic sur le bouton", async () => {
+    const user = userEvent.setup();
+    renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");
+
+    await user.click(screen.getByText("Créer une équipe"));
+
+    await waitFor(() => {
+      expect(currentPath).toBe("/rugby-teams/team-creation");
+    });
+  });
+
   it("devrait naviguer vers le sous-menu au clic", async () => {
     const user = userEvent.setup();
     renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");

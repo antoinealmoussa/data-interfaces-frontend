@@ -1,9 +1,9 @@
 import { GenericSidebar } from "../layout/GenericSidebar";
-import { Groups, EmojiEvents, FitnessCenter } from "@mui/icons-material";
+import { Groups, EmojiEvents, FitnessCenter, Add } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTeamAndSeason } from "../../hooks/rugby-teams/useTeamAndSeason";
 import type { Season } from "../../types/rugby-teams/seasonTypes";
-import type { SidebarItem } from "../../types/uiTypes";
+import type { SidebarAction, SidebarItem } from "../../types/uiTypes";
 import { useMemo } from "react";
 
 const menuItems: SidebarItem[] = [
@@ -37,6 +37,15 @@ export const RugbyTeamsSidebar = () => {
 
   const basePath = "/rugby-teams";
 
+  const createTeamAction = useMemo<SidebarAction>(
+    () => ({
+      label: "Créer une équipe",
+      icon: <Add />,
+      onClick: () => navigate(`${basePath}/team-creation`),
+    }),
+    [navigate],
+  );
+
   const navigateTo = (team: string, season: string, subPath: string) => {
     navigate(
       `${basePath}/${encodeURIComponent(team)}/${encodeURIComponent(season)}/${subPath}`,
@@ -51,6 +60,7 @@ export const RugbyTeamsSidebar = () => {
       selectedTeamName={selectedTeamName}
       selectedSeasonName={selectedSeasonName}
       basePath={basePath}
+      action={createTeamAction}
       onTeamChange={(name) => {
         if (selectedSeasonName) {
           navigateTo(name, selectedSeasonName, "team-management");
