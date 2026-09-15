@@ -44,7 +44,7 @@ const renderSidebar = (
         selectedSeasonName={props.selectedSeasonName ?? "2024-2025"}
         onTeamChange={props.onTeamChange ?? onTeamChange}
         onSeasonChange={props.onSeasonChange ?? onSeasonChange}
-        action={props.action}
+        actions={props.actions}
       />
     </MemoryRouter>,
   );
@@ -94,26 +94,40 @@ describe("GenericSidebar", () => {
     expect(teamInput?.getAttribute("value")).toBe("Équipe A");
   });
 
-  it("devrait afficher le bouton d'action et appeler onClick au clic", async () => {
+  it("devrait afficher les boutons d'action et appeler onClick au clic", async () => {
     const onClick = vi.fn();
+    const onSecondClick = vi.fn();
     const user = userEvent.setup();
     renderSidebar({
-      action: {
-        label: "Créer une équipe",
-        icon: <Box data-testid="icon-create" />,
-        onClick,
-      },
+      actions: [
+        {
+          label: "Créer une équipe",
+          icon: <Box data-testid="icon-create" />,
+          onClick,
+        },
+        {
+          label: "Nouvelle saison",
+          icon: <Box data-testid="icon-season" />,
+          onClick: onSecondClick,
+        },
+      ],
     });
 
     expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
     expect(screen.getByTestId("icon-create")).toBeInTheDocument();
+    expect(screen.getByText("Nouvelle saison")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-season")).toBeInTheDocument();
 
     await user.click(screen.getByText("Créer une équipe"));
     expect(onClick).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByText("Nouvelle saison"));
+    expect(onSecondClick).toHaveBeenCalledTimes(1);
   });
 
-  it("ne devrait pas afficher le bouton d'action sans prop action", () => {
+  it("ne devrait pas afficher les boutons d'action sans prop actions", () => {
     renderSidebar();
     expect(screen.queryByText("Créer une équipe")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nouvelle saison")).not.toBeInTheDocument();
   });
 });

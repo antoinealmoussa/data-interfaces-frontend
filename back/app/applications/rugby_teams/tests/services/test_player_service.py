@@ -4,15 +4,17 @@ from app.applications.rugby_teams.models.season import Season
 from app.applications.rugby_teams.schemas.player import PlayerBase
 from app.applications.rugby_teams.schemas.team import ApiCreateTeam
 from app.applications.rugby_teams.services import player_service, team_service
+from app.applications.rugby_teams.services.season_service import create_season_if_not_exists
 from app.utils.exceptions import ForbiddenError, PlayerNotFoundError, TeamNotFoundError
 
 
 @pytest.fixture
-def team(db_session, test_user):
-    season = Season(name="2025-2026")
-    db_session.add(season)
-    db_session.commit()
+def season_id(db_session):
+    return create_season_if_not_exists(db_session, "2025-2026").id
 
+
+@pytest.fixture
+def team(db_session, test_user):
     team_in = ApiCreateTeam(
         name="Mon equipe",
         categories=["Mixte", "+35"],
@@ -22,11 +24,13 @@ def team(db_session, test_user):
 
 
 class TestGetPlayersByTeam:
-    def test_get_players_by_team_empty(self, db_session, team, test_user):
-        players = player_service.get_players_by_team(db_session, team.name, test_user.id)
+    def test_get_players_by_team_empty(self, db_session, team, season_id, test_user):
+        players = player_service.get_players_by_team(
+            db_session, team.name, season_id, test_user.id
+        )
         assert players == []
 
-    def test_get_players_by_team_with_data(self, db_session, team, test_user):
+    def test_get_players_by_team_with_data(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -34,21 +38,49 @@ class TestGetPlayersByTeam:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
-        players = player_service.get_players_by_team(db_session, team.name, test_user.id)
+        players = player_service.get_players_by_team(
+            db_session, team.name, season_id, test_user.id
+        )
         assert len(players) == 1
         assert players[0].id == created.id
 
     def test_get_players_by_team_not_found(self, db_session):
         with pytest.raises(TeamNotFoundError):
-            player_service.get_players_by_team(db_session, "Equipe inexistante", 999)
+            player_service.get_players_by_team(db_session, "Equipe inexistante", 1, 999)
 
-    def test_get_players_by_team_with_pagination(self, db_session, team, test_user):
+    def test_get_players_by_team_other_season_empty(
+        self, db_session, team, season_id, test_user
+    ):
+        other = Season(name="2026-2027")
+        db_session.add(other)
+        db_session.commit()
+
+        player_in = PlayerBase(
+            name="Jean",
+            level=2,
+            sex="H",
+            position="Ailier",
+            category_names=["Mixte"],
+        )
+        player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
+
+        players = player_service.get_players_by_team(
+            db_session, team.name, other.id, test_user.id
+        )
+        assert players == []
+
+    def test_get_players_by_team_with_pagination(self, db_session, team, season_id, test_user):
         for name in ["Alice", "Bob", "Charlie"]:
             player_service.create_player(
                 db_session,
                 team.name,
+                season_id,
                 PlayerBase(
                     name=name,
                     level=2,
@@ -60,14 +92,14 @@ class TestGetPlayersByTeam:
             )
 
         players = player_service.get_players_by_team(
-            db_session, team.name, test_user.id, skip=1, limit=1
+            db_session, team.name, season_id, test_user.id, skip=1, limit=1
         )
         assert len(players) == 1
         assert players[0].name == "Bob"
 
 
 class TestCreatePlayer:
-    def test_create_player_success(self, db_session, team, test_user):
+    def test_create_player_success(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean Dupont",
             level=3,
@@ -75,17 +107,18 @@ class TestCreatePlayer:
             position="Meneur",
             category_names=["Mixte", "+35"],
         )
-        result = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        result = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         assert result.id is not None
         assert result.name == "Jean Dupont"
         assert result.level == 3
         assert result.sex == "H"
         assert result.position == "Meneur"
-        assert result.team_name == team.name
         assert set(result.category_names) == {"Mixte", "+35"}
 
-    def test_create_player_team_not_found(self, db_session):
+    def test_create_player_team_not_found(self, db_session, season_id):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -94,11 +127,13 @@ class TestCreatePlayer:
             category_names=["Mixte"],
         )
         with pytest.raises(TeamNotFoundError):
-            player_service.create_player(db_session, "Equipe inexistante", player_in, 0)
+            player_service.create_player(
+                db_session, "Equipe inexistante", season_id, player_in, 0
+            )
 
 
 class TestUpdatePlayer:
-    def test_update_player_success(self, db_session, team, test_user):
+    def test_update_player_success(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -106,7 +141,9 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         update_in = PlayerBase(
             name="Jean Modifié",
@@ -119,6 +156,7 @@ class TestUpdatePlayer:
             db_session,
             created.id,
             team.name,
+            season_id,
             test_user.id,
             update_in,
         )
@@ -129,7 +167,7 @@ class TestUpdatePlayer:
         assert result.position == "Meneur"
         assert set(result.category_names) == {"+35", "+50"}
 
-    def test_update_player_not_found(self, db_session, team, test_user):
+    def test_update_player_not_found(self, db_session, team, season_id, test_user):
         update_in = PlayerBase(
             name="Jean",
             level=2,
@@ -139,10 +177,10 @@ class TestUpdatePlayer:
         )
         with pytest.raises(PlayerNotFoundError):
             player_service.update_player(
-                db_session, 999, team.name, test_user.id, update_in
+                db_session, 999, team.name, season_id, test_user.id, update_in
             )
 
-    def test_update_player_wrong_team(self, db_session, team, test_user):
+    def test_update_player_wrong_team(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -150,7 +188,9 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         update_in = PlayerBase(
             name="Jean",
@@ -161,10 +201,10 @@ class TestUpdatePlayer:
         )
         with pytest.raises(TeamNotFoundError):
             player_service.update_player(
-                db_session, created.id, "Autre equipe", test_user.id, update_in
+                db_session, created.id, "Autre equipe", season_id, test_user.id, update_in
             )
 
-    def test_update_player_forbidden(self, db_session, team, test_user):
+    def test_update_player_forbidden(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -172,7 +212,9 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         update_in = PlayerBase(
             name="Jean",
@@ -183,10 +225,14 @@ class TestUpdatePlayer:
         )
         with pytest.raises(ForbiddenError):
             player_service.update_player(
-                db_session, created.id, team.name, 999, update_in
+                db_session, created.id, team.name, season_id, 999, update_in
             )
 
-    def test_update_player_categories_add_and_remove(self, db_session, team, test_user):
+    def test_update_player_not_in_season(self, db_session, team, season_id, test_user):
+        other = Season(name="2026-2027")
+        db_session.add(other)
+        db_session.commit()
+
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -194,7 +240,33 @@ class TestUpdatePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
+
+        update_in = PlayerBase(
+            name="Jean",
+            level=2,
+            sex="H",
+            position="Ailier",
+            category_names=["Mixte"],
+        )
+        with pytest.raises(PlayerNotFoundError):
+            player_service.update_player(
+                db_session, created.id, team.name, other.id, test_user.id, update_in
+            )
+
+    def test_update_player_categories_add_and_remove(self, db_session, team, season_id, test_user):
+        player_in = PlayerBase(
+            name="Jean",
+            level=2,
+            sex="H",
+            position="Ailier",
+            category_names=["Mixte"],
+        )
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         update_in = PlayerBase(
             name="Jean",
@@ -207,6 +279,7 @@ class TestUpdatePlayer:
             db_session,
             created.id,
             team.name,
+            season_id,
             test_user.id,
             update_in,
         )
@@ -214,7 +287,7 @@ class TestUpdatePlayer:
 
 
 class TestDeletePlayer:
-    def test_delete_player_success(self, db_session, team, test_user):
+    def test_delete_player_success(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -222,17 +295,23 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
-        player_service.delete_player(db_session, created.id, team.name, test_user.id)
+        player_service.delete_player(
+            db_session, created.id, team.name, season_id, test_user.id
+        )
 
         assert player_service.get_player_by_id(db_session, created.id) is None
 
-    def test_delete_player_not_found(self, db_session, team, test_user):
+    def test_delete_player_not_found(self, db_session, team, season_id, test_user):
         with pytest.raises(PlayerNotFoundError):
-            player_service.delete_player(db_session, 999, team.name, test_user.id)
+            player_service.delete_player(
+                db_session, 999, team.name, season_id, test_user.id
+            )
 
-    def test_delete_player_forbidden(self, db_session, team, test_user):
+    def test_delete_player_forbidden(self, db_session, team, season_id, test_user):
         player_in = PlayerBase(
             name="Jean",
             level=2,
@@ -240,12 +319,43 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
         with pytest.raises(ForbiddenError):
-            player_service.delete_player(db_session, created.id, team.name, 999)
+            player_service.delete_player(
+                db_session, created.id, team.name, season_id, 999
+            )
 
-    def test_delete_player_does_not_delete_category(self, db_session, team, test_user):
+    def test_delete_player_keeps_person_when_other_season(
+        self, db_session, team, season_id, test_user
+    ):
+        other = Season(name="2026-2027")
+        db_session.add(other)
+        db_session.commit()
+
+        player_in = PlayerBase(
+            name="Jean",
+            level=2,
+            sex="H",
+            position="Ailier",
+            category_names=["Mixte"],
+        )
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
+        other_membership = player_service.create_player(
+            db_session, team.name, other.id, player_in, test_user.id
+        )
+
+        player_service.delete_player(
+            db_session, created.id, team.name, season_id, test_user.id
+        )
+
+        assert player_service.get_player_by_id(db_session, other_membership.id) is not None
+
+    def test_delete_player_does_not_delete_category(self, db_session, team, season_id, test_user):
         from app.applications.rugby_teams.models.category import Category
 
         player_in = PlayerBase(
@@ -255,9 +365,13 @@ class TestDeletePlayer:
             position="Ailier",
             category_names=["Mixte"],
         )
-        created = player_service.create_player(db_session, team.name, player_in, test_user.id)
+        created = player_service.create_player(
+            db_session, team.name, season_id, player_in, test_user.id
+        )
 
-        player_service.delete_player(db_session, created.id, team.name, test_user.id)
+        player_service.delete_player(
+            db_session, created.id, team.name, season_id, test_user.id
+        )
 
         category = db_session.query(Category).filter(Category.name == "Mixte").first()
         assert category is not None

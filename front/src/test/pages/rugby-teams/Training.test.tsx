@@ -25,9 +25,9 @@ vi.mock("../../../api/rugby-teams/playerApi", () => ({
 }));
 
 const playersFixture: Player[] = [
-  { id: 1, name: "Alice", level: 3, sex: "F", position: "Ailier", team_name: "Mon equipe", category_names: ["Mixte"] },
-  { id: 2, name: "Bob", level: 2, sex: "H", position: "Ailier", team_name: "Mon equipe", category_names: ["Mixte"] },
-  { id: 3, name: "Carlos", level: 4, sex: "H", position: "Meneur", team_name: "Mon equipe", category_names: ["Open masculin"] },
+  { id: 1, name: "Alice", level: 3, sex: "F", position: "Ailier", category_names: ["Mixte"] },
+  { id: 2, name: "Bob", level: 2, sex: "H", position: "Ailier", category_names: ["Mixte"] },
+  { id: 3, name: "Carlos", level: 4, sex: "H", position: "Meneur", category_names: ["Open masculin"] },
 ];
 
 const teamFixture = {
@@ -110,6 +110,7 @@ describe("Training", () => {
     );
 
     expect(mockedTrainingApi.distribute).toHaveBeenCalledWith("Mon equipe", {
+      season_id: 10,
       player_ids: [1, 2],
       team_count: 2,
       algorithm: "balanced",

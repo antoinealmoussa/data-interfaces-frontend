@@ -1,8 +1,10 @@
 from fastapi import status
 
 
-def test_read_players_empty(authenticated_client, test_user, db_session):
+def _create_team_and_season(authenticated_client, db_session) -> int:
+    """Crée la saison 2025-2026 et l'équipe 'Mon equipe'. Retourne l'id de la saison."""
     from app.applications.rugby_teams.models.season import Season
+
     season = Season(name="2025-2026")
     db_session.add(season)
     db_session.commit()
@@ -13,39 +15,39 @@ def test_read_players_empty(authenticated_client, test_user, db_session):
         "season_name": "2025-2026",
     }
     authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
+    return season.id
 
-    response = authenticated_client.get("/api/v1/rugby-teams/teams/Mon equipe/players")
+
+PLAYER_DATA = {
+    "name": "Jean Dupont",
+    "level": 2,
+    "sex": "H",
+    "position": "Ailier",
+    "category_names": ["Mixte"],
+}
+
+
+def test_read_players_empty(authenticated_client, test_user, db_session):
+    season_id = _create_team_and_season(authenticated_client, db_session)
+
+    response = authenticated_client.get(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}"
+    )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == []
 
 
 def test_read_players_unauthenticated(client):
-    response = client.get("/api/v1/rugby-teams/teams/Mon equipe/players")
+    response = client.get("/api/v1/rugby-teams/teams/Mon equipe/players?season_id=1")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_create_player_success(authenticated_client, test_user, db_session):
-    from app.applications.rugby_teams.models.season import Season
-    season = Season(name="2025-2026")
-    db_session.add(season)
-    db_session.commit()
+    season_id = _create_team_and_season(authenticated_client, db_session)
 
-    team_data = {
-        "name": "Mon equipe",
-        "categories": ["Mixte"],
-        "season_name": "2025-2026",
-    }
-    authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
-
-    player_data = {
-        "name": "Jean Dupont",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
     response = authenticated_client.post(
-        "/api/v1/rugby-teams/teams/Mon equipe/players", json=player_data
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}",
+        json=PLAYER_DATA,
     )
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
@@ -58,68 +60,57 @@ def test_create_player_success(authenticated_client, test_user, db_session):
 
 
 def test_create_player_unauthenticated(client):
-    player_data = {
-        "name": "Jean",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
-    response = client.post("/api/v1/rugby-teams/teams/equipe/players", json=player_data)
+    response = client.post(
+        "/api/v1/rugby-teams/teams/equipe/players?season_id=1", json=PLAYER_DATA
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_read_players_with_data(authenticated_client, test_user, db_session):
-    from app.applications.rugby_teams.models.season import Season
-    season = Season(name="2025-2026")
-    db_session.add(season)
-    db_session.commit()
+    season_id = _create_team_and_season(authenticated_client, db_session)
 
-    team_data = {
-        "name": "Mon equipe",
-        "categories": ["Mixte"],
-        "season_name": "2025-2026",
-    }
-    authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
+    authenticated_client.post(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}",
+        json=PLAYER_DATA,
+    )
 
-    player_data = {
-        "name": "Jean Dupont",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
-    authenticated_client.post("/api/v1/rugby-teams/teams/Mon equipe/players", json=player_data)
-
-    response = authenticated_client.get("/api/v1/rugby-teams/teams/Mon equipe/players")
+    response = authenticated_client.get(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}"
+    )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert len(data) == 1
     assert data[0]["name"] == "Jean Dupont"
 
 
-def test_update_player_success(authenticated_client, test_user, db_session):
+def test_read_players_season_scoped(authenticated_client, test_user, db_session):
+    """Un joueur créé pour 2025-2026 n'apparaît pas dans 2026-2027."""
     from app.applications.rugby_teams.models.season import Season
-    season = Season(name="2025-2026")
-    db_session.add(season)
+
+    season_id = _create_team_and_season(authenticated_client, db_session)
+
+    season2 = Season(name="2026-2027")
+    db_session.add(season2)
     db_session.commit()
 
-    team_data = {
-        "name": "Mon equipe",
-        "categories": ["Mixte"],
-        "season_name": "2025-2026",
-    }
-    authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
+    authenticated_client.post(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}",
+        json=PLAYER_DATA,
+    )
 
-    player_data = {
-        "name": "Jean",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
+    response = authenticated_client.get(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season2.id}"
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
+
+
+def test_update_player_success(authenticated_client, test_user, db_session):
+    season_id = _create_team_and_season(authenticated_client, db_session)
+
     create_resp = authenticated_client.post(
-        "/api/v1/rugby-teams/teams/Mon equipe/players", json=player_data
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}",
+        json=PLAYER_DATA,
     )
     player_id = create_resp.json()["id"]
 
@@ -131,7 +122,8 @@ def test_update_player_success(authenticated_client, test_user, db_session):
         "category_names": ["+35"],
     }
     response = authenticated_client.put(
-        f"/api/v1/rugby-teams/teams/Mon equipe/players/{player_id}", json=update_data
+        f"/api/v1/rugby-teams/teams/Mon equipe/players/{player_id}?season_id={season_id}",
+        json=update_data,
     )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -140,65 +132,40 @@ def test_update_player_success(authenticated_client, test_user, db_session):
 
 
 def test_update_player_unauthenticated(client):
-    update_data = {
-        "name": "Jean",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
-    response = client.put("/api/v1/rugby-teams/teams/equipe/players/1", json=update_data)
+    response = client.put(
+        "/api/v1/rugby-teams/teams/equipe/players/1?season_id=1", json=PLAYER_DATA
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_delete_player_success(authenticated_client, test_user, db_session):
-    from app.applications.rugby_teams.models.season import Season
-    season = Season(name="2025-2026")
-    db_session.add(season)
-    db_session.commit()
+    season_id = _create_team_and_season(authenticated_client, db_session)
 
-    team_data = {
-        "name": "Mon equipe",
-        "categories": ["Mixte"],
-        "season_name": "2025-2026",
-    }
-    authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
-
-    player_data = {
-        "name": "Jean",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
     create_resp = authenticated_client.post(
-        "/api/v1/rugby-teams/teams/Mon equipe/players", json=player_data
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}",
+        json=PLAYER_DATA,
     )
     player_id = create_resp.json()["id"]
 
     response = authenticated_client.delete(
-        f"/api/v1/rugby-teams/teams/Mon equipe/players/{player_id}"
+        f"/api/v1/rugby-teams/teams/Mon equipe/players/{player_id}?season_id={season_id}"
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    get_resp = authenticated_client.get("/api/v1/rugby-teams/teams/Mon equipe/players")
+    get_resp = authenticated_client.get(
+        f"/api/v1/rugby-teams/teams/Mon equipe/players?season_id={season_id}"
+    )
     assert len(get_resp.json()) == 0
 
 
 def test_delete_player_unauthenticated(client):
-    response = client.delete("/api/v1/rugby-teams/teams/equipe/players/1")
+    response = client.delete("/api/v1/rugby-teams/teams/equipe/players/1?season_id=1")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_create_player_team_not_found(authenticated_client):
-    player_data = {
-        "name": "Jean",
-        "level": 2,
-        "sex": "H",
-        "position": "Ailier",
-        "category_names": ["Mixte"],
-    }
     response = authenticated_client.post(
-        "/api/v1/rugby-teams/teams/EquipeInexistante/players", json=player_data
+        "/api/v1/rugby-teams/teams/EquipeInexistante/players?season_id=1",
+        json=PLAYER_DATA,
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND

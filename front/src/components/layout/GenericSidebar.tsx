@@ -24,7 +24,7 @@ export const GenericSidebar = ({
   onTeamChange,
   onSeasonChange,
   basePath = "/rugby-teams",
-  action,
+  actions = [],
 }: GenericSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,8 +51,9 @@ export const GenericSidebar = ({
       }}
     >
       <Box sx={{ p: 2, pb: 0 }}>
-        {action && (
+        {actions.map((action) => (
           <Button
+            key={action.label}
             fullWidth
             variant="outlined"
             startIcon={action.icon}
@@ -61,7 +62,7 @@ export const GenericSidebar = ({
           >
             {action.label}
           </Button>
-        )}
+        ))}
 
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Équipe</InputLabel>

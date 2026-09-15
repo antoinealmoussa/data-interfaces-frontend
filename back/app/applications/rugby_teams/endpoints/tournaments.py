@@ -18,13 +18,14 @@ router = APIRouter(prefix="/teams/{team_name}/tournaments")
 @router.get("", response_model=List[ApiReturnTournament])
 def read_tournaments(
     team_name: str,
+    season_id: int = Query(..., ge=1),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> List[ApiReturnTournament]:
     tournaments = tournament_service.get_tournaments_by_team(
-        db, team_name, current_user.id, skip=skip, limit=limit
+        db, team_name, season_id, current_user.id, skip=skip, limit=limit
     )
     return [ApiReturnTournament.model_validate(t) for t in tournaments]
 
@@ -33,12 +34,13 @@ def read_tournaments(
 def read_tournament(
     team_name: str,
     tournament_id: int,
+    season_id: int = Query(..., ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
-    team_service.get_owned_team(db, team_name, current_user.id)
     tournament = tournament_service.get_tournament_by_id(db, tournament_id)
-    if not tournament:
+    team = team_service.get_owned_team(db, team_name, current_user.id)
+    if not tournament or tournament.team_id != team.id or tournament.season_id != season_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Tournoi non trouvé",
@@ -54,10 +56,13 @@ def read_tournament(
 def create_tournament(
     team_name: str,
     tournament_in: TournamentBase,
+    season_id: int = Query(..., ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
-    return tournament_service.create_tournament(db, team_name, tournament_in, current_user.id)
+    return tournament_service.create_tournament(
+        db, team_name, season_id, tournament_in, current_user.id
+    )
 
 
 @router.put("/{tournament_id}", response_model=ApiReturnTournament)
@@ -65,11 +70,12 @@ def update_tournament(
     team_name: str,
     tournament_id: int,
     tournament_in: TournamentBase,
+    season_id: int = Query(..., ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> ApiReturnTournament:
     return tournament_service.update_tournament(
-        db, tournament_id, team_name, tournament_in, current_user.id
+        db, tournament_id, team_name, season_id, tournament_in, current_user.id
     )
 
 
@@ -77,7 +83,10 @@ def update_tournament(
 def delete_tournament(
     team_name: str,
     tournament_id: int,
+    season_id: int = Query(..., ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ) -> None:
-    tournament_service.delete_tournament(db, tournament_id, team_name, current_user.id)
+    tournament_service.delete_tournament(
+        db, tournament_id, team_name, season_id, current_user.id
+    )

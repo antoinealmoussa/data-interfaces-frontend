@@ -95,6 +95,35 @@ describe("RugbyTeamsSidebar", () => {
     expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
   });
 
+  it("devrait afficher le bouton Nouvelle saison avec équipe et saison", () => {
+    renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");
+
+    expect(screen.getByText("Nouvelle saison")).toBeInTheDocument();
+  });
+
+  it("devrait naviguer vers la nouvelle saison au clic sur le bouton", async () => {
+    const user = userEvent.setup();
+    renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");
+
+    await user.click(screen.getByText("Nouvelle saison"));
+
+    await waitFor(() => {
+      expect(currentPath).toBe("/rugby-teams/Mon%20equipe/2025-2026/new-season");
+    });
+  });
+
+  it("ne devrait pas naviguer vers la nouvelle saison sans équipe et saison", async () => {
+    const user = userEvent.setup();
+    renderSidebar("/rugby-teams");
+
+    expect(screen.getByText("Nouvelle saison")).toBeInTheDocument();
+    await user.click(screen.getByText("Nouvelle saison"));
+
+    await waitFor(() => {
+      expect(currentPath).toBe("/rugby-teams");
+    });
+  });
+
   it("devrait naviguer vers la création d'équipe au clic sur le bouton", async () => {
     const user = userEvent.setup();
     renderSidebar("/rugby-teams/Mon%20equipe/2025-2026");

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "./useSnackbar";
 
 interface CrudManagerConfig<TEntity, TCreateDto> {
-  queryKey: (string | undefined)[];
+  queryKey: (string | number | undefined)[];
   queryFn: () => Promise<TEntity[]>;
   createFn: (data: TCreateDto) => Promise<TEntity>;
   updateFn: (id: number, data: TCreateDto) => Promise<TEntity>;

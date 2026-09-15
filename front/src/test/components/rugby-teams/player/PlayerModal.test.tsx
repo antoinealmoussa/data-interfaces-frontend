@@ -52,7 +52,7 @@ describe("PlayerModal", () => {
           level: 2,
           sex: "H",
           position: "Ailier",
-          team_name: "Mon equipe",
+          
           category_names: ["Mixte"],
         }}
         onSave={mockSave}

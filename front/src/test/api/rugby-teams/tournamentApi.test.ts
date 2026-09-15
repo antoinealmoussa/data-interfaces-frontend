@@ -18,14 +18,14 @@ describe("tournamentApi", () => {
     vi.clearAllMocks();
   });
 
-  it("getByTeam devrait appeler GET /rugby-teams/teams/:teamName/tournaments", async () => {
+  it("getByTeam devrait appeler GET avec season_id", async () => {
     mockedClient.get.mockResolvedValue({ data: [{ id: 1, name: "Tournoi A" }] });
 
     const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
-    const result = await tournamentApi.getByTeam("Mon equipe");
+    const result = await tournamentApi.getByTeam("Mon equipe", 3);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/tournaments",
+      "/rugby-teams/teams/Mon%20equipe/tournaments?season_id=3",
     );
     expect(result).toEqual([{ id: 1, name: "Tournoi A" }]);
   });
@@ -34,14 +34,14 @@ describe("tournamentApi", () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
     const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
-    await tournamentApi.getByTeam("Équipe spéciale");
+    await tournamentApi.getByTeam("Équipe spéciale", 1);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
       expect.stringContaining(encodeURIComponent("Équipe spéciale")),
     );
   });
 
-  it("create devrait appeler POST /rugby-teams/teams/:teamName/tournaments", async () => {
+  it("create devrait appeler POST avec season_id", async () => {
     const newTournament = {
       name: "Tournoi Test",
       category_name: "Mixte",
@@ -52,16 +52,16 @@ describe("tournamentApi", () => {
     });
 
     const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
-    const result = await tournamentApi.create("Mon equipe", newTournament);
+    const result = await tournamentApi.create("Mon equipe", 3, newTournament);
 
     expect(mockedClient.post).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/tournaments",
+      "/rugby-teams/teams/Mon%20equipe/tournaments?season_id=3",
       newTournament,
     );
     expect(result).toMatchObject({ name: "Tournoi Test" });
   });
 
-  it("update devrait appeler PUT /rugby-teams/teams/:teamName/tournaments/:tournamentId", async () => {
+  it("update devrait appeler PUT avec season_id", async () => {
     const updateData = {
       name: "Tournoi Modifié",
       category_name: "+35",
@@ -72,23 +72,23 @@ describe("tournamentApi", () => {
     });
 
     const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
-    const result = await tournamentApi.update("Mon equipe", 5, updateData);
+    const result = await tournamentApi.update("Mon equipe", 3, 5, updateData);
 
     expect(mockedClient.put).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/tournaments/5",
+      "/rugby-teams/teams/Mon%20equipe/tournaments/5?season_id=3",
       updateData,
     );
     expect(result).toMatchObject({ name: "Tournoi Modifié" });
   });
 
-  it("delete devrait appeler DELETE /rugby-teams/teams/:teamName/tournaments/:tournamentId", async () => {
+  it("delete devrait appeler DELETE avec season_id", async () => {
     mockedClient.delete.mockResolvedValue({});
 
     const { tournamentApi } = await import("../../../api/rugby-teams/tournamentApi");
-    await tournamentApi.delete("Mon equipe", 3);
+    await tournamentApi.delete("Mon equipe", 3, 7);
 
     expect(mockedClient.delete).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/tournaments/3",
+      "/rugby-teams/teams/Mon%20equipe/tournaments/7?season_id=3",
     );
   });
 });

@@ -23,10 +23,12 @@ class TestDistributeInput:
             player_ids=[1, 2, 3],
             team_count=2,
             algorithm="balanced",
+            season_id=1,
         )
         assert input_data.player_ids == [1, 2, 3]
         assert input_data.team_count == 2
         assert input_data.algorithm == "balanced"
+        assert input_data.season_id == 1
 
 
 class TestTrainingTeam:

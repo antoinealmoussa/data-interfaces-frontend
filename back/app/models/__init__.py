@@ -4,6 +4,9 @@ from app.applications.race_preparation.models.track_point import TrackPoint as T
 from app.applications.rugby_teams.models.category import Category as Category
 from app.applications.rugby_teams.models.player import Player as Player
 from app.applications.rugby_teams.models.player_category import PlayerCategory as PlayerCategory
+from app.applications.rugby_teams.models.player_team_season import (
+    PlayerTeamSeason as PlayerTeamSeason,
+)
 from app.applications.rugby_teams.models.season import Season as Season
 from app.applications.rugby_teams.models.team import Team as Team
 from app.applications.rugby_teams.models.team_category import TeamCategory as TeamCategory

@@ -49,6 +49,7 @@ describe("trainingApi", () => {
 
   it("distribute devrait appeler POST /rugby-teams/teams/:teamName/training/distribute", async () => {
     const request = {
+      season_id: 3,
       player_ids: [1, 2, 3],
       team_count: 2,
       algorithm: "balanced",

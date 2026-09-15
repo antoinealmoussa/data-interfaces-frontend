@@ -20,6 +20,7 @@ class TestRandomAlgorithm:
             player_ids=[1, 2, 3, 4, 5, 6],
             team_count=3,
             algorithm="random",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS)
         assert len(result.teams) == 3
@@ -30,6 +31,7 @@ class TestRandomAlgorithm:
             player_ids=[1, 2, 3, 4, 5, 6],
             team_count=2,
             algorithm="random",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS)
         total = sum(len(t.players) for t in result.teams)
@@ -41,6 +43,7 @@ class TestRandomAlgorithm:
             player_ids=[1, 2],
             team_count=2,
             algorithm="random",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS[:2])
         for team in result.teams:
@@ -54,6 +57,7 @@ class TestRandomAlgorithm:
             player_ids=[1, 2, 3, 4],
             team_count=2,
             algorithm="random",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS[:4])
         assert len(result.teams) == 2
@@ -67,6 +71,7 @@ class TestBalancedAlgorithm:
             player_ids=[1, 2, 3, 4],
             team_count=2,
             algorithm="balanced",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS[:4])
         assert len(result.teams) == 2
@@ -77,6 +82,7 @@ class TestBalancedAlgorithm:
             player_ids=[1, 2, 3, 4, 5, 6],
             team_count=3,
             algorithm="balanced",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS)
         total = sum(len(t.players) for t in result.teams)
@@ -88,6 +94,7 @@ class TestBalancedAlgorithm:
             player_ids=[1, 2],
             team_count=2,
             algorithm="balanced",
+            season_id=1,
         )
         result = algo.distribute(input_data, PLAYERS[:2])
         for team in result.teams:
@@ -100,6 +107,7 @@ class TestBalancedAlgorithm:
             player_ids=[1, 2, 3, 4, 5, 6],
             team_count=2,
             algorithm="balanced",
+            season_id=1,
         )
         result1 = algo.distribute(input_data, PLAYERS)
         assert len(result1.teams) == 2

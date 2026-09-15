@@ -46,7 +46,7 @@ describe("PlayerForm", () => {
           level: 3,
           sex: "H",
           position: "Meneur",
-          team_name: "Mon equipe",
+          
           category_names: ["Mixte", "+35"],
         }}
         onSubmit={mockSubmit}
@@ -71,7 +71,7 @@ describe("PlayerForm", () => {
           level: 2,
           sex: "H",
           position: "Ailier",
-          team_name: "Mon equipe",
+          
           category_names: ["Mixte"],
         }}
         onSubmit={mockSubmit}
@@ -142,7 +142,7 @@ describe("PlayerForm", () => {
           level: 2,
           sex: "H",
           position: "Ailier",
-          team_name: "Mon equipe",
+          
           category_names: ["Mixte"],
         }}
         onSubmit={mockSubmit}
@@ -169,7 +169,7 @@ describe("PlayerForm", () => {
           level: 2,
           sex: "H",
           position: "Ailier",
-          team_name: "Mon equipe",
+          
           category_names: ["Mixte", "+35"],
         }}
         onSubmit={mockSubmit}
@@ -199,7 +199,7 @@ describe("PlayerForm", () => {
           level: 2,
           sex: "H",
           position: "Ailier",
-          team_name: "Mon equipe",
+          
           category_names: [],
         }}
         onSubmit={mockSubmit}

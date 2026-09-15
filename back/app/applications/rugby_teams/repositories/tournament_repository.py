@@ -8,10 +8,19 @@ class TournamentRepository(BaseRepository[Tournament, ApiReturnTournament]):
     model_class = Tournament
     return_schema = ApiReturnTournament
 
-    def get_by_team(
-        self, team_id: int, skip: int = 0, limit: int = 100
+    def get_by_team_and_season(
+        self, team_id: int, season_id: int, skip: int = 0, limit: int = 100
     ) -> list[Tournament]:
-        return self.get_many(team_id=team_id, skip=skip, limit=limit)
+        return (
+            self.db.query(Tournament)
+            .filter(
+                Tournament.team_id == team_id,
+                Tournament.season_id == season_id,
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def update_tournament(
         self,

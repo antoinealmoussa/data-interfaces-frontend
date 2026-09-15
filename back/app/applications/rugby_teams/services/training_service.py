@@ -31,7 +31,9 @@ def distribute(
     if not algorithm:
         raise InvalidRequestError(f"Algorithme '{input.algorithm}' inconnu")
 
-    players = PlayerRepository(db).get_by_ids_in_team(input.player_ids, team.id)
+    players = PlayerRepository(db).get_by_ids_in_team_and_season(
+        input.player_ids, team.id, input.season_id
+    )
 
     if len(players) != len(input.player_ids):
         found_ids = {p.id for p in players}

@@ -4,7 +4,6 @@ export interface Player {
   level: number;
   sex: "H" | "F";
   position: "Ailier" | "Meneur";
-  team_name: string;
   category_names: string[];
 }
 

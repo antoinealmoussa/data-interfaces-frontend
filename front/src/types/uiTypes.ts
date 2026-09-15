@@ -80,7 +80,7 @@ export interface GenericSidebarProps {
   onTeamChange: (teamName: string) => void;
   onSeasonChange: (seasonName: string) => void;
   basePath?: string;
-  action?: SidebarAction;
+  actions?: SidebarAction[];
 }
 
 export interface SnackbarState {

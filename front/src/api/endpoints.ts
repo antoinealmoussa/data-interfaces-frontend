@@ -29,6 +29,7 @@ export const API_PATHS = {
 export const API_SEGMENTS = {
   players: "players",
   tournaments: "tournaments",
+  seasons: "seasons",
   training: "training",
   algorithms: "algorithms",
   distribute: "distribute",
