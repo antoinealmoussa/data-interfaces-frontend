@@ -1,6 +1,5 @@
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
-  Box,
   InputAdornment,
   Table,
   TableBody,
@@ -9,12 +8,7 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from "@mui/material";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import LocalDrinkIcon from "@mui/icons-material/LocalDrink";
 import type { Section, ComputedSection } from "../../types/race-preparation/raceTypes";
 
 interface SectionTableProps {
@@ -26,13 +20,6 @@ interface SectionTableProps {
     actual_pace?: number | null;
   }[]) => void;
 }
-
-const SECTION_ICONS: Record<string, React.ReactNode> = {
-  climb: <TrendingUpIcon fontSize="small" sx={{ color: "#FF9800" }} />,
-  flat: <HorizontalRuleIcon fontSize="small" sx={{ color: "#4CAF50" }} />,
-  descent: <TrendingDownIcon fontSize="small" sx={{ color: "#2196F3" }} />,
-  aid_station: <LocalDrinkIcon fontSize="small" sx={{ color: "#9C27B0" }} />,
-};
 
 const SECTION_LABELS: Record<string, string> = {
   climb: "Montée",
@@ -46,7 +33,7 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
   const [editingPace, setEditingPace] = useState<Record<number, string>>({});
   const [editingVam, setEditingVam] = useState<Record<number, string>>({});
   const [editingTime, setEditingTime] = useState<Record<number, string>>({});
-  const [editingActualTime, setEditingActualTime] = useState<
+  const [editingActualCumul, setEditingActualCumul] = useState<
     Record<number, string>
   >({});
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -60,8 +47,8 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
       if (!nextSection) return;
       const nextIsAid = nextSection.section_type === "aid_station";
       fieldRefs.current[`${nextIsAid ? "time" : "pace"}-${nextRow}`]?.focus();
-    } else if (field === "actualTime") {
-      fieldRefs.current[`actualTime-${nextRow}`]?.focus();
+    } else if (field === "actualCumul") {
+      fieldRefs.current[`actualCumul-${nextRow}`]?.focus();
     } else {
       fieldRefs.current[`${field}-${nextRow}`]?.focus();
     }
@@ -173,37 +160,37 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
     });
   };
 
-  const handleActualTimeChange = (id: number, value: string) => {
-    setEditingActualTime((prev) => ({ ...prev, [id]: value }));
+  const handleActualCumulChange = (id: number, value: string) => {
+    setEditingActualCumul((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleActualTimeBlur = (s: Section | ComputedSection) => {
+  const handleActualCumulBlur = (
+    s: Section | ComputedSection,
+    i: number,
+  ) => {
     const id = s.id;
     if (id === undefined) return;
-    const raw = editingActualTime[id];
+    const raw = editingActualCumul[id];
     const minutes =
       raw === "" || raw === undefined ? null : parseFloat(raw);
     let actual_pace: number | null = null;
-    if (minutes !== null) {
-      if (s.section_type === "aid_station") {
-        actual_pace = minutes;
-      } else if (s.distance > 0) {
-        actual_pace = minutes / (s.distance / 1000);
+    if (minutes !== null && !Number.isNaN(minutes)) {
+      const prevCumul = i > 0 ? cumulative.timeActualCumul[i - 1] : 0;
+      const sectionTime = minutes - prevCumul;
+      if (sectionTime >= 0) {
+        if (s.section_type === "aid_station") {
+          actual_pace = sectionTime;
+        } else if (s.distance > 0) {
+          actual_pace = sectionTime / (s.distance / 1000);
+        }
       }
     }
     onUpdate([{ section_id: id, actual_pace }]);
-    setEditingActualTime((prev) => {
+    setEditingActualCumul((prev) => {
       const next = { ...prev };
       delete next[id];
       return next;
     });
-  };
-
-  const formatTime = (minutes: number) => {
-    if (minutes === 0) return "-";
-    const h = Math.floor(minutes / 60);
-    const m = Math.round(minutes % 60);
-    return h > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${m}min`;
   };
 
   return (
@@ -222,7 +209,6 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
           <TableRow>
             <TableCell>#</TableCell>
             <TableCell>Nom</TableCell>
-            <TableCell>Type</TableCell>
             <TableCell align="right">Distance</TableCell>
             <TableCell align="right">Dist. cumul.</TableCell>
             <TableCell align="right">D+</TableCell>
@@ -232,10 +218,11 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
             <TableCell align="right">Pente %</TableCell>
             <TableCell align="right">Vitesse</TableCell>
             <TableCell align="right">Temps</TableCell>
-            <TableCell align="right">Temps cumul.</TableCell>
+            <TableCell align="right">Temps cumulé</TableCell>
             <TableCell align="right">VAM</TableCell>
             <TableCell align="right">Vit. réelle</TableCell>
             <TableCell align="right">Temps réel</TableCell>
+            <TableCell align="right">Temps cumulé réel</TableCell>
             <TableCell align="right">VAM réelle</TableCell>
           </TableRow>
         </TableHead>
@@ -260,14 +247,6 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
                   }}
                   sx={{ minWidth: 120 }}
                 />
-              </TableCell>
-              <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  {SECTION_ICONS[s.section_type]}
-                  <Typography variant="caption">
-                    {SECTION_LABELS[s.section_type]}
-                  </Typography>
-                </Box>
               </TableCell>
               <TableCell align="right">
                 {(s.distance / 1000).toFixed(2)} km
@@ -339,11 +318,11 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
                     }}
                   />
                 ) : (
-                  formatTime(cumulative.timeCumul[i] - (i > 0 ? cumulative.timeCumul[i - 1] : 0))
+                  (cumulative.timeCumul[i] - (i > 0 ? cumulative.timeCumul[i - 1] : 0)).toFixed(2)
                 )}
               </TableCell>
               <TableCell align="right">
-                {formatTime(cumulative.timeCumul[i])}
+                {cumulative.timeCumul[i].toFixed(2)}
               </TableCell>
               <TableCell align="right">
                 {s.section_type === "aid_station" ? (
@@ -386,24 +365,23 @@ export default function SectionTable({ sections, onUpdate }: SectionTableProps) 
                     : "-"}
               </TableCell>
               <TableCell align="right">
+                {(cumulative.timeActualCumul[i] - (i > 0 ? cumulative.timeActualCumul[i - 1] : 0)).toFixed(2)}
+              </TableCell>
+              <TableCell align="right">
                 <TextField
                   size="small"
                   variant="standard"
                   value={
-                    editingActualTime[s.id ?? 0] ??
-                    (s.section_type === "aid_station"
-                      ? (s.actual_pace ?? 0).toString()
-                      : s.actual_pace != null
-                        ? ((s.distance / 1000) * s.actual_pace).toFixed(0)
-                        : "")
+                    editingActualCumul[s.id ?? 0] ??
+                    cumulative.timeActualCumul[i].toFixed(2)
                   }
-                  inputRef={(el) => { fieldRefs.current[`actualTime-${i}`] = el; }}
-                  onChange={(e) => { if (s.id) handleActualTimeChange(s.id, e.target.value); }}
-                  onBlur={() => handleActualTimeBlur(s)}
+                  inputRef={(el) => { fieldRefs.current[`actualCumul-${i}`] = el; }}
+                  onChange={(e) => { if (s.id) handleActualCumulChange(s.id, e.target.value); }}
+                  onBlur={() => handleActualCumulBlur(s, i)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleActualTimeBlur(s);
-                      focusNextField("actualTime", i);
+                      handleActualCumulBlur(s, i);
+                      focusNextField("actualCumul", i);
                     }
                   }}
                   sx={{ width: 90 }}
