@@ -77,8 +77,8 @@ describe("SectionSplitter", () => {
 
     expect(screen.getByTestId("elevation-profile")).toBeInTheDocument();
     expect(screen.getByTestId("trail-map")).toBeInTheDocument();
-    expect(screen.getByText("Montée")).toBeInTheDocument();
-    expect(screen.getAllByText("Ravitaillement").length).toBeGreaterThan(0);
+    expect(screen.getByPlaceholderText("Montée")).toBeInTheDocument();
+    expect(screen.getAllByPlaceholderText("Ravitaillement").length).toBeGreaterThan(0);
     expect(screen.queryByText("Profil / Carte")).not.toBeInTheDocument();
     expect(screen.queryByText("Tableau")).not.toBeInTheDocument();
   });
@@ -88,7 +88,7 @@ describe("SectionSplitter", () => {
 
     expect(screen.getByTestId("elevation-profile")).toBeInTheDocument();
     expect(screen.getByTestId("trail-map")).toBeInTheDocument();
-    expect(screen.queryByText("Montée")).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Montée")).not.toBeInTheDocument();
     expect(screen.queryByText("Profil / Carte")).not.toBeInTheDocument();
     expect(screen.queryByText("Tableau")).not.toBeInTheDocument();
   });

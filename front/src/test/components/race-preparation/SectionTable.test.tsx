@@ -94,7 +94,7 @@ describe("SectionTable", () => {
     expect(screen.getByText("0")).toBeInTheDocument();
   });
 
-  it("une aid_station : Temps et Temps réel éditables en minutes avec suffixe min", () => {
+  it("une aid_station : Temps éditable en minutes et Temps cumulé réel éditable avec suffixe min", () => {
     const aid = makeSection({
       section_type: "aid_station",
       distance: 0,
@@ -105,7 +105,7 @@ describe("SectionTable", () => {
     renderTable([aid]);
 
     expect(screen.getByDisplayValue("8")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("9")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("9.00")).toBeInTheDocument();
     expect(screen.getAllByText("min").length).toBeGreaterThanOrEqual(2);
   });
 
@@ -123,7 +123,7 @@ describe("SectionTable", () => {
     ]);
   });
 
-  it("une aid_station : la saisie du Temps réel commit actual_pace en minutes", () => {
+  it("une aid_station : la saisie du Temps cumulé réel commit actual_pace en minutes", () => {
     const onUpdate = renderTable([
       makeSection({
         section_type: "aid_station",
@@ -133,36 +133,37 @@ describe("SectionTable", () => {
       }),
     ]);
 
-    const actualTimeInput = screen.getByDisplayValue("45");
-    fireEvent.change(actualTimeInput, { target: { value: "20" } });
-    fireEvent.keyDown(actualTimeInput, { key: "Enter" });
+    const actualCumulInput = screen.getByDisplayValue("45.00");
+    fireEvent.change(actualCumulInput, { target: { value: "20" } });
+    fireEvent.keyDown(actualCumulInput, { key: "Enter" });
 
     expect(onUpdate).toHaveBeenCalledWith([
       { section_id: 1, actual_pace: 20 },
     ]);
   });
 
-  it("une montée : la saisie du Temps réel (min) commit actual_pace en min/km", () => {
+  it("une montée : la saisie du Temps cumulé réel (min) commit actual_pace en min/km", () => {
     const onUpdate = renderTable([
       makeSection({ distance: 2000, section_type: "climb", pace: 6, actual_pace: 4 }),
     ]);
 
-    const actualTimeInput = screen.getByDisplayValue("8");
-    fireEvent.change(actualTimeInput, { target: { value: "14" } });
-    fireEvent.keyDown(actualTimeInput, { key: "Enter" });
+    const actualCumulInput = screen.getByDisplayValue("8.00");
+    fireEvent.change(actualCumulInput, { target: { value: "14" } });
+    fireEvent.keyDown(actualCumulInput, { key: "Enter" });
 
     expect(onUpdate).toHaveBeenCalledWith([
       { section_id: 1, actual_pace: 7 },
     ]);
   });
 
-  it("une montée : Vit. réelle affichée en lecture seule calculée depuis actual_pace", () => {
+  it("une montée : Vit. réelle affichée en lecture seule et Temps réel calculé depuis le cumul réel", () => {
     renderTable([
       makeSection({ distance: 2000, section_type: "climb", pace: 6, actual_pace: 6 }),
     ]);
 
     expect(screen.getByText("6.0")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("12")).toBeInTheDocument();
+    expect(screen.getAllByText("12.00").length).toBe(3);
+    expect(screen.getByDisplayValue("12.00")).toBeInTheDocument();
   });
 
   it("une montée : la saisie de la VAM commit pace en min/km (VAM→pace)", () => {
