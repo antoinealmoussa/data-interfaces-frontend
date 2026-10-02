@@ -19,6 +19,11 @@ class Tournament(Base):
         ForeignKey("rt_team.id", ondelete="CASCADE"),
         nullable=False,
     )
+    season_id = Column(
+        Integer,
+        ForeignKey("rt_season.id", ondelete="CASCADE"),
+        nullable=False,
+    )
 
     category = relationship("Category", lazy="joined")
     team = relationship("Team", back_populates="tournaments")

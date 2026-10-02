@@ -8,6 +8,7 @@ export interface AlgorithmInfo {
 }
 
 export interface DistributeRequest {
+  season_id: number;
   player_ids: number[];
   team_count: number;
   algorithm: string;

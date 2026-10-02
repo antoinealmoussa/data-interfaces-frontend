@@ -38,7 +38,6 @@ const playerFixture: Player = {
   level: 3,
   sex: "F",
   position: "Meneur",
-  team_name: "Mon equipe",
   category_names: ["Mixte"],
 };
 

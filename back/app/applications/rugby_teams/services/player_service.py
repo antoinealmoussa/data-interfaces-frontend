@@ -14,15 +14,15 @@ def get_player_by_id(db: Session, player_id: int) -> Player | None:
 
 
 def get_players_by_team(
-    db: Session, team_name: str, user_id: int, skip: int = 0, limit: int = 100
+    db: Session, team_name: str, season_id: int, user_id: int,
+    skip: int = 0, limit: int = 100,
 ):
     team = get_owned_team(db, team_name, user_id)
-    repo = PlayerRepository(db)
-    return repo.get_by_team(team.id, skip, limit)
+    return PlayerRepository(db).get_by_team_and_season(team.id, season_id, skip, limit)
 
 
 def create_player(
-    db: Session, team_name: str, player_in: PlayerBase, user_id: int
+    db: Session, team_name: str, season_id: int, player_in: PlayerBase, user_id: int
 ) -> ApiReturnPlayer:
     team = get_team_by_name(db, team_name)
     if team.user_id != user_id:
@@ -33,12 +33,13 @@ def create_player(
     except ValueError:
         raise PlayerNotFoundError(0)
 
-    repo = PlayerRepository(db)
-    return repo.create(player_in, team_id=team.id, categories=categories)
+    return PlayerRepository(db).create_player(
+        player_in, team_id=team.id, season_id=season_id, categories=categories
+    )
 
 
 def update_player(
-    db: Session, player_id: int, team_name: str, user_id: int,
+    db: Session, player_id: int, team_name: str, season_id: int, user_id: int,
     player_in: PlayerBase,
 ) -> ApiReturnPlayer:
     repo = PlayerRepository(db)
@@ -47,10 +48,10 @@ def update_player(
         raise PlayerNotFoundError(player_id)
 
     team = get_team_by_name(db, team_name)
-    if player.team_id != team.id:
-        raise PlayerNotFoundError(player_id)
     if team.user_id != user_id:
         raise ForbiddenError()
+    if not repo.has_membership(player_id, team.id, season_id):
+        raise PlayerNotFoundError(player_id)
 
     try:
         categories = resolve_categories(db, player_in.category_names)
@@ -62,16 +63,18 @@ def update_player(
     )
 
 
-def delete_player(db: Session, player_id: int, team_name: str, user_id: int) -> None:
+def delete_player(
+    db: Session, player_id: int, team_name: str, season_id: int, user_id: int
+) -> None:
     repo = PlayerRepository(db)
     player = repo.get_by_id(player_id)
     if not player:
         raise PlayerNotFoundError(player_id)
 
     team = get_team_by_name(db, team_name)
-    if player.team_id != team.id:
-        raise PlayerNotFoundError(player_id)
     if team.user_id != user_id:
         raise ForbiddenError()
+    if not repo.has_membership(player_id, team.id, season_id):
+        raise PlayerNotFoundError(player_id)
 
-    repo.delete_player(player)
+    repo.delete_player(player, team.id, season_id)

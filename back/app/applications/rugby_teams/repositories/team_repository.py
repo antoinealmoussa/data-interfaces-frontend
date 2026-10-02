@@ -16,6 +16,22 @@ class TeamRepository(BaseRepository[Team, ApiReturnTeam]):
     def find_by_name(self, name: str) -> Team | None:
         return self.db.query(Team).filter(Team.name == name).first()
 
+    def get_full_by_name(self, name: str) -> Team | None:
+        """Équipe avec categories + seasons chargées (pour ApiReturnTeam)."""
+        return (
+            self.db.query(Team)
+            .options(
+                selectinload(Team.categories),
+                selectinload(Team.seasons),
+            )
+            .filter(Team.name == name)
+            .first()
+        )
+
+    def link_season(self, team_id: int, season_id: int) -> None:
+        self.db.add(TeamSeason(team_id=team_id, season_id=season_id))
+        self.db.commit()
+
     def get_by_season(self, season_id: int, user_id: int) -> list[Team]:
         return (
             self.db.query(Team)

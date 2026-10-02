@@ -60,20 +60,17 @@ class ApiReturnPlayer(BaseModel):
     level: int
     sex: str
     position: str
-    team_name: str
     category_names: list[str]
 
     model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def model_validate(cls, obj, **kwargs):
-        data = {
-            "id": obj.id,
-            "name": obj.name,
-            "level": obj.level,
-            "sex": obj.sex,
-            "position": obj.position,
-            "team_name": obj.team.name if obj.team else None,
-            "category_names": [c.name for c in obj.categories] if obj.categories else [],
-        }
-        return cls(**data)
+        return cls(
+            id=obj.id,
+            name=obj.name,
+            level=obj.level,
+            sex=obj.sex,
+            position=obj.position,
+            category_names=[c.name for c in obj.categories] if obj.categories else [],
+        )

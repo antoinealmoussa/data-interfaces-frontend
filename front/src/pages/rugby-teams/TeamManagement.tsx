@@ -34,13 +34,13 @@ const TeamManagement = () => {
       }
     >
       <EntityCrudPage<Player, CreatePlayerDto>
-        queryKey={["players", team?.name]}
-        queryFn={() => playerApi.getByTeam(team!.name)}
-        createFn={(data) => playerApi.create(team!.name, data)}
-        updateFn={(id, data) => playerApi.update(team!.name, id, data)}
-        deleteFn={(id) => playerApi.delete(team!.name, id)}
+        queryKey={["players", team?.name, season?.id]}
+        queryFn={() => playerApi.getByTeam(team!.name, season!.id)}
+        createFn={(data) => playerApi.create(team!.name, season!.id, data)}
+        updateFn={(id, data) => playerApi.update(team!.name, season!.id, id, data)}
+        deleteFn={(id) => playerApi.delete(team!.name, season!.id, id)}
         entityName="joueur"
-        enabled={!!team}
+        enabled={!!team && !!season}
         columns={playerColumns}
         addButtonLabel="Ajouter un joueur"
         addButtonIcon={<PersonAddIcon />}

@@ -3,22 +3,30 @@ import { API_SEGMENTS } from "../endpoints";
 import type { Player, CreatePlayerDto } from "../../types/rugby-teams/playerTypes";
 
 export const playerApi = {
-  getByTeam: (teamName: string, skip = 0, limit = 100) =>
+  getByTeam: (teamName: string, seasonId: number, skip = 0, limit = 100) =>
     apiClient
       .get<Player[]>(
-        `${teamPath(teamName, API_SEGMENTS.players)}?skip=${skip}&limit=${limit}`,
+        `${teamPath(teamName, API_SEGMENTS.players)}?season_id=${seasonId}&skip=${skip}&limit=${limit}`,
       )
       .then((r) => r.data),
-  create: (teamName: string, data: CreatePlayerDto) =>
+  create: (teamName: string, seasonId: number, data: CreatePlayerDto) =>
     apiClient
-      .post<Player>(teamPath(teamName, API_SEGMENTS.players), data)
+      .post<Player>(
+        `${teamPath(teamName, API_SEGMENTS.players)}?season_id=${seasonId}`,
+        data,
+      )
       .then((r) => r.data),
-  update: (teamName: string, playerId: number, data: CreatePlayerDto) =>
+  update: (teamName: string, seasonId: number, playerId: number, data: CreatePlayerDto) =>
     apiClient
-      .put<Player>(teamPath(teamName, API_SEGMENTS.players, String(playerId)), data)
+      .put<Player>(
+        `${teamPath(teamName, API_SEGMENTS.players, String(playerId))}?season_id=${seasonId}`,
+        data,
+      )
       .then((r) => r.data),
-  delete: (teamName: string, playerId: number) =>
-    apiClient.delete(teamPath(teamName, API_SEGMENTS.players, String(playerId))),
+  delete: (teamName: string, seasonId: number, playerId: number) =>
+    apiClient.delete(
+      `${teamPath(teamName, API_SEGMENTS.players, String(playerId))}?season_id=${seasonId}`,
+    ),
 };
 
 export type PlayerApiType = typeof playerApi;

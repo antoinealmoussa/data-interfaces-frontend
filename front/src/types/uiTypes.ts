@@ -65,6 +65,12 @@ export interface SidebarItem {
   icon: JSX.Element;
 }
 
+export interface SidebarAction {
+  label: string;
+  icon?: JSX.Element;
+  onClick: () => void;
+}
+
 export interface GenericSidebarProps {
   items: SidebarItem[];
   teams: Array<{ id: number; name: string }>;
@@ -74,6 +80,7 @@ export interface GenericSidebarProps {
   onTeamChange: (teamName: string) => void;
   onSeasonChange: (seasonName: string) => void;
   basePath?: string;
+  actions?: SidebarAction[];
 }
 
 export interface SnackbarState {

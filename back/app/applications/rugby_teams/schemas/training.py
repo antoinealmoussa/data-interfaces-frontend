@@ -12,6 +12,7 @@ class PlayerInfo(BaseModel):
 
 
 class DistributeInput(BaseModel):
+    season_id: int
     player_ids: list[int]
     team_count: int = Field(..., ge=2, le=50)
     algorithm: str

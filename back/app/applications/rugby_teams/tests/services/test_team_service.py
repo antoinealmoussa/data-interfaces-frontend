@@ -1,9 +1,16 @@
 import pytest
 
 from app.applications.rugby_teams.models.season import Season
+from app.applications.rugby_teams.schemas.player import PlayerBase
+from app.applications.rugby_teams.schemas.season import ApiCreateSeason
 from app.applications.rugby_teams.schemas.team import ApiCreateTeam
-from app.applications.rugby_teams.services import season_service, team_service
-from app.utils.exceptions import ForbiddenError, TeamNotFoundError
+from app.applications.rugby_teams.services import player_service, season_service, team_service
+from app.utils.exceptions import (
+    ForbiddenError,
+    InvalidRequestError,
+    PlayerNotFoundError,
+    TeamNotFoundError,
+)
 
 
 def test_get_teams_by_user_empty(db_session, test_user):
@@ -203,3 +210,100 @@ def test_delete_team_keeps_shared_season(db_session, test_user):
     team_service.delete_team(db_session, team1.id, test_user.id)
 
     assert season_service.get_season_by_id(db_session, season.id) is not None
+
+
+class TestCreateSeasonForTeam:
+    def _setup_team_and_player(self, db_session, test_user):
+        team_in = ApiCreateTeam(
+            name="Mon équipe",
+            categories=["Mixte"],
+            season_name="2025-2026",
+        )
+        team = team_service.create_team(db_session, team_in, user_id=test_user.id)
+        old_season = season_service.get_season_by_name(db_session, "2025-2026")
+        player = player_service.create_player(
+            db_session,
+            team.name,
+            old_season.id,
+            PlayerBase(
+                name="Jean",
+                level=2,
+                sex="H",
+                position="Ailier",
+                category_names=["Mixte"],
+            ),
+            test_user.id,
+        )
+        return team, old_season, player
+
+    def test_success(self, db_session, test_user):
+        team, old_season, player = self._setup_team_and_player(db_session, test_user)
+
+        result = team_service.create_season_for_team(
+            db_session,
+            team.name,
+            ApiCreateSeason(name="2026-2027", player_ids=[player.id]),
+            test_user.id,
+        )
+
+        season_names = [s.name for s in result.seasons]
+        assert "2026-2027" in season_names
+        new_season = season_service.get_season_by_name(db_session, "2026-2027")
+        players = player_service.get_players_by_team(
+            db_session, team.name, new_season.id, test_user.id
+        )
+        assert [p.id for p in players] == [player.id]
+
+    def test_empty_roster(self, db_session, test_user):
+        team, old_season, _ = self._setup_team_and_player(db_session, test_user)
+
+        result = team_service.create_season_for_team(
+            db_session,
+            team.name,
+            ApiCreateSeason(name="2026-2027", player_ids=[]),
+            test_user.id,
+        )
+
+        assert len([s for s in result.seasons if s.name == "2026-2027"]) == 1
+
+    def test_duplicate_season(self, db_session, test_user):
+        team, old_season, _ = self._setup_team_and_player(db_session, test_user)
+
+        with pytest.raises(InvalidRequestError):
+            team_service.create_season_for_team(
+                db_session,
+                team.name,
+                ApiCreateSeason(name="2025-2026", player_ids=[]),
+                test_user.id,
+            )
+
+    def test_player_not_in_team(self, db_session, test_user):
+        team, old_season, _ = self._setup_team_and_player(db_session, test_user)
+
+        with pytest.raises(PlayerNotFoundError):
+            team_service.create_season_for_team(
+                db_session,
+                team.name,
+                ApiCreateSeason(name="2026-2027", player_ids=[9999]),
+                test_user.id,
+            )
+
+    def test_team_not_found(self, db_session, test_user):
+        with pytest.raises(TeamNotFoundError):
+            team_service.create_season_for_team(
+                db_session,
+                "Equipe inexistante",
+                ApiCreateSeason(name="2026-2027", player_ids=[]),
+                test_user.id,
+            )
+
+    def test_other_user_sees_team_as_not_found(self, db_session, test_user):
+        team, old_season, _ = self._setup_team_and_player(db_session, test_user)
+
+        with pytest.raises(TeamNotFoundError):
+            team_service.create_season_for_team(
+                db_session,
+                team.name,
+                ApiCreateSeason(name="2026-2027", player_ids=[]),
+                999,
+            )

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { GenericSidebar } from "../../../components/layout/GenericSidebar";
 import { Box } from "@mui/material";
@@ -43,6 +44,7 @@ const renderSidebar = (
         selectedSeasonName={props.selectedSeasonName ?? "2024-2025"}
         onTeamChange={props.onTeamChange ?? onTeamChange}
         onSeasonChange={props.onSeasonChange ?? onSeasonChange}
+        actions={props.actions}
       />
     </MemoryRouter>,
   );
@@ -90,5 +92,42 @@ describe("GenericSidebar", () => {
     const teamInput = selectInputs[0];
     expect(teamInput).toBeInTheDocument();
     expect(teamInput?.getAttribute("value")).toBe("Équipe A");
+  });
+
+  it("devrait afficher les boutons d'action et appeler onClick au clic", async () => {
+    const onClick = vi.fn();
+    const onSecondClick = vi.fn();
+    const user = userEvent.setup();
+    renderSidebar({
+      actions: [
+        {
+          label: "Créer une équipe",
+          icon: <Box data-testid="icon-create" />,
+          onClick,
+        },
+        {
+          label: "Nouvelle saison",
+          icon: <Box data-testid="icon-season" />,
+          onClick: onSecondClick,
+        },
+      ],
+    });
+
+    expect(screen.getByText("Créer une équipe")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-create")).toBeInTheDocument();
+    expect(screen.getByText("Nouvelle saison")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-season")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Créer une équipe"));
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByText("Nouvelle saison"));
+    expect(onSecondClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne devrait pas afficher les boutons d'action sans prop actions", () => {
+    renderSidebar();
+    expect(screen.queryByText("Créer une équipe")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nouvelle saison")).not.toBeInTheDocument();
   });
 });

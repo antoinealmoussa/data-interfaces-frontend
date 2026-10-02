@@ -10,6 +10,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { type GenericSidebarProps } from "../../types/uiTypes";
@@ -23,6 +24,7 @@ export const GenericSidebar = ({
   onTeamChange,
   onSeasonChange,
   basePath = "/rugby-teams",
+  actions = [],
 }: GenericSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,7 +50,20 @@ export const GenericSidebar = ({
         borderColor: "divider",
       }}
     >
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, pb: 0 }}>
+        {actions.map((action) => (
+          <Button
+            key={action.label}
+            fullWidth
+            variant="outlined"
+            startIcon={action.icon}
+            onClick={action.onClick}
+            sx={{ mb: 2 }}
+          >
+            {action.label}
+          </Button>
+        ))}
+
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Équipe</InputLabel>
           <Select

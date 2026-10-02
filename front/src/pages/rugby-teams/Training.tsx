@@ -108,12 +108,12 @@ const Training = () => {
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
 
   const { data: players = [], isLoading: playersLoading } = useQuery({
-    queryKey: ["players", team?.name],
+    queryKey: ["players", team?.name, season?.id],
     queryFn: () =>
       playerApi
-        .getByTeam(team!.name)
+        .getByTeam(team!.name, season!.id)
         .then((data) => data.sort((a, b) => a.name.localeCompare(b.name))),
-    enabled: !!team,
+    enabled: !!team && !!season,
   });
 
   const { data: algorithms = [] } = useQuery({
@@ -140,14 +140,16 @@ const Training = () => {
   }, []);
 
   const handleGenerate = useCallback(() => {
-    if (!team || selectedPlayerIds.length < 2 || !effectiveAlgorithm) return;
+    if (!team || !season || selectedPlayerIds.length < 2 || !effectiveAlgorithm) return;
     distributeMutation.mutate({
+      season_id: season.id,
       player_ids: selectedPlayerIds,
       team_count: teamCount,
       algorithm: effectiveAlgorithm,
     });
   }, [
     team,
+    season,
     selectedPlayerIds,
     distributeMutation,
     effectiveAlgorithm,

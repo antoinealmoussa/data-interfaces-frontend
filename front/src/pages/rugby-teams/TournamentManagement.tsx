@@ -30,16 +30,16 @@ const TournamentManagement = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const { data: players = [] } = useQuery<PlayerSimple[]>({
-    queryKey: ["tournament-players", team?.name],
+    queryKey: ["tournament-players", team?.name, season?.id],
     queryFn: () =>
-      playerApi.getByTeam(team!.name).then((data) =>
+      playerApi.getByTeam(team!.name, season!.id).then((data) =>
         data.map((p) => ({
           id: p.id,
           name: p.name,
           category_names: p.category_names,
         })),
       ),
-    enabled: !!team,
+    enabled: !!team && !!season,
   });
 
   const tournamentColumns: Column<Tournament>[] = [
@@ -107,9 +107,9 @@ const TournamentManagement = () => {
         </Box>
 
         <EntityCrudPage<Tournament, CreateTournamentDto>
-          queryKey={["tournaments", team?.name]}
+          queryKey={["tournaments", team?.name, season?.id]}
           queryFn={() =>
-            tournamentApi.getByTeam(team!.name).then((data) =>
+            tournamentApi.getByTeam(team!.name, season!.id).then((data) =>
               data
                 .map((t) => ({
                   ...t,
@@ -120,11 +120,11 @@ const TournamentManagement = () => {
                 .sort((a, b) => b.id - a.id),
             )
           }
-          createFn={(data) => tournamentApi.create(team!.name, data)}
-          updateFn={(id, data) => tournamentApi.update(team!.name, id, data)}
-          deleteFn={(id) => tournamentApi.delete(team!.name, id)}
+          createFn={(data) => tournamentApi.create(team!.name, season!.id, data)}
+          updateFn={(id, data) => tournamentApi.update(team!.name, season!.id, id, data)}
+          deleteFn={(id) => tournamentApi.delete(team!.name, season!.id, id)}
           entityName="tournoi"
-          enabled={!!team}
+          enabled={!!team && !!season}
           columns={tournamentColumns}
           addButtonLabel="Ajouter un tournoi"
           addButtonIcon={<EmojiEventsIcon />}

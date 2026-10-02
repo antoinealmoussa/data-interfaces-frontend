@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.utils.validators import validate_season_format
@@ -11,6 +13,12 @@ class SeasonBase(BaseModel):
     def validate_name(cls, v):
         validate_season_format(v)
         return v
+
+
+class ApiCreateSeason(SeasonBase):
+    """Création d'une saison pour une équipe, avec l'effectif conservé."""
+    player_ids: List[int]
+
 
 class ApiReturnSeason(SeasonBase):
     id: int

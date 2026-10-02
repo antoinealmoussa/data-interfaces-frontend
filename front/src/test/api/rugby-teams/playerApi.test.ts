@@ -18,14 +18,14 @@ describe("playerApi", () => {
     vi.clearAllMocks();
   });
 
-  it("getByTeam devrait appeler GET /rugby-teams/teams/:teamName/players", async () => {
+  it("getByTeam devrait appeler GET avec season_id", async () => {
     mockedClient.get.mockResolvedValue({ data: [{ id: 1, name: "Jean" }] });
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    const result = await playerApi.getByTeam("Mon equipe");
+    const result = await playerApi.getByTeam("Mon equipe", 3);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/players?skip=0&limit=100",
+      "/rugby-teams/teams/Mon%20equipe/players?season_id=3&skip=0&limit=100",
     );
     expect(result).toEqual([{ id: 1, name: "Jean" }]);
   });
@@ -34,7 +34,7 @@ describe("playerApi", () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    await playerApi.getByTeam("Équipe spéciale");
+    await playerApi.getByTeam("Équipe spéciale", 1);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
       expect.stringContaining(encodeURIComponent("Équipe spéciale")),
@@ -45,14 +45,14 @@ describe("playerApi", () => {
     mockedClient.get.mockResolvedValue({ data: [] });
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    await playerApi.getByTeam("Equipe", 10, 25);
+    await playerApi.getByTeam("Equipe", 4, 10, 25);
 
     expect(mockedClient.get).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Equipe/players?skip=10&limit=25",
+      "/rugby-teams/teams/Equipe/players?season_id=4&skip=10&limit=25",
     );
   });
 
-  it("create devrait appeler POST /rugby-teams/teams/:teamName/players", async () => {
+  it("create devrait appeler POST avec season_id", async () => {
     const newPlayer = {
       name: "Jean",
       level: 2,
@@ -63,16 +63,16 @@ describe("playerApi", () => {
     mockedClient.post.mockResolvedValue({ data: { id: 1, ...newPlayer } });
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    const result = await playerApi.create("Mon equipe", newPlayer);
+    const result = await playerApi.create("Mon equipe", 3, newPlayer);
 
     expect(mockedClient.post).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/players",
+      "/rugby-teams/teams/Mon%20equipe/players?season_id=3",
       newPlayer,
     );
     expect(result).toMatchObject({ name: "Jean" });
   });
 
-  it("update devrait appeler PUT /rugby-teams/teams/:teamName/players/:playerId", async () => {
+  it("update devrait appeler PUT avec season_id", async () => {
     const updateData = {
       name: "Jean Modifié",
       level: 3,
@@ -83,23 +83,23 @@ describe("playerApi", () => {
     mockedClient.put.mockResolvedValue({ data: { id: 5, ...updateData } });
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    const result = await playerApi.update("Mon equipe", 5, updateData);
+    const result = await playerApi.update("Mon equipe", 3, 5, updateData);
 
     expect(mockedClient.put).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/players/5",
+      "/rugby-teams/teams/Mon%20equipe/players/5?season_id=3",
       updateData,
     );
     expect(result).toMatchObject({ name: "Jean Modifié" });
   });
 
-  it("delete devrait appeler DELETE /rugby-teams/teams/:teamName/players/:playerId", async () => {
+  it("delete devrait appeler DELETE avec season_id", async () => {
     mockedClient.delete.mockResolvedValue({});
 
     const { playerApi } = await import("../../../api/rugby-teams/playerApi");
-    await playerApi.delete("Mon equipe", 3);
+    await playerApi.delete("Mon equipe", 3, 7);
 
     expect(mockedClient.delete).toHaveBeenCalledWith(
-      "/rugby-teams/teams/Mon%20equipe/players/3",
+      "/rugby-teams/teams/Mon%20equipe/players/7?season_id=3",
     );
   });
 });

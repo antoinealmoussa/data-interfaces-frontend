@@ -11,6 +11,7 @@ const RacePreparation = lazy(
 const RaceDetail = lazy(() => import("./pages/race-preparation/RaceDetail"));
 const RugbyTeams = lazy(() => import("./pages/rugby-teams/RugbyTeams"));
 const TeamCreation = lazy(() => import("./pages/rugby-teams/TeamCreation"));
+const SeasonCreation = lazy(() => import("./pages/rugby-teams/SeasonCreation"));
 const TeamManagement = lazy(() => import("./pages/rugby-teams/TeamManagement"));
 const TournamentManagement = lazy(
   () => import("./pages/rugby-teams/TournamentManagement"),
@@ -35,6 +36,7 @@ export const DYNAMIC_APP_ROUTES: Record<AppName, RouteProps> = {
     element: <RugbyTeams />,
     children: [
       { path: "team-creation", element: <TeamCreation /> },
+      { path: ":teamName/:seasonName/new-season", element: <SeasonCreation /> },
       {
         path: ":teamName/:seasonName/team-management",
         element: <TeamManagement />,

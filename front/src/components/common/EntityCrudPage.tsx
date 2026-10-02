@@ -18,7 +18,7 @@ interface FormRenderProps<TEntity, TCreateDto> {
 }
 
 interface EntityCrudPageProps<TEntity extends { id: number; name: string }, TCreateDto> {
-  queryKey: (string | undefined)[];
+  queryKey: (string | number | undefined)[];
   queryFn: () => Promise<TEntity[]>;
   createFn: (data: TCreateDto) => Promise<TEntity>;
   updateFn: (id: number, data: TCreateDto) => Promise<TEntity>;

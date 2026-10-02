@@ -17,7 +17,7 @@ def team(db_session, authenticated_client):
     }
     response = authenticated_client.post("/api/v1/rugby-teams/teams", json=team_data)
     assert response.status_code == status.HTTP_201_CREATED
-    return response.json()
+    return {"season_id": season.id}
 
 
 def test_list_algorithms(authenticated_client, team):
@@ -46,6 +46,7 @@ def test_list_algorithms_team_not_found(authenticated_client):
 
 def test_distribute_unknown_algorithm(authenticated_client, team):
     payload = {
+        "season_id": team["season_id"],
         "player_ids": [1, 2],
         "team_count": 2,
         "algorithm": "unknown",
@@ -59,6 +60,7 @@ def test_distribute_unknown_algorithm(authenticated_client, team):
 
 def test_distribute_unauthenticated(client):
     payload = {
+        "season_id": 1,
         "player_ids": [1, 2],
         "team_count": 2,
         "algorithm": "random",
